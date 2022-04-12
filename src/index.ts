@@ -2,6 +2,10 @@
  * Configuration used for initializing the Eppo client
  * @public
  */
-export interface IClientConfig {
+interface IClientConfig {
   accessToken: string;
 }
+
+export const myFun = (config: IClientConfig) => {
+  console.log('ff');
+};

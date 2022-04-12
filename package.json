@@ -9,8 +9,8 @@
     "lint:fix": "eslint --fix '**/*.{ts,tsx}' --cache",
     "lint:fix-pre-commit": "eslint -c .eslintrc.pre-commit.js --fix '**/*.{ts,tsx}' --no-eslintrc --cache",
     "postinstall": "husky install",
-    "pre-commit": "lint-staged",
-    "typecheck": "tsc && api-extractor run --local --verbose",
+    "pre-commit": "lint-staged && api-extractor run --local --verbose",
+    "typecheck": "tsc",
     "test": "yarn test:unit",
     "test:unit": "NODE_ENV=test jest '.*\\.spec\\.ts'"
   },
