@@ -63,7 +63,7 @@ describe('EppoClient test', () => {
     variation: ITestVariation,
   ) {
     const assignedCount = assignments.filter((assignment) => assignment === variation.value).length;
-    // expect(assignedCount).toEqual(variation.expectedAssignmentCount);
+    expect(assignedCount).toEqual(variation.expectedAssignmentCount);
     console.log(
       `Expect variation ${variation.value} ratio of ${
         assignedCount / assignments.length

@@ -1027,19 +1027,19 @@
     "variations": [
       {
         "value": "control",
-        "expectedAssigmentCount": 235
+        "expectedAssignmentCount": 235
       },
       {
         "value": "red",
-        "expectedAssigmentCount": 249
+        "expectedAssignmentCount": 249
       },
       {
         "value": "green",
-        "expectedAssigmentCount": 212
+        "expectedAssignmentCount": 212
       },
       {
         "value": "purple",
-        "expectedAssigmentCount": 205
+        "expectedAssignmentCount": 205
       }
     ],
     "subjects": [
