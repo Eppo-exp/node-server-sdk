@@ -4,7 +4,7 @@
 
 ```ts
 
-// @beta
+// @public
 export interface IClientConfig {
     // (undocumented)
     accessToken: string;
