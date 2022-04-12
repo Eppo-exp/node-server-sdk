@@ -45,7 +45,7 @@ jobs:
         working-directory: ./
       - name: Install sdk dependencies
         run: yarn --frozen-lockfile
-        working-directory: ./packages/api
+        working-directory: ./
       - name: Run typecheck
         run: yarn typecheck
-        working-directory: ./packages/api
+        working-directory: ./
