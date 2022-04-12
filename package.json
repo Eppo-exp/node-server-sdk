@@ -1,0 +1,53 @@
+{
+  "name": "@eppo/node-server-sdk",
+  "version": "1.0.0",
+  "description": "Eppo node server SDK",
+  "main": "dist/index.js",
+  "typings": "dist/node-server-sdk.d.ts",
+  "scripts": {
+    "lint": "eslint '**/*.{ts,tsx}' '**/*.d.{ts,tsx}' --cache",
+    "lint:fix": "eslint --fix '**/*.{ts,tsx}' --cache",
+    "lint:fix-pre-commit": "eslint -c .eslintrc.pre-commit.js --fix '**/*.{ts,tsx}' --no-eslintrc --cache",
+    "postinstall": "husky install",
+    "pre-commit": "lint-staged && tsc && yarn docs",
+    "typecheck": "tsc",
+    "test": "yarn test:unit",
+    "test:unit": "NODE_ENV=test jest '.*\\.spec\\.ts'",
+    "docs": "api-extractor run --local --verbose && api-documenter markdown -i ./temp -o ./docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eppo-exp/node-server-sdk.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/Eppo-exp/node-server-sdk/issues"
+  },
+  "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@microsoft/api-documenter": "^7.17.6",
+    "@microsoft/api-extractor": "^7.21.2",
+    "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.13.0",
+    "@typescript-eslint/parser": "^5.13.0",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "husky": "^6.0.0",
+    "jest": "^27.5.1",
+    "lint-staged": "^12.3.5",
+    "prettier": "^2.2.1",
+    "testdouble": "^3.16.4",
+    "ts-jest": "^27.1.4",
+    "typescript": "^4.2.4"
+  },
+  "engines": {
+    "node": ">=14.x",
+    "yarn": "1.x"
+  }
+}

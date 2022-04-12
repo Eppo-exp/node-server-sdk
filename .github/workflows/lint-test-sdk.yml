@@ -1,0 +1,51 @@
+name: Lint and Test SDK
+on:
+  pull_request:
+    path: '**/*'
+
+jobs:
+  lint-test-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/cache@v2
+        with:
+          path: './node_modules'
+          key: ${{ runner.os }}-root-node-modules-${{ hashFiles('./yarn.lock') }}
+      - name: Install root dependencies
+        run: yarn --frozen-lockfile
+        working-directory: ./
+      - name: Install sdk dependencies
+        run: yarn --frozen-lockfile
+        working-directory: ./
+      - name: Check code with eslint
+        run: npx eslint '**/*.{ts,tsx}'
+        working-directory: ./
+      - name: Run unit tests
+        run: yarn test:unit
+        working-directory: ./
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.x'
+      - uses: actions/cache@v2
+        with:
+          path: './node_modules'
+          key: ${{ runner.os }}-root-node-modules-${{ hashFiles('./yarn.lock') }}
+      - name: Install root dependencies
+        run: yarn --frozen-lockfile
+        working-directory: ./
+      - name: Install sdk dependencies
+        run: yarn --frozen-lockfile
+        working-directory: ./
+      - name: Run typecheck
+        run: yarn typecheck
+        working-directory: ./
