@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "declarationMap": true,
+    "sourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "outDir": "dist",
+    "noImplicitAny": true,
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "types"
+  ]
+}
