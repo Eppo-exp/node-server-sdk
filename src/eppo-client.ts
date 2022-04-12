@@ -10,12 +10,24 @@ import { IExperimentConfiguration } from './experiment/experiment-configuration'
  */
 const EXPERIMENT_EXPOSURE_NUM_BUCKETS = 10000;
 
+/**
+ * Client for assigning experiment variations.
+ * @public
+ */
 export default class EppoClient {
   constructor(
     private accessToken: string,
     private configurationStore: IConfigurationStore<IExperimentConfiguration>,
   ) {}
 
+  /**
+   * Maps a subject to a variation for a given experiment.
+   *
+   * @param subject an entity ID, e.g. userId
+   * @param experiment experiment identifier
+   * @returns a variation value if the subject is part of the experiment sample, otherwise null
+   * @public
+   */
   async getAssignment(subject: string, experiment: string): Promise<string> {
     const experimentConfig = await this.configurationStore.getConfiguration(experiment);
     if (
