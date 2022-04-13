@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 
-import { IVariation } from './experiment/variation';
+import { IShardRange } from './experiment/variation';
 
 export function getBucket(input: string, totalBuckets: number): number {
   const hashOutput = createHash('md5').update(input).digest('hex');
@@ -10,29 +10,6 @@ export function getBucket(input: string, totalBuckets: number): number {
   return intFromHash % totalBuckets;
 }
 
-export interface IBucketRange {
-  variation: string;
-  start: number;
-  end: number;
-}
-
-export function isBucketInRange(bucket: number, range: IBucketRange) {
+export function isBucketInRange(bucket: number, range: IShardRange) {
   return bucket >= range.start && bucket <= range.end;
-}
-
-export function getBucketRanges(variations: IVariation[], totalBuckets: number): IBucketRange[] {
-  const bucketsPerVariant = totalBuckets / variations.length;
-  const lastVariationIndex = variations.length - 1;
-  return variations.map((variation, index) => {
-    const start = index * Math.floor(bucketsPerVariant);
-    // the last variant is assigned 1 extra bucket if there is an uneven split (e.g. split 33 / 33 / 34 when totalBuckets = 100)
-    const numBuckets =
-      index === lastVariationIndex ? Math.ceil(bucketsPerVariant) : Math.floor(bucketsPerVariant);
-    const end = start + numBuckets - 1;
-    return {
-      variation: variation.value,
-      start,
-      end,
-    };
-  });
 }

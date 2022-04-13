@@ -1,24 +1,13 @@
-import { getBucket, getBucketRanges, isBucketInRange } from './bucket';
+import { getBucket, isBucketInRange } from './bucket';
 import { IConfigurationStore } from './configuration-store';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
-
-/**
- * Total buckets used to determine whether a user is part of an experiment.
- * This is different from the buckets used for assigning a variant.
- * Using 10000 instead of 100 buckets allows for more precise sample sizes up to 2 decimal places:
- * e.g. only show the experiment to 4.25% of users.
- */
-const EXPERIMENT_EXPOSURE_NUM_BUCKETS = 10000;
 
 /**
  * Client for assigning experiment variations.
  * @public
  */
 export default class EppoClient {
-  constructor(
-    private accessToken: string,
-    private configurationStore: IConfigurationStore<IExperimentConfiguration>,
-  ) {}
+  constructor(private configurationStore: IConfigurationStore<IExperimentConfiguration>) {}
 
   /**
    * Maps a subject to a variation for a given experiment.
@@ -31,15 +20,14 @@ export default class EppoClient {
   async getAssignment(subject: string, experiment: string): Promise<string> {
     const experimentConfig = await this.configurationStore.getConfiguration(experiment);
     if (
-      !experimentConfig ||
-      !this.isInExperimentSample(subject, experiment, experimentConfig.exposurePercentage)
+      !experimentConfig?.enabled ||
+      !this.isInExperimentSample(subject, experiment, experimentConfig)
     ) {
       return null;
     }
-    const { variations, totalBuckets } = experimentConfig;
-    const variationBucketRanges = getBucketRanges(variations, totalBuckets);
-    const bucket = getBucket(`assignment-${subject}-${experiment}`, totalBuckets);
-    return variationBucketRanges.find((range) => isBucketInRange(bucket, range)).variation;
+    const { variations, subjectShards } = experimentConfig;
+    const bucket = getBucket(`assignment-${subject}-${experiment}`, subjectShards);
+    return variations.find((variation) => isBucketInRange(bucket, variation.shardRange)).name;
   }
 
   /**
@@ -50,9 +38,10 @@ export default class EppoClient {
   private isInExperimentSample(
     subject: string,
     experiment: string,
-    exposurePercentage: number,
+    experimentConfig: IExperimentConfiguration,
   ): boolean {
-    const bucket = getBucket(`exposure-${subject}-${experiment}`, EXPERIMENT_EXPOSURE_NUM_BUCKETS);
-    return bucket <= exposurePercentage * EXPERIMENT_EXPOSURE_NUM_BUCKETS;
+    const { percentExposure, subjectShards } = experimentConfig;
+    const bucket = getBucket(`exposure-${subject}-${experiment}`, subjectShards);
+    return bucket <= (percentExposure / 100) * subjectShards;
   }
 }
