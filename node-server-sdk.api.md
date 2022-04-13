@@ -6,8 +6,7 @@
 
 // @public
 export interface IClientConfig {
-    // (undocumented)
-    accessToken: string;
+    apiKey: string;
 }
 
 // (No @packageDocumentation comment for this package)
