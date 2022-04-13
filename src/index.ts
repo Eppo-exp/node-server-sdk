@@ -3,5 +3,8 @@
  * @public
  */
 export interface IClientConfig {
-  accessToken: string;
+  /**
+   * Eppo API key
+   */
+  apiKey: string;
 }

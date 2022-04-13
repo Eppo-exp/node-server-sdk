@@ -16,5 +16,5 @@ export interface IClientConfig
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [accessToken](./node-server-sdk.iclientconfig.accesstoken.md) | string |  |
+|  [apiKey](./node-server-sdk.iclientconfig.apikey.md) | string | Eppo API key |
 
