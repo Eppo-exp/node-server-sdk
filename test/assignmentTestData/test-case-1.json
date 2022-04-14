@@ -6,21 +6,21 @@
       "name": "control",
       "shardRange": {
         "start": 0,
-        "end": 2499
+        "end": 2500
       }
     },
     {
       "name": "red",
       "shardRange": {
         "start": 2500,
-        "end": 4999
+        "end": 5000
       }
     },
     {
       "name": "green",
       "shardRange": {
         "start": 5000,
-        "end": 7499
+        "end": 7500
       }
     },
     {

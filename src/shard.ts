@@ -11,5 +11,5 @@ export function getShard(input: string, subjectShards: number): number {
 }
 
 export function isShardInRange(shard: number, range: IShardRange) {
-  return shard >= range.start && shard <= range.end;
+  return shard >= range.start && shard < range.end;
 }
