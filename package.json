@@ -25,7 +25,9 @@
     "url": "https://github.com/Eppo-exp/node-server-sdk/issues"
   },
   "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
-  "dependencies": {},
+  "dependencies": {
+    "node-cache": "^5.1.2"
+  },
   "devDependencies": {
     "@microsoft/api-documenter": "^7.17.6",
     "@microsoft/api-extractor": "^7.21.2",
