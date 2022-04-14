@@ -71,6 +71,25 @@ describe('EppoClient test', () => {
         });
       },
     );
+
+    it('returns null if no assignment configuration is found', async () => {
+      const experiment = 'testExperiment';
+      td.when(mockConfigurationStore.getConfiguration(experiment)).thenResolve(null);
+      const assignment = await client.getAssignment('testSubject', experiment);
+      expect(assignment).toEqual(null);
+    });
+
+    it('returns null if the experiment is disabled', async () => {
+      const experiment = 'testExperiment';
+      td.when(mockConfigurationStore.getConfiguration(experiment)).thenResolve({
+        enabled: false,
+        subjectShards: 10000,
+        percentExposure: 100,
+        variations: [],
+      });
+      const assignment = await client.getAssignment('testSubject', experiment);
+      expect(assignment).toEqual(null);
+    });
   });
 
   /**
