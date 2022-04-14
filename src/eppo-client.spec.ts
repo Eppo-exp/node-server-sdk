@@ -62,10 +62,7 @@ describe('EppoClient test', () => {
         expect(assignments).toEqual(expectedAssignments);
         const expectedVariationSplitPercentage = percentExposure / variations.length;
         const unassignedCount = assignments.filter((assignment) => assignment == null).length;
-        expectToBeCloseToPercentage(
-          (unassignedCount / assignments.length) * 100,
-          100 - percentExposure,
-        );
+        expectToBeCloseToPercentage(unassignedCount / assignments.length, 1 - percentExposure);
         variations.forEach((variation) => {
           validateAssignmentCounts(assignments, expectedVariationSplitPercentage, variation);
         });
@@ -84,7 +81,7 @@ describe('EppoClient test', () => {
       td.when(mockConfigurationStore.getConfiguration(experiment)).thenResolve({
         enabled: false,
         subjectShards: 10000,
-        percentExposure: 100,
+        percentExposure: 1,
         variations: [],
       });
       const assignment = await client.getAssignment('testSubject', experiment);
@@ -107,18 +104,17 @@ describe('EppoClient test', () => {
   ) {
     const assignedCount = assignments.filter((assignment) => assignment === variation.name).length;
     console.log(
-      `Expect variation ${variation.name} percentage of ${(
-        (assignedCount / assignments.length) *
-        100
-      ).toFixed(2)} to be close to ${expectedPercentage.toFixed(2)}`,
+      `Expect variation ${variation.name} percentage of ${
+        assignedCount / assignments.length
+      } to be close to ${expectedPercentage}`,
     );
-    expectToBeCloseToPercentage((assignedCount / assignments.length) * 100, expectedPercentage);
+    expectToBeCloseToPercentage(assignedCount / assignments.length, expectedPercentage);
   }
 
   // expect assignment count to be within 5 percentage points of the expected count (because the hash output is random)
   function expectToBeCloseToPercentage(percentage: number, expectedPercentage: number) {
-    expect(percentage).toBeGreaterThanOrEqual(expectedPercentage - 5);
-    expect(percentage).toBeLessThanOrEqual(expectedPercentage + 5);
+    expect(percentage).toBeGreaterThanOrEqual(expectedPercentage - 0.05);
+    expect(percentage).toBeLessThanOrEqual(expectedPercentage + 0.05);
   }
 
   async function getAssignments(subjects: string[], experiment: string): Promise<string[]> {

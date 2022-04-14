@@ -1,6 +1,6 @@
 {
   "experiment": "new_user_onboarding",
-  "percentExposure": 95.00,
+  "percentExposure": 0.9500,
   "variations": [
     {
       "name": "control",

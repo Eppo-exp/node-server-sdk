@@ -1,6 +1,6 @@
 {
   "experiment": "randomization_algo",
-  "percentExposure": 45.33,
+  "percentExposure": 0.4533,
   "variations": [
     {
       "name": "control",

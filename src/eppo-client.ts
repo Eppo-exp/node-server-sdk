@@ -13,20 +13,17 @@ export default class EppoClient {
    * Maps a subject to a variation for a given experiment.
    *
    * @param subject an entity ID, e.g. userId
-   * @param experiment experiment identifier
+   * @param flag experiment identifier
    * @returns a variation value if the subject is part of the experiment sample, otherwise null
    * @public
    */
-  async getAssignment(subject: string, experiment: string): Promise<string> {
-    const experimentConfig = await this.configurationStore.getConfiguration(experiment);
-    if (
-      !experimentConfig?.enabled ||
-      !this.isInExperimentSample(subject, experiment, experimentConfig)
-    ) {
+  async getAssignment(subject: string, flag: string): Promise<string> {
+    const experimentConfig = await this.configurationStore.getConfiguration(flag);
+    if (!experimentConfig?.enabled || !this.isInExperimentSample(subject, flag, experimentConfig)) {
       return null;
     }
     const { variations, subjectShards } = experimentConfig;
-    const shard = getShard(`assignment-${subject}-${experiment}`, subjectShards);
+    const shard = getShard(`assignment-${subject}-${flag}`, subjectShards);
     return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
   }
 
@@ -42,6 +39,6 @@ export default class EppoClient {
   ): boolean {
     const { percentExposure, subjectShards } = experimentConfig;
     const shard = getShard(`exposure-${subject}-${experiment}`, subjectShards);
-    return shard <= (percentExposure / 100) * subjectShards;
+    return shard <= percentExposure * subjectShards;
   }
 }
