@@ -1,6 +1,6 @@
-import { getBucket, isBucketInRange } from './bucket';
 import { IConfigurationStore } from './configuration-store';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
+import { getShard, isShardInRange } from './shard';
 
 /**
  * Client for assigning experiment variations.
@@ -26,8 +26,8 @@ export default class EppoClient {
       return null;
     }
     const { variations, subjectShards } = experimentConfig;
-    const bucket = getBucket(`assignment-${subject}-${experiment}`, subjectShards);
-    return variations.find((variation) => isBucketInRange(bucket, variation.shardRange)).name;
+    const shard = getShard(`assignment-${subject}-${experiment}`, subjectShards);
+    return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
   }
 
   /**
@@ -41,7 +41,7 @@ export default class EppoClient {
     experimentConfig: IExperimentConfiguration,
   ): boolean {
     const { percentExposure, subjectShards } = experimentConfig;
-    const bucket = getBucket(`exposure-${subject}-${experiment}`, subjectShards);
-    return bucket <= (percentExposure / 100) * subjectShards;
+    const shard = getShard(`exposure-${subject}-${experiment}`, subjectShards);
+    return shard <= (percentExposure / 100) * subjectShards;
   }
 }
