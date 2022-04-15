@@ -26,6 +26,8 @@
   },
   "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
   "dependencies": {
+    "axios": "^0.26.1",
+    "http-status-codes": "^2.2.0",
     "node-cache": "^5.1.2"
   },
   "devDependencies": {

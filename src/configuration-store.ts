@@ -5,7 +5,7 @@ export interface IConfigurationStore<T> {
   setConfigurations(namespace: string, configs: Record<string, T>): Promise<void>;
 }
 
-export const ASSIGNMENT_CONFIGURATION_NAMESPACE = 'assignment_configurations';
+export const EXPERIMENT_CONFIGURATIONS_NAMESPACE = 'experiment_configurations';
 
 /**
  * Default ConfigurationStore implementation. Sets and retrieves entries from an in-memory cache.

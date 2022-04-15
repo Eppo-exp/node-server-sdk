@@ -1,8 +1,12 @@
+import axios from 'axios';
+
 import { InMemoryConfigurationStore } from './configuration-store';
 import EppoClient, { IEppoClient } from './eppo-client';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
+import HttpClient from './http-client';
 import initPoller from './poller';
+import { sdkName, sdkVersion } from './sdk-data';
 
 /**
  * Configuration used for initializing the Eppo client
@@ -19,6 +23,10 @@ const POLL_INTERVAL_MILLIS = 5 * 60 * 1000;
 const JITTER_MILLIS = 30 * 1000;
 const CACHE_TTL_MILLIS = 15 * 60 * 1000;
 
+const axiosInstance = axios.create({
+  baseURL: 'http://localhost:4000',
+});
+
 export { IEppoClient } from './eppo-client';
 
 /**
@@ -32,9 +40,14 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     CACHE_TTL_MILLIS,
   );
+  const httpClient = new HttpClient(axiosInstance, {
+    apiKey: config.apiKey,
+    sdkName,
+    sdkVersion,
+  });
   const configurationRequestor = new ExperimentConfigurationRequestor(
-    config.apiKey,
     configurationStore,
+    httpClient,
   );
   const poller = initPoller(
     POLL_INTERVAL_MILLIS,

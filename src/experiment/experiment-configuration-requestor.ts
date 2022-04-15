@@ -1,16 +1,24 @@
-import { ASSIGNMENT_CONFIGURATION_NAMESPACE, IConfigurationStore } from '../configuration-store';
+import { EXPERIMENT_CONFIGURATIONS_NAMESPACE, IConfigurationStore } from '../configuration-store';
+import HttpClient from '../http-client';
 
 import { IExperimentConfiguration } from './experiment-configuration';
 
+const RAC_ENDPOINT = '/randomized-assignment-configurations';
+
+interface IRandomizedAssignmentConfig {
+  subjectShards: number;
+  experiments: Record<string, IExperimentConfiguration>;
+}
+
 export default class ExperimentConfigurationRequestor {
   constructor(
-    private apiKey: string,
     private configurationStore: IConfigurationStore<IExperimentConfiguration>,
+    private httpClient: HttpClient,
   ) {}
 
   async getConfiguration(experiment: string): Promise<IExperimentConfiguration> {
     const cachedConfigurations = await this.configurationStore.getConfigurations(
-      ASSIGNMENT_CONFIGURATION_NAMESPACE,
+      EXPERIMENT_CONFIGURATIONS_NAMESPACE,
     );
     if (cachedConfigurations) {
       return cachedConfigurations[experiment];
@@ -20,32 +28,14 @@ export default class ExperimentConfigurationRequestor {
   }
 
   async fetchAndStoreConfigurations(): Promise<Record<string, IExperimentConfiguration>> {
-    // TODO: add network request; the response is mocked here
-    const configs = {
-      randomization_algo: {
-        name: 'randomization_algo',
-        enabled: true,
-        percentExposure: 0.5,
-        subjectShards: 1000,
-        variations: [
-          {
-            name: 'variation-1',
-            shardRange: {
-              start: 0,
-              end: 50,
-            },
-          },
-          {
-            name: 'variation-2',
-            shardRange: {
-              start: 50,
-              end: 100,
-            },
-          },
-        ],
-      },
-    };
-    await this.configurationStore.setConfigurations(ASSIGNMENT_CONFIGURATION_NAMESPACE, configs);
-    return configs;
+    const responseData = await this.httpClient.get<IRandomizedAssignmentConfig>(RAC_ENDPOINT);
+    Object.values(responseData.experiments).forEach((experiment) => {
+      experiment.subjectShards = responseData.subjectShards;
+    });
+    await this.configurationStore.setConfigurations(
+      EXPERIMENT_CONFIGURATIONS_NAMESPACE,
+      responseData.experiments,
+    );
+    return responseData.experiments;
   }
 }
