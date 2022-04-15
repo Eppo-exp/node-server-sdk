@@ -1,5 +1,5 @@
 import { InMemoryConfigurationStore } from './configuration-store';
-import EppoClient from './eppo-client';
+import EppoClient, { IEppoClient } from './eppo-client';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import initPoller from './poller';
@@ -19,6 +19,8 @@ const POLL_INTERVAL_MILLIS = 5 * 60 * 1000;
 const JITTER_MILLIS = 30 * 1000;
 const CACHE_TTL_MILLIS = 15 * 60 * 1000;
 
+export { IEppoClient } from './eppo-client';
+
 /**
  * Initializes the Eppo client with configuration parameters.
  * This method should be called once on application startup.
@@ -26,7 +28,7 @@ const CACHE_TTL_MILLIS = 15 * 60 * 1000;
  * @param config client configuration
  * @public
  */
-export function init(config: IClientConfig): EppoClient {
+export async function init(config: IClientConfig): Promise<IEppoClient> {
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     CACHE_TTL_MILLIS,
   );
@@ -39,6 +41,6 @@ export function init(config: IClientConfig): EppoClient {
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations,
   );
-  poller.start();
+  await poller.start();
   return new EppoClient(configurationRequestor);
 }

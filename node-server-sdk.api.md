@@ -9,6 +9,14 @@ export interface IClientConfig {
     apiKey: string;
 }
 
+// @public
+export interface IEppoClient {
+    getAssignment(subject: string, flag: string): Promise<string>;
+}
+
+// @public
+export function init(config: IClientConfig): Promise<IEppoClient>;
+
 // (No @packageDocumentation comment for this package)
 
 ```

@@ -6,9 +6,7 @@ import { getShard, isShardInRange } from './shard';
  * Client for assigning experiment variations.
  * @public
  */
-export default class EppoClient {
-  constructor(private configurationRequestor: ExperimentConfigurationRequestor) {}
-
+export interface IEppoClient {
   /**
    * Maps a subject to a variation for a given experiment.
    *
@@ -17,6 +15,12 @@ export default class EppoClient {
    * @returns a variation value if the subject is part of the experiment sample, otherwise null
    * @public
    */
+  getAssignment(subject: string, flag: string): Promise<string>;
+}
+
+export default class EppoClient implements IEppoClient {
+  constructor(private configurationRequestor: ExperimentConfigurationRequestor) {}
+
   async getAssignment(subject: string, flag: string): Promise<string> {
     const experimentConfig = await this.configurationRequestor.getConfiguration(flag);
     if (!experimentConfig?.enabled || !this.isInExperimentSample(subject, flag, experimentConfig)) {

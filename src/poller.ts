@@ -10,6 +10,9 @@ export default function initPoller(
   callback: () => Promise<any>,
 ): IPoller {
   let stopped = false;
+  const stop = () => {
+    stopped = true;
+  };
 
   async function poll() {
     if (stopped) {
@@ -18,7 +21,10 @@ export default function initPoller(
     try {
       await callback();
     } catch (error) {
-      console.error(`Error polling configurations ${error.message}`);
+      console.error(`Error polling configurations: ${error.message}`);
+      if (!error.isRecoverable) {
+        stop();
+      }
     }
     const intervalWithJitter = interval + Math.random() * jitterMillis;
     setTimeout(poll, intervalWithJitter);
@@ -26,8 +32,6 @@ export default function initPoller(
 
   return {
     start: poll,
-    stop: () => {
-      stopped = true;
-    },
+    stop,
   };
 }
