@@ -10,7 +10,7 @@ export interface IConfigurationStore<T> {
  */
 export class InMemoryConfigurationStore<T> implements IConfigurationStore<T> {
   private cache: NodeCache;
-  constructor(private ttlSeconds: number) {
+  constructor(ttlSeconds: number) {
     this.cache = new NodeCache({ stdTTL: ttlSeconds });
   }
 
