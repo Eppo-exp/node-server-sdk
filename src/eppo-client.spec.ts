@@ -5,6 +5,7 @@ import * as td from 'testdouble';
 import { IConfigurationStore } from './configuration-store';
 import EppoClient from './eppo-client';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
+import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { IVariation } from './experiment/variation';
 
 interface IAssignmentTestCase {
@@ -27,8 +28,8 @@ function readTestCaseData(): IAssignmentTestCase[] {
 }
 
 describe('EppoClient test', () => {
-  const mockConfigurationStore = td.object<IConfigurationStore<IExperimentConfiguration>>();
-  const client = new EppoClient(mockConfigurationStore);
+  const mockConfigurationRequestor = td.object<ExperimentConfigurationRequestor>();
+  const client = new EppoClient(mockConfigurationRequestor);
   const subjectShards = 10000;
   const shouldLogAssignments = false;
 
@@ -46,7 +47,7 @@ describe('EppoClient test', () => {
         subjects,
         expectedAssignments,
       }: IAssignmentTestCase) => {
-        td.when(mockConfigurationStore.getConfiguration(experiment)).thenResolve({
+        td.when(mockConfigurationRequestor.getConfiguration(experiment)).thenResolve({
           name: experiment,
           percentExposure,
           subjectShards,
@@ -71,14 +72,14 @@ describe('EppoClient test', () => {
 
     it('returns null if no assignment configuration is found', async () => {
       const experiment = 'testExperiment';
-      td.when(mockConfigurationStore.getConfiguration(experiment)).thenResolve(null);
+      td.when(mockConfigurationRequestor.getConfiguration(experiment)).thenResolve(null);
       const assignment = await client.getAssignment('testSubject', experiment);
       expect(assignment).toEqual(null);
     });
 
     it('returns null if the experiment is disabled', async () => {
       const experiment = 'testExperiment';
-      td.when(mockConfigurationStore.getConfiguration(experiment)).thenResolve({
+      td.when(mockConfigurationRequestor.getConfiguration(experiment)).thenResolve({
         enabled: false,
         subjectShards: 10000,
         percentExposure: 1,

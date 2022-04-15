@@ -13,7 +13,7 @@ describe('initPoller', () => {
   });
 
   it('starts polling at interval', async () => {
-    const poller = initPoller<string>(testInterval, 0, callback);
+    const poller = initPoller(testInterval, 0, callback);
     await poller.start();
     td.verify(callback(), { times: 1 });
     await verifyPoll(2);
@@ -21,7 +21,7 @@ describe('initPoller', () => {
   });
 
   it('stops polling', async () => {
-    const poller = initPoller<string>(testInterval, 0, callback);
+    const poller = initPoller(testInterval, 0, callback);
     await poller.start();
     poller.stop();
     jest.advanceTimersByTime(testInterval * 10);

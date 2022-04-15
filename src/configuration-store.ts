@@ -1,28 +1,26 @@
 import * as NodeCache from 'node-cache';
 
 export interface IConfigurationStore<T> {
-  getConfiguration(key: string): Promise<T>;
-  setConfigurations(configs: Record<string, T>): Promise<void>;
+  getConfigurations(namespace: string): Promise<Record<string, T>>;
+  setConfigurations(namespace: string, configs: Record<string, T>): Promise<void>;
 }
+
+export const ASSIGNMENT_CONFIGURATION_NAMESPACE = 'assignment_configurations';
 
 /**
  * Default ConfigurationStore implementation. Sets and retrieves entries from an in-memory cache.
  */
 export class InMemoryConfigurationStore<T> implements IConfigurationStore<T> {
   private cache: NodeCache;
-  constructor(ttlSeconds: number) {
-    this.cache = new NodeCache({ stdTTL: ttlSeconds });
+  constructor(ttl: number) {
+    this.cache = new NodeCache({ stdTTL: ttl / 1000 }); // divide by 1000 because NodeCache uses seconds
   }
 
-  async getConfiguration(key: string): Promise<T> {
-    return this.cache.get<T>(key);
+  async getConfigurations(namespace: string): Promise<Record<string, T>> {
+    return this.cache.get<Record<string, T>>(namespace);
   }
 
-  async setConfigurations(configs: Record<string, T>) {
-    const cacheEntries = Object.entries(configs).map(([key, val]) => ({
-      val,
-      key,
-    }));
-    this.cache.mset(cacheEntries);
+  async setConfigurations(namespace: string, configs: Record<string, T>) {
+    this.cache.set(namespace, configs);
   }
 }

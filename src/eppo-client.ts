@@ -1,5 +1,5 @@
-import { IConfigurationStore } from './configuration-store';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
+import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { getShard, isShardInRange } from './shard';
 
 /**
@@ -7,7 +7,7 @@ import { getShard, isShardInRange } from './shard';
  * @public
  */
 export default class EppoClient {
-  constructor(private configurationStore: IConfigurationStore<IExperimentConfiguration>) {}
+  constructor(private configurationRequestor: ExperimentConfigurationRequestor) {}
 
   /**
    * Maps a subject to a variation for a given experiment.
@@ -18,7 +18,7 @@ export default class EppoClient {
    * @public
    */
   async getAssignment(subject: string, flag: string): Promise<string> {
-    const experimentConfig = await this.configurationStore.getConfiguration(flag);
+    const experimentConfig = await this.configurationRequestor.getConfiguration(flag);
     if (!experimentConfig?.enabled || !this.isInExperimentSample(subject, flag, experimentConfig)) {
       return null;
     }

@@ -3,10 +3,11 @@ interface IPoller {
   stop: () => void;
 }
 
-export default function initPoller<T>(
+export default function initPoller(
   interval: number,
   jitterMillis: number,
-  callback: () => Promise<void>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  callback: () => Promise<any>,
 ): IPoller {
   let stopped = false;
 
