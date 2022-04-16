@@ -29,9 +29,6 @@ export default class ExperimentConfigurationRequestor {
 
   async fetchAndStoreConfigurations(): Promise<Record<string, IExperimentConfiguration>> {
     const responseData = await this.httpClient.get<IRandomizedAssignmentConfig>(RAC_ENDPOINT);
-    Object.values(responseData.experiments).forEach((experiment) => {
-      experiment.subjectShards = responseData.subjectShards;
-    });
     await this.configurationStore.setConfigurations(
       EXPERIMENT_CONFIGURATIONS_NAMESPACE,
       responseData.experiments,
