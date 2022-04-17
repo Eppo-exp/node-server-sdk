@@ -20,9 +20,5 @@ export declare function init(config: IClientConfig): Promise<IEppoClient>;
 
 <b>Returns:</b>
 
-<<<<<<< HEAD
 Promise&lt;[IEppoClient](./node-server-sdk.ieppoclient.md)<!-- -->&gt;
-=======
-[IEppoClient](./node-server-sdk.ieppoclient.md)
->>>>>>> 624bddb (export EppoClient from index)
 
