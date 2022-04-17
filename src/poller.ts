@@ -21,10 +21,10 @@ export default function initPoller(
     try {
       await callback();
     } catch (error) {
-      console.error(`Error polling configurations: ${error.message}`);
       if (!error.isRecoverable) {
-        stop();
+        throw error;
       }
+      console.error(`Error polling configurations: ${error.message}`);
     }
     const intervalWithJitter = interval + Math.random() * jitterMillis;
     setTimeout(poll, intervalWithJitter);
