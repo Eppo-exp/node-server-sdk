@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { InMemoryConfigurationStore } from './configuration-store';
+import { BASE_URL, CACHE_TTL_MILLIS, JITTER_MILLIS, POLL_INTERVAL_MILLIS } from './constants';
 import EppoClient, { IEppoClient } from './eppo-client';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
@@ -19,12 +20,8 @@ export interface IClientConfig {
   apiKey: string;
 }
 
-const POLL_INTERVAL_MILLIS = 5 * 60 * 1000;
-const JITTER_MILLIS = 30 * 1000;
-const CACHE_TTL_MILLIS = 15 * 60 * 1000;
-
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:4000/api/internal',
+  baseURL: BASE_URL,
 });
 
 export { IEppoClient } from './eppo-client';

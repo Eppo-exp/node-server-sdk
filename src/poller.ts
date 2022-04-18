@@ -26,7 +26,7 @@ export default function initPoller(
       }
       console.error(`Error polling configurations: ${error.message}`);
     }
-    const intervalWithJitter = interval + Math.random() * jitterMillis;
+    const intervalWithJitter = interval - Math.random() * jitterMillis;
     setTimeout(poll, intervalWithJitter);
   }
 
