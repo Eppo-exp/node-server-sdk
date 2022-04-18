@@ -24,7 +24,7 @@ const JITTER_MILLIS = 30 * 1000;
 const CACHE_TTL_MILLIS = 15 * 60 * 1000;
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:4000',
+  baseURL: 'http://localhost:4000/api/internal',
 });
 
 export { IEppoClient } from './eppo-client';
@@ -36,7 +36,7 @@ export { IEppoClient } from './eppo-client';
  * @param config client configuration
  * @public
  */
-export async function init(config: IClientConfig): Promise<IEppoClient> {
+export function init(config: IClientConfig): IEppoClient {
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     CACHE_TTL_MILLIS,
   );
@@ -52,8 +52,8 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   const poller = initPoller(
     POLL_INTERVAL_MILLIS,
     JITTER_MILLIS,
-    configurationRequestor.fetchAndStoreConfigurations,
+    configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  await poller.start();
+  poller.start();
   return new EppoClient(configurationRequestor);
 }

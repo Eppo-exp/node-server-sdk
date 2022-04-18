@@ -2,9 +2,7 @@ import * as fs from 'fs';
 
 import * as td from 'testdouble';
 
-import { IConfigurationStore } from './configuration-store';
 import EppoClient from './eppo-client';
-import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { IVariation } from './experiment/variation';
 
