@@ -1,7 +1,13 @@
 import axios from 'axios';
 
 import { InMemoryConfigurationStore } from './configuration-store';
-import { BASE_URL, CACHE_TTL_MILLIS, JITTER_MILLIS, POLL_INTERVAL_MILLIS } from './constants';
+import {
+  BASE_URL,
+  CACHE_TTL_MILLIS,
+  JITTER_MILLIS,
+  POLL_INTERVAL_MILLIS,
+  REQUEST_TIMEOUT_MILLIS,
+} from './constants';
 import EppoClient, { IEppoClient } from './eppo-client';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
@@ -20,10 +26,6 @@ export interface IClientConfig {
   apiKey: string;
 }
 
-const axiosInstance = axios.create({
-  baseURL: BASE_URL,
-});
-
 export { IEppoClient } from './eppo-client';
 
 /**
@@ -37,6 +39,10 @@ export function init(config: IClientConfig): IEppoClient {
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     CACHE_TTL_MILLIS,
   );
+  const axiosInstance = axios.create({
+    baseURL: BASE_URL,
+    timeout: REQUEST_TIMEOUT_MILLIS,
+  });
   const httpClient = new HttpClient(axiosInstance, {
     apiKey: config.apiKey,
     sdkName,
