@@ -13,6 +13,8 @@ class HttpRequestError extends Error {
   }
 }
 
+export class InvalidApiKeyError extends HttpRequestError {}
+
 export default class HttpClient {
   constructor(private axiosInstance: AxiosInstance, private sdkQueryParams: ISdkQueryParams) {}
 
@@ -21,6 +23,12 @@ export default class HttpClient {
       const response = await this.axiosInstance.get<T>(resource, { params: this.sdkQueryParams });
       return response.data;
     } catch (error) {
+      if (error.response.status === StatusCodes.UNAUTHORIZED) {
+        throw new InvalidApiKeyError(
+          'Authorization failed. Please check the client API key.',
+          false,
+        );
+      }
       const isRecoverable = isHttpErrorRecoverable(error.response.status);
       throw new HttpRequestError(error.message, isRecoverable);
     }

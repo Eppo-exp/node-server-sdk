@@ -13,7 +13,9 @@ import { IExperimentConfiguration } from './experiment/experiment-configuration'
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import HttpClient from './http-client';
 import initPoller from './poller';
+import PollingErrorObserver from './polling-error-observer';
 import { sdkName, sdkVersion } from './sdk-data';
+import { validateNotBlank } from './validation';
 
 /**
  * Configuration used for initializing the Eppo client
@@ -36,6 +38,7 @@ export { IEppoClient } from './eppo-client';
  * @public
  */
 export function init(config: IClientConfig): IEppoClient {
+  validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     CACHE_TTL_MILLIS,
   );
@@ -48,14 +51,17 @@ export function init(config: IClientConfig): IEppoClient {
     sdkName,
     sdkVersion,
   });
+  const pollingErrorObserver = new PollingErrorObserver();
   const configurationRequestor = new ExperimentConfigurationRequestor(
     configurationStore,
     httpClient,
+    pollingErrorObserver,
   );
   const poller = initPoller(
     POLL_INTERVAL_MILLIS,
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
+    pollingErrorObserver,
   );
   poller.start();
   return new EppoClient(configurationRequestor);
