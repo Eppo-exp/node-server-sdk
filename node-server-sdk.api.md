@@ -11,7 +11,7 @@ export interface IClientConfig {
 
 // @public
 export interface IEppoClient {
-    getAssignment(subject: string, flag: string): Promise<string>;
+    getAssignment(subject: string, flag: string): string;
 }
 
 // @public

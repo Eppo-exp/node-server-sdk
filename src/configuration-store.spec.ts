@@ -1,17 +1,14 @@
-import {
-  EXPERIMENT_CONFIGURATIONS_NAMESPACE,
-  InMemoryConfigurationStore,
-} from './configuration-store';
+import { InMemoryConfigurationStore } from './configuration-store';
 
 describe('InMemoryConfigurationStore', () => {
-  it('clears entries after TTL', async () => {
+  it('clears entries after TTL', () => {
     jest.useFakeTimers();
     const store = new InMemoryConfigurationStore<string>(1000);
-    await store.setConfigurations(EXPERIMENT_CONFIGURATIONS_NAMESPACE, { key1: 'item1' });
-    expect(await store.getConfigurations(EXPERIMENT_CONFIGURATIONS_NAMESPACE)).toEqual({
-      key1: 'item1',
-    });
+    store.setConfigurations({ key1: 'item1', key2: 'item2' });
+    expect(store.getConfiguration('key1')).toEqual('item1');
+    expect(store.getConfiguration('key2')).toEqual('item2');
     jest.advanceTimersByTime(1011);
-    expect(await store.getConfigurations(EXPERIMENT_CONFIGURATIONS_NAMESPACE)).toEqual(undefined);
+    expect(store.getConfiguration('key1')).toEqual(undefined);
+    expect(store.getConfiguration('key2')).toEqual(undefined);
   });
 });

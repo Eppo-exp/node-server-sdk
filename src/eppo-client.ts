@@ -15,14 +15,14 @@ export interface IEppoClient {
    * @returns a variation value if the subject is part of the experiment sample, otherwise null
    * @public
    */
-  getAssignment(subject: string, flag: string): Promise<string>;
+  getAssignment(subject: string, flag: string): string;
 }
 
 export default class EppoClient implements IEppoClient {
   constructor(private configurationRequestor: ExperimentConfigurationRequestor) {}
 
-  async getAssignment(subject: string, flag: string): Promise<string> {
-    const experimentConfig = await this.configurationRequestor.getConfiguration(flag);
+  getAssignment(subject: string, flag: string): string {
+    const experimentConfig = this.configurationRequestor.getConfiguration(flag);
     if (!experimentConfig?.enabled || !this.isInExperimentSample(subject, flag, experimentConfig)) {
       return null;
     }

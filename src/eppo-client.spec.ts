@@ -45,7 +45,7 @@ describe('EppoClient test', () => {
         subjects,
         expectedAssignments,
       }: IAssignmentTestCase) => {
-        td.when(mockConfigurationRequestor.getConfiguration(experiment)).thenResolve({
+        td.when(mockConfigurationRequestor.getConfiguration(experiment)).thenReturn({
           name: experiment,
           percentExposure,
           subjectShards,

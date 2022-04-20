@@ -22,7 +22,7 @@ export default function initPoller(
       await callback();
     } catch (error) {
       if (!error.isRecoverable) {
-        throw error;
+        stop();
       }
       console.error(`Error polling configurations: ${error.message}`);
     }
