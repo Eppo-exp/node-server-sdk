@@ -1,5 +1,6 @@
 import { IConfigurationStore } from '../configuration-store';
-import HttpClient from '../http-client';
+import HttpClient, { InvalidApiKeyError } from '../http-client';
+import PollingErrorObserver from '../polling-error-observer';
 
 import { IExperimentConfiguration } from './experiment-configuration';
 
@@ -13,9 +14,13 @@ export default class ExperimentConfigurationRequestor {
   constructor(
     private configurationStore: IConfigurationStore<IExperimentConfiguration>,
     private httpClient: HttpClient,
+    private pollingErrorObserver: PollingErrorObserver,
   ) {}
 
   getConfiguration(experiment: string): IExperimentConfiguration {
+    if (this.pollingErrorObserver.error instanceof InvalidApiKeyError) {
+      throw this.pollingErrorObserver.error;
+    }
     return this.configurationStore.getConfiguration(experiment);
   }
 
