@@ -1,6 +1,5 @@
 import { IConfigurationStore } from '../configuration-store';
-import HttpClient, { InvalidApiKeyError } from '../http-client';
-import PollingErrorObserver from '../polling-error-observer';
+import HttpClient from '../http-client';
 
 import { IExperimentConfiguration } from './experiment-configuration';
 
@@ -10,16 +9,17 @@ interface IRandomizedAssignmentConfig {
   experiments: Record<string, IExperimentConfiguration>;
 }
 
+class InvalidApiKeyError extends Error {}
+
 export default class ExperimentConfigurationRequestor {
   constructor(
     private configurationStore: IConfigurationStore<IExperimentConfiguration>,
     private httpClient: HttpClient,
-    private pollingErrorObserver: PollingErrorObserver,
   ) {}
 
   getConfiguration(experiment: string): IExperimentConfiguration {
-    if (this.pollingErrorObserver.error instanceof InvalidApiKeyError) {
-      throw this.pollingErrorObserver.error;
+    if (this.httpClient.isUnauthorized) {
+      throw new InvalidApiKeyError('Unauthorized: please check your API key');
     }
     return this.configurationStore.getConfiguration(experiment);
   }

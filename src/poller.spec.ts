@@ -1,11 +1,11 @@
 import * as td from 'testdouble';
 
+import EventProcessor from './event-processor';
 import initPoller from './poller';
-import PollingErrorObserver from './polling-error-observer';
 
 describe('initPoller', () => {
   const testInterval = 10;
-  const errorObserver = td.object<PollingErrorObserver>();
+  const errorObserver = td.object<EventProcessor>();
   const callback = td.func<() => Promise<void>>();
   jest.useFakeTimers();
 
