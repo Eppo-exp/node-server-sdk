@@ -10,8 +10,8 @@ interface ISdkParams {
 // For use by POST and PUT requests
 type IRequestBody<T> = { data: T } | ISdkParams;
 
-class HttpRequestError extends Error {
-  constructor(public message: string, public isRecoverable: boolean) {
+export class HttpRequestError extends Error {
+  constructor(public message: string, public status: number, public isRecoverable: boolean) {
     super(message);
   }
 }
@@ -31,9 +31,10 @@ export default class HttpClient {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private handleHttpError(error: any) {
-    this.isUnauthorized = error?.response?.status === StatusCodes.UNAUTHORIZED;
-    const isRecoverable = isHttpErrorRecoverable(error?.response?.status);
-    throw new HttpRequestError(error.message, isRecoverable);
+    const status = error?.response?.status;
+    this.isUnauthorized = status === StatusCodes.UNAUTHORIZED;
+    const isRecoverable = isHttpErrorRecoverable(status);
+    throw new HttpRequestError(error.message, status, isRecoverable);
   }
 
   async post<T>(resource: string, data: T) {
@@ -46,6 +47,15 @@ export default class HttpClient {
       this.handleHttpError(error);
     }
   }
+}
+
+// Don't report the error if the backend is unavailable or the error cause is on the server side.
+export function shouldReportHttpError(status?: number): boolean {
+  return (
+    status !== StatusCodes.TOO_MANY_REQUESTS &&
+    status !== StatusCodes.SERVICE_UNAVAILABLE &&
+    status !== StatusCodes.INTERNAL_SERVER_ERROR
+  );
 }
 
 /**
