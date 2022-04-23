@@ -1,4 +1,4 @@
-import { AxiosInstance, AxiosResponse } from 'axios';
+import { AxiosInstance } from 'axios';
 import { StatusCodes } from 'http-status-codes';
 
 interface ISdkParams {
@@ -6,9 +6,6 @@ interface ISdkParams {
   sdkVersion: string;
   sdkName: string;
 }
-
-// For use by POST and PUT requests
-type IRequestBody<T> = { data: T } | ISdkParams;
 
 export class HttpRequestError extends Error {
   constructor(public message: string, public status: number, public isRecoverable: boolean) {
@@ -36,26 +33,6 @@ export default class HttpClient {
     const isRecoverable = isHttpErrorRecoverable(status);
     throw new HttpRequestError(error.message, status, isRecoverable);
   }
-
-  async post<T>(resource: string, data: T) {
-    try {
-      await this.axiosInstance.post<void, AxiosResponse<void>, IRequestBody<T>>(resource, {
-        data,
-        ...this.sdkParams,
-      });
-    } catch (error) {
-      this.handleHttpError(error);
-    }
-  }
-}
-
-// Don't report the error if the backend is unavailable or the error cause is on the server side.
-export function shouldReportHttpError(status?: number): boolean {
-  return (
-    status !== StatusCodes.TOO_MANY_REQUESTS &&
-    status !== StatusCodes.SERVICE_UNAVAILABLE &&
-    status !== StatusCodes.INTERNAL_SERVER_ERROR
-  );
 }
 
 /**

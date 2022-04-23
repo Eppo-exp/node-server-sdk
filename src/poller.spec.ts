@@ -1,11 +1,9 @@
 import * as td from 'testdouble';
 
-import EventProcessor from './event-processor';
 import initPoller from './poller';
 
 describe('initPoller', () => {
   const testInterval = 10;
-  const eventProcessor = td.object<EventProcessor>();
   const callback = td.func<() => Promise<void>>();
   jest.useFakeTimers();
 
@@ -15,7 +13,7 @@ describe('initPoller', () => {
   });
 
   it('starts polling at interval', async () => {
-    const poller = initPoller(testInterval, 0, callback, eventProcessor);
+    const poller = initPoller(testInterval, 0, callback);
     await poller.start();
     td.verify(callback(), { times: 1 });
     await verifyPoll(2);
@@ -23,7 +21,7 @@ describe('initPoller', () => {
   });
 
   it('stops polling', async () => {
-    const poller = initPoller(testInterval, 0, callback, eventProcessor);
+    const poller = initPoller(testInterval, 0, callback);
     await poller.start();
     poller.stop();
     jest.advanceTimersByTime(testInterval * 10);

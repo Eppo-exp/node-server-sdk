@@ -1,6 +1,3 @@
-import EventProcessor, { EventType } from './event-processor';
-import { HttpRequestError, shouldReportHttpError } from './http-client';
-
 interface IPoller {
   start: () => Promise<void>;
   stop: () => void;
@@ -11,7 +8,6 @@ export default function initPoller(
   jitterMillis: number,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback: () => Promise<any>,
-  eventProcessor: EventProcessor,
 ): IPoller {
   let stopped = false;
   const stop = () => {
@@ -29,15 +25,6 @@ export default function initPoller(
         stop();
       }
       console.error(`Error polling configurations: ${error.message}`);
-      if (!(error instanceof HttpRequestError) || shouldReportHttpError(error.status)) {
-        eventProcessor.enqueue({
-          type: EventType.ERROR,
-          properties: {
-            message: `Error polling configurations: ${error.message}`,
-            status: error.status,
-          },
-        });
-      }
     }
     const intervalWithJitter = interval - Math.random() * jitterMillis;
     setTimeout(poll, intervalWithJitter);
