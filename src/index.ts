@@ -14,6 +14,7 @@ import ExperimentConfigurationRequestor from './experiment/experiment-configurat
 import HttpClient from './http-client';
 import initPoller from './poller';
 import { sdkName, sdkVersion } from './sdk-data';
+import { validateNotBlank } from './validation';
 
 /**
  * Configuration used for initializing the Eppo client
@@ -36,6 +37,7 @@ export { IEppoClient } from './eppo-client';
  * @public
  */
 export function init(config: IClientConfig): IEppoClient {
+  validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     CACHE_TTL_MILLIS,
   );

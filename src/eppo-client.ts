@@ -1,6 +1,7 @@
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { getShard, isShardInRange } from './shard';
+import { validateNotBlank } from './validation';
 
 /**
  * Client for assigning experiment variations.
@@ -22,6 +23,8 @@ export default class EppoClient implements IEppoClient {
   constructor(private configurationRequestor: ExperimentConfigurationRequestor) {}
 
   getAssignment(subject: string, flag: string): string {
+    validateNotBlank(subject, 'Invalid argument: subject cannot be blank');
+    validateNotBlank(flag, 'Invalid argument: flag cannot be blank');
     const experimentConfig = this.configurationRequestor.getConfiguration(flag);
     if (!experimentConfig?.enabled || !this.isInExperimentSample(subject, flag, experimentConfig)) {
       return null;

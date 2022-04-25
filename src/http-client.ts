@@ -1,29 +1,37 @@
 import { AxiosInstance } from 'axios';
 import { StatusCodes } from 'http-status-codes';
 
-interface ISdkQueryParams {
+interface ISdkParams {
   apiKey: string;
   sdkVersion: string;
   sdkName: string;
 }
 
-class HttpRequestError extends Error {
-  constructor(public message: string, public isRecoverable: boolean) {
+export class HttpRequestError extends Error {
+  constructor(public message: string, public status: number, public isRecoverable: boolean) {
     super(message);
   }
 }
 
 export default class HttpClient {
-  constructor(private axiosInstance: AxiosInstance, private sdkQueryParams: ISdkQueryParams) {}
+  public isUnauthorized = false;
+  constructor(private axiosInstance: AxiosInstance, private sdkParams: ISdkParams) {}
 
   async get<T>(resource: string): Promise<T> {
     try {
-      const response = await this.axiosInstance.get<T>(resource, { params: this.sdkQueryParams });
+      const response = await this.axiosInstance.get<T>(resource, { params: this.sdkParams });
       return response.data;
     } catch (error) {
-      const isRecoverable = isHttpErrorRecoverable(error.response.status);
-      throw new HttpRequestError(error.message, isRecoverable);
+      this.handleHttpError(error);
     }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private handleHttpError(error: any) {
+    const status = error?.response?.status;
+    this.isUnauthorized = status === StatusCodes.UNAUTHORIZED;
+    const isRecoverable = isHttpErrorRecoverable(status);
+    throw new HttpRequestError(error.message, status, isRecoverable);
   }
 }
 

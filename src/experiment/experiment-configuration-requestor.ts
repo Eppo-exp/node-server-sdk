@@ -9,6 +9,8 @@ interface IRandomizedAssignmentConfig {
   experiments: Record<string, IExperimentConfiguration>;
 }
 
+class InvalidApiKeyError extends Error {}
+
 export default class ExperimentConfigurationRequestor {
   constructor(
     private configurationStore: IConfigurationStore<IExperimentConfiguration>,
@@ -16,6 +18,9 @@ export default class ExperimentConfigurationRequestor {
   ) {}
 
   getConfiguration(experiment: string): IExperimentConfiguration {
+    if (this.httpClient.isUnauthorized) {
+      throw new InvalidApiKeyError('Unauthorized: please check your API key');
+    }
     return this.configurationStore.getConfiguration(experiment);
   }
 
