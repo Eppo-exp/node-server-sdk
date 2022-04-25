@@ -31,6 +31,7 @@
     "node-cache": "^5.1.2"
   },
   "devDependencies": {
+    "@google-cloud/storage": "^5.19.3",
     "@microsoft/api-documenter": "^7.17.6",
     "@microsoft/api-extractor": "^7.21.2",
     "@types/jest": "^27.4.1",
