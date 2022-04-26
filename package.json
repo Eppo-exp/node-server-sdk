@@ -11,7 +11,7 @@
     "postinstall": "husky install",
     "pre-commit": "lint-staged && tsc && yarn docs",
     "typecheck": "tsc",
-    "test": "yarn test:unit --detectOpenHandles --forceExit",
+    "test": "yarn test:unit",
     "test:unit": "NODE_ENV=test jest '.*\\.spec\\.ts'",
     "docs": "api-extractor run --local --verbose && api-documenter markdown -i ./temp -o ./docs"
   },

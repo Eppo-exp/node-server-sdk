@@ -42,7 +42,7 @@ export { IEppoClient } from './eppo-client';
  * @param config client configuration
  * @public
  */
-export async function init(config: IClientConfig): Promise<IEppoClient> {
+export function init(config: IClientConfig): IEppoClient {
   validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     CACHE_TTL_MILLIS,
@@ -65,6 +65,6 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  await poller.start();
+  poller.start();
   return new EppoClient(configurationRequestor);
 }

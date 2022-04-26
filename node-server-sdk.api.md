@@ -16,7 +16,7 @@ export interface IEppoClient {
 }
 
 // @public
-export function init(config: IClientConfig): Promise<IEppoClient>;
+export function init(config: IClientConfig): IEppoClient;
 
 // (No @packageDocumentation comment for this package)
 

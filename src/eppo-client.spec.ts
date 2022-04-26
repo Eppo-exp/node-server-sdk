@@ -19,7 +19,7 @@ describe('EppoClient E2E test', () => {
       const address = apiServer.address();
       console.log(`Running API server on '${JSON.stringify(address)}'...`);
     });
-    client = await init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
+    client = init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
   });
 
   afterAll((done) => {
@@ -39,6 +39,7 @@ describe('EppoClient E2E test', () => {
         subjects,
         expectedAssignments,
       }: IAssignmentTestCase) => {
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // wait for polling to start
         console.log(`---- Test Case for ${experiment} Experiment ----`);
         const assignments = getAssignments(subjects, experiment);
         if (shouldLogAssignments) {
