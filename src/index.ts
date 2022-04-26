@@ -65,6 +65,6 @@ export function init(config: IClientConfig): IEppoClient {
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  poller.start();
-  return new EppoClient(configurationRequestor);
+  const startedPolling = poller.start();
+  return new EppoClient(() => startedPolling, configurationRequestor);
 }

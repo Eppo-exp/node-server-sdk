@@ -13,6 +13,7 @@ export interface IClientConfig {
 // @public
 export interface IEppoClient {
     getAssignment(subject: string, flag: string): string;
+    waitForInitialization: () => Promise<void>;
 }
 
 // @public

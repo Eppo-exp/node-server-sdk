@@ -23,4 +23,9 @@ api.get('/randomized_assignment/config', (_req, res) => {
   });
 });
 
-export default api;
+const server = api.listen(4000, () => {
+  const address = server.address();
+  console.log(`Running API server on '${JSON.stringify(address)}'...`);
+});
+
+export default server;

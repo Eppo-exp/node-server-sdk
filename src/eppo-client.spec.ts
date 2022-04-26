@@ -1,7 +1,6 @@
 import * as fs from 'fs';
-import { Server } from 'http';
 
-import api from '../test/mockApiServer';
+import apiServer from '../test/mockApiServer';
 import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers';
 
 import { IEppoClient } from './eppo-client';
@@ -11,21 +10,24 @@ import { init } from '.';
 
 describe('EppoClient E2E test', () => {
   let client: IEppoClient;
-  let apiServer: Server;
   const shouldLogAssignments = false;
+  jest.useFakeTimers();
 
   beforeAll(async () => {
-    apiServer = api.listen(4000, '127.0.0.1', function () {
-      const address = apiServer.address();
-      console.log(`Running API server on '${JSON.stringify(address)}'...`);
-    });
     client = init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
+    await client.waitForInitialization();
   });
 
-  afterAll((done) => {
-    apiServer.close(() => {
-      console.log('closed connection to server');
-      done();
+  afterAll(async () => {
+    jest.clearAllTimers();
+    return new Promise<void>((resolve, reject) => {
+      apiServer.close((error) => {
+        if (error) {
+          reject(error);
+        }
+        console.log('closed server');
+        resolve();
+      });
     });
   });
 
@@ -39,7 +41,6 @@ describe('EppoClient E2E test', () => {
         subjects,
         expectedAssignments,
       }: IAssignmentTestCase) => {
-        await new Promise((resolve) => setTimeout(resolve, 2000)); // wait for polling to start
         console.log(`---- Test Case for ${experiment} Experiment ----`);
         const assignments = getAssignments(subjects, experiment);
         if (shouldLogAssignments) {
