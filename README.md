@@ -49,4 +49,6 @@ git tag -a v1.0.0
 git push
 ```
 
-5) Run `npm publish`. You can also do `npm publish --dryrun` to test.
+5) `npm login` - enter your credentials
+
+6) Run `npm publish`. You can also do `npm publish --dryrun` to test.
