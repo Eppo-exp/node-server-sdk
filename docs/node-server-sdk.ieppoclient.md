@@ -12,6 +12,12 @@ Client for assigning experiment variations.
 export interface IEppoClient 
 ```
 
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [waitForInitialization](./node-server-sdk.ieppoclient.waitforinitialization.md) | () =&gt; Promise&lt;void&gt; | Returns a Promise that resolves once the client polling process has started. |
+
 ## Methods
 
 |  Method | Description |

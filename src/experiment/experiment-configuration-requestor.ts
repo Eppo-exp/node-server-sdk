@@ -3,7 +3,7 @@ import HttpClient from '../http-client';
 
 import { IExperimentConfiguration } from './experiment-configuration';
 
-const RAC_ENDPOINT = '/randomized-assignment-configurations';
+const RAC_ENDPOINT = '/randomized_assignment/config';
 
 interface IRandomizedAssignmentConfig {
   experiments: Record<string, IExperimentConfiguration>;

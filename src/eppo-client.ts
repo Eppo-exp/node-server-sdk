@@ -17,10 +17,19 @@ export interface IEppoClient {
    * @public
    */
   getAssignment(subject: string, flag: string): string;
+
+  /**
+   * Returns a Promise that resolves once the client polling process has started.
+   * @public
+   */
+  waitForInitialization: () => Promise<void>;
 }
 
 export default class EppoClient implements IEppoClient {
-  constructor(private configurationRequestor: ExperimentConfigurationRequestor) {}
+  constructor(
+    public waitForInitialization: () => Promise<void>,
+    private configurationRequestor: ExperimentConfigurationRequestor,
+  ) {}
 
   getAssignment(subject: string, flag: string): string {
     validateNotBlank(subject, 'Invalid argument: subject cannot be blank');

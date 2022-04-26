@@ -69,3 +69,5 @@ Thumbs.db
 .eslintcache
 
 temp
+
+test/assignmentTestData
