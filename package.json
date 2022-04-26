@@ -3,6 +3,9 @@
   "version": "0.2.0",
   "description": "Eppo node server SDK",
   "main": "dist/index.js",
+  "files": [
+    "/dist"
+  ],
   "typings": "dist/node-server-sdk.d.ts",
   "scripts": {
     "lint": "eslint '**/*.{ts,tsx}' '**/*.d.{ts,tsx}' --cache",
