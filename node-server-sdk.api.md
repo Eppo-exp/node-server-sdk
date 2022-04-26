@@ -7,6 +7,7 @@
 // @public
 export interface IClientConfig {
     apiKey: string;
+    baseUrl?: string;
 }
 
 // @public
@@ -15,7 +16,7 @@ export interface IEppoClient {
 }
 
 // @public
-export function init(config: IClientConfig): IEppoClient;
+export function init(config: IClientConfig): Promise<IEppoClient>;
 
 // (No @packageDocumentation comment for this package)
 

@@ -10,6 +10,7 @@ module.exports = {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
   globalSetup: './test/globalSetup.ts',
+  globalTeardown: './test/globalTeardown.ts',
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: 'coverage/',
   testEnvironment: 'node',

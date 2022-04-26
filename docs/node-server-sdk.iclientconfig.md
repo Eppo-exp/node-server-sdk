@@ -17,4 +17,5 @@ export interface IClientConfig
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [apiKey](./node-server-sdk.iclientconfig.apikey.md) | string | Eppo API key |
+|  [baseUrl?](./node-server-sdk.iclientconfig.baseurl.md) | string | <i>(Optional)</i> Base URL of the Eppo API. Clients should use the default setting in most cases. |
 

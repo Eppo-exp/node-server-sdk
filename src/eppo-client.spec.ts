@@ -2,41 +2,28 @@ import * as fs from 'fs';
 
 import * as td from 'testdouble';
 
-import EppoClient from './eppo-client';
-import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
+import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers';
+
+import { IEppoClient } from './eppo-client';
 import { IVariation } from './experiment/variation';
 
-interface IAssignmentTestCase {
-  experiment: string;
-  percentExposure: number;
-  variations: IVariation[];
-  subjects: string[];
-  expectedAssignments: string[];
-}
-
-function readTestCaseData(): IAssignmentTestCase[] {
-  const testDataDir = './test/assignmentTestData/';
-  const testCaseData: IAssignmentTestCase[] = [];
-  const testCaseFiles = fs.readdirSync(testDataDir);
-  testCaseFiles.forEach((file) => {
-    const testCase = JSON.parse(fs.readFileSync(testDataDir + file, 'utf8'));
-    testCaseData.push(testCase);
-  });
-  return testCaseData;
-}
+import { init } from '.';
 
 describe('EppoClient test', () => {
-  const mockConfigurationRequestor = td.object<ExperimentConfigurationRequestor>();
-  const client = new EppoClient(mockConfigurationRequestor);
-  const subjectShards = 10000;
+  let client: IEppoClient;
   const shouldLogAssignments = false;
+  jest.useFakeTimers();
+
+  beforeAll(async () => {
+    client = await init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
+  });
 
   afterEach(() => {
     td.reset();
   });
 
   describe('getAssignment', () => {
-    it.each(readTestCaseData())(
+    it.each(readAssignmentTestData())(
       'test variation assignment splits',
       async ({
         variations,
@@ -45,15 +32,8 @@ describe('EppoClient test', () => {
         subjects,
         expectedAssignments,
       }: IAssignmentTestCase) => {
-        td.when(mockConfigurationRequestor.getConfiguration(experiment)).thenReturn({
-          name: experiment,
-          percentExposure,
-          subjectShards,
-          variations,
-          enabled: true,
-        });
         console.log(`---- Test Case for ${experiment} Experiment ----`);
-        const assignments = await getAssignments(subjects, experiment);
+        const assignments = getAssignments(subjects, experiment);
         if (shouldLogAssignments) {
           logAssignments(experiment, assignments);
         }
@@ -67,25 +47,6 @@ describe('EppoClient test', () => {
         });
       },
     );
-
-    it('returns null if no assignment configuration is found', async () => {
-      const experiment = 'testExperiment';
-      td.when(mockConfigurationRequestor.getConfiguration(experiment)).thenResolve(null);
-      const assignment = await client.getAssignment('testSubject', experiment);
-      expect(assignment).toEqual(null);
-    });
-
-    it('returns null if the experiment is disabled', async () => {
-      const experiment = 'testExperiment';
-      td.when(mockConfigurationRequestor.getConfiguration(experiment)).thenResolve({
-        enabled: false,
-        subjectShards: 10000,
-        percentExposure: 1,
-        variations: [],
-      });
-      const assignment = await client.getAssignment('testSubject', experiment);
-      expect(assignment).toEqual(null);
-    });
   });
 
   /**
@@ -116,11 +77,9 @@ describe('EppoClient test', () => {
     expect(percentage).toBeLessThanOrEqual(expectedPercentage + 0.05);
   }
 
-  async function getAssignments(subjects: string[], experiment: string): Promise<string[]> {
-    return Promise.all(
-      subjects.map((subject) => {
-        return client.getAssignment(subject, experiment);
-      }),
-    );
+  function getAssignments(subjects: string[], experiment: string): string[] {
+    return subjects.map((subject) => {
+      return client.getAssignment(subject, experiment);
+    });
   }
 });

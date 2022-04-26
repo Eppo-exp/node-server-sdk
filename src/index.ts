@@ -25,6 +25,12 @@ export interface IClientConfig {
    * Eppo API key
    */
   apiKey: string;
+
+  /**
+   * Base URL of the Eppo API.
+   * Clients should use the default setting in most cases.
+   */
+  baseUrl?: string;
 }
 
 export { IEppoClient } from './eppo-client';
@@ -36,13 +42,13 @@ export { IEppoClient } from './eppo-client';
  * @param config client configuration
  * @public
  */
-export function init(config: IClientConfig): IEppoClient {
+export async function init(config: IClientConfig): Promise<IEppoClient> {
   validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     CACHE_TTL_MILLIS,
   );
   const axiosInstance = axios.create({
-    baseURL: BASE_URL,
+    baseURL: config.baseUrl || BASE_URL,
     timeout: REQUEST_TIMEOUT_MILLIS,
   });
   const httpClient = new HttpClient(axiosInstance, {
@@ -59,6 +65,6 @@ export function init(config: IClientConfig): IEppoClient {
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  poller.start();
+  await poller.start();
   return new EppoClient(configurationRequestor);
 }
