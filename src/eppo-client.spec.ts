@@ -12,7 +12,6 @@ import { init } from '.';
 describe('EppoClient test', () => {
   let client: IEppoClient;
   const shouldLogAssignments = false;
-  jest.useFakeTimers();
 
   beforeAll(async () => {
     client = await init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
