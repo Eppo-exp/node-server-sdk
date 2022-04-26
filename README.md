@@ -33,22 +33,17 @@ Create a new branch off of `main` and submit a PR. In the PR, update the `Unrele
 
 Do not change the package version in the PR.
 
-### Releases
+### Release Process
+A release may include changes from multiple pull requests. Only the package maintainers have access to publish releases.
+
 1) Checkout the `main` branch and pull the latest changes
 
 2) Bump the package version: `npm version [major | minor | patch]`.
 
   - Follow [Semver guidelines](https://semver.org/) when choosing major | minor | patch
 
-3) Update CHANGELOG.md with the list of changes that have occurred since the last release
+3) Update CHANGELOG.md with the list of changes that have occurred since the last release. Commit the version bump and CHANGELOG updates to the main branch. Example:
 
-4) Commit the version bump and CHANGELOG updates to the main branch. Annotate the commit with the release tag. Example:
-```
-git commit -m "release 1.0.0"
-git tag -a v1.0.0
-git push
-```
+4) `npm login` - enter your credentials
 
-5) `npm login` - enter your credentials
-
-6) Run `npm publish`. You can also do `npm publish --dryrun` to test.
+5) `npm publish`. (You can also do `npm publish --dryrun` to test)
