@@ -2,7 +2,6 @@ import * as fs from 'fs';
 
 import { Storage } from '@google-cloud/storage';
 
-import { startServer } from './mockApiServer';
 import { TEST_DATA_DIR } from './testHelpers';
 
 const storage = new Storage();
@@ -23,9 +22,4 @@ export default async () => {
     fs.mkdirSync(TEST_DATA_DIR);
     await downloadTestDataFiles();
   }
-
-  // Start dummy API server to use in E2E tests
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const globalAny = global as any;
-  globalAny.apiServer = await startServer();
 };

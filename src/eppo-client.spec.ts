@@ -1,7 +1,7 @@
 import * as fs from 'fs';
+import { Server } from 'http';
 
-import * as td from 'testdouble';
-
+import api from '../test/mockApiServer';
 import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers';
 
 import { IEppoClient } from './eppo-client';
@@ -9,16 +9,24 @@ import { IVariation } from './experiment/variation';
 
 import { init } from '.';
 
-describe('EppoClient test', () => {
+describe('EppoClient E2E test', () => {
   let client: IEppoClient;
+  let apiServer: Server;
   const shouldLogAssignments = false;
 
   beforeAll(async () => {
+    apiServer = api.listen(4000, '127.0.0.1', function () {
+      const address = apiServer.address();
+      console.log(`Running API server on '${JSON.stringify(address)}'...`);
+    });
     client = await init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
   });
 
-  afterEach(() => {
-    td.reset();
+  afterAll((done) => {
+    apiServer.close(() => {
+      console.log('closed connection to server');
+      done();
+    });
   });
 
   describe('getAssignment', () => {

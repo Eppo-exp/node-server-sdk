@@ -1,5 +1,3 @@
-import { Server } from 'http';
-
 import * as express from 'express';
 
 import { IExperimentConfiguration } from '../src/experiment/experiment-configuration';
@@ -25,10 +23,4 @@ api.get('/randomized_assignment/config', (_req, res) => {
   });
 });
 
-export async function startServer(): Promise<Server> {
-  const apiServer = api.listen(4000, '127.0.0.1', function () {
-    const address = apiServer.address();
-    console.log(`Running API server on '${JSON.stringify(address)}'...`);
-  });
-  return apiServer;
-}
+export default api;
