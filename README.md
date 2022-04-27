@@ -42,7 +42,7 @@ A release may include changes from multiple pull requests. Only the package main
 
   - Follow [Semver guidelines](https://semver.org/) when choosing major | minor | patch
 
-3) Update CHANGELOG.md with the list of changes that have occurred since the last release. Commit the version bump and CHANGELOG updates to the main branch. Example:
+3) Update CHANGELOG.md with the list of changes that have occurred since the last release. Commit the version bump and CHANGELOG updates to the main branch.
 
 4) `npm login` - enter your credentials
 
