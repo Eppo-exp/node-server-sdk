@@ -23,7 +23,7 @@
     "url": "git+https://github.com/Eppo-exp/node-server-sdk.git"
   },
   "author": "",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Eppo-exp/node-server-sdk/issues"
   },
