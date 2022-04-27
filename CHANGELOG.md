@@ -11,7 +11,7 @@
 * Describe deprecated APIs in this version
 -->
 
-## [0.3.1] - 2022-04-26
+## [0.3.2] - 2022-04-26
 
 #### New Features:
 
