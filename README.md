@@ -21,25 +21,12 @@ const eppoClient = EppoSdk.init({ apiKey: 'YOUR_API_KEY' });
 
 ## Contributing
 
-### Pull Requests
-
-Create a new branch off of `main` and submit a PR. In the PR, update the `Unreleased` section of the changelog with a description of your change:
-
-```
-## Unreleased
-
-* Brief description of your change
-```
-
-Do not change the package version in the PR.
-
 ### Release Process
 A release may include changes from multiple pull requests. Only the package maintainers have access to publish releases.
 
 1) Checkout the `main` branch and pull the latest changes
 
 2) Bump the package version: `npm version [major | minor | patch]`.
-
   - Follow [Semver guidelines](https://semver.org/) when choosing major | minor | patch
 
 3) Update CHANGELOG.md with the list of changes that have occurred since the last release. Commit the version bump and CHANGELOG updates to the main branch.
