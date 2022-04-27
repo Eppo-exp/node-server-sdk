@@ -1,14 +1,17 @@
 {
   "name": "@eppo/node-server-sdk",
-  "version": "1.0.0",
+  "version": "0.3.1",
   "description": "Eppo node server SDK",
   "main": "dist/index.js",
+  "files": [
+    "/dist"
+  ],
   "typings": "dist/node-server-sdk.d.ts",
   "scripts": {
     "lint": "eslint '**/*.{ts,tsx}' '**/*.d.{ts,tsx}' --cache",
     "lint:fix": "eslint --fix '**/*.{ts,tsx}' --cache",
     "lint:fix-pre-commit": "eslint -c .eslintrc.pre-commit.js --fix '**/*.{ts,tsx}' --no-eslintrc --cache",
-    "postinstall": "husky install",
+    "prepare": "husky install",
     "pre-commit": "lint-staged && tsc && yarn docs",
     "typecheck": "tsc",
     "test": "yarn test:unit",
@@ -20,7 +23,7 @@
     "url": "git+https://github.com/Eppo-exp/node-server-sdk.git"
   },
   "author": "",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Eppo-exp/node-server-sdk/issues"
   },
