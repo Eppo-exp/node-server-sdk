@@ -15,4 +15,4 @@
 
 #### New Features:
 
-* This is the initial development release. It a variation assignment function and the ability to retrieve assignment configurations in the background.
+* This is the initial development release. It adds a variation assignment function and the ability to retrieve assignment configurations in the background.
