@@ -11,6 +11,10 @@
 * Describe deprecated APIs in this version
 -->
 
+## [0.3.3] - 2022-04-28
+
+* Added MIT license
+
 ## [0.3.2] - 2022-04-26
 
 #### New Features:
