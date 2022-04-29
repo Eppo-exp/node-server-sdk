@@ -16,6 +16,7 @@ export interface IEppoClient
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [close](./node-server-sdk.ieppoclient.close.md) | () =&gt; void | Closes all background processes used by the client. |
 |  [waitForInitialization](./node-server-sdk.ieppoclient.waitforinitialization.md) | () =&gt; Promise&lt;void&gt; | Returns a Promise that resolves once the client polling process has started. |
 
 ## Methods

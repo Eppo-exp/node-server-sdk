@@ -23,11 +23,18 @@ export interface IEppoClient {
    * @public
    */
   waitForInitialization: () => Promise<void>;
+
+  /**
+   * Closes all background processes used by the client.
+   * @public
+   */
+  close: () => void;
 }
 
 export default class EppoClient implements IEppoClient {
   constructor(
     public waitForInitialization: () => Promise<void>,
+    public close: () => void,
     private configurationRequestor: ExperimentConfigurationRequestor,
   ) {}
 

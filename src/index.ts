@@ -35,6 +35,9 @@ export interface IClientConfig {
 
 export { IEppoClient } from './eppo-client';
 
+// shared client instance
+let client: IEppoClient = null;
+
 /**
  * Initializes the Eppo client with configuration parameters.
  * This method should be called once on application startup.
@@ -60,11 +63,16 @@ export function init(config: IClientConfig): IEppoClient {
     configurationStore,
     httpClient,
   );
+  if (client) {
+    // if client was already initialized, release its resources before re-initializing it
+    client.close();
+  }
   const poller = initPoller(
     POLL_INTERVAL_MILLIS,
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
   const startedPolling = poller.start();
-  return new EppoClient(() => startedPolling, configurationRequestor);
+  client = new EppoClient(() => startedPolling, poller.stop, configurationRequestor);
+  return client;
 }
