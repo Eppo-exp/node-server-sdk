@@ -12,7 +12,7 @@ import EppoClient, { IEppoClient } from './eppo-client';
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import HttpClient from './http-client';
-import initPoller from './poller';
+import initPoller, { IPoller } from './poller';
 import { sdkName, sdkVersion } from './sdk-data';
 import { validateNotBlank } from './validation';
 
@@ -34,6 +34,8 @@ export interface IClientConfig {
 }
 
 export { IEppoClient } from './eppo-client';
+
+let poller: IPoller = null;
 
 /**
  * Initializes the Eppo client with configuration parameters.
@@ -60,7 +62,11 @@ export function init(config: IClientConfig): IEppoClient {
     configurationStore,
     httpClient,
   );
-  const poller = initPoller(
+  if (poller) {
+    // if a client was already initialized, stop the polling process from the previous init call
+    poller.stop();
+  }
+  poller = initPoller(
     POLL_INTERVAL_MILLIS,
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
