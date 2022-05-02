@@ -11,6 +11,11 @@
 * Describe deprecated APIs in this version
 -->
 
+## [0.3.5] - 2022-04-29
+
+#### Fixed:
+* If the init method is called twice in a row, the second call should cancel the previous polling process.
+
 ## [0.3.3] - 2022-04-28
 
 * Added MIT license
