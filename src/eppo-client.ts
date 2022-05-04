@@ -31,15 +31,18 @@ export default class EppoClient implements IEppoClient {
     private configurationRequestor: ExperimentConfigurationRequestor,
   ) {}
 
-  getAssignment(subject: string, flag: string): string {
+  getAssignment(subject: string, experimentKey: string): string {
     validateNotBlank(subject, 'Invalid argument: subject cannot be blank');
-    validateNotBlank(flag, 'Invalid argument: flag cannot be blank');
-    const experimentConfig = this.configurationRequestor.getConfiguration(flag);
-    if (!experimentConfig?.enabled || !this.isInExperimentSample(subject, flag, experimentConfig)) {
+    validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
+    const experimentConfig = this.configurationRequestor.getConfiguration(experimentKey);
+    if (
+      !experimentConfig?.enabled ||
+      !this.isInExperimentSample(subject, experimentKey, experimentConfig)
+    ) {
       return null;
     }
     const { variations, subjectShards } = experimentConfig;
-    const shard = getShard(`assignment-${subject}-${flag}`, subjectShards);
+    const shard = getShard(`assignment-${subject}-${experimentKey}`, subjectShards);
     return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
   }
 
@@ -50,11 +53,11 @@ export default class EppoClient implements IEppoClient {
    */
   private isInExperimentSample(
     subject: string,
-    experiment: string,
+    experimentKey: string,
     experimentConfig: IExperimentConfiguration,
   ): boolean {
     const { percentExposure, subjectShards } = experimentConfig;
-    const shard = getShard(`exposure-${subject}-${experiment}`, subjectShards);
+    const shard = getShard(`exposure-${subject}-${experimentKey}`, subjectShards);
     return shard <= percentExposure * subjectShards;
   }
 }

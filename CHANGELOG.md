@@ -11,6 +11,11 @@
 * Describe deprecated APIs in this version
 -->
 
+## [0.3.6] - 2022-05-03
+
+#### Changed:
+* Renamed the `flag` parameter of the assignment function to `experimentKey`
+
 ## [0.3.5] - 2022-04-29
 
 #### Fixed:
