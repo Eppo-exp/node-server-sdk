@@ -9,7 +9,7 @@ Maps a subject to a variation for a given experiment.
 <b>Signature:</b>
 
 ```typescript
-getAssignment(subject: string, flag: string): string;
+getAssignment(subject: string, experimentKey: string): string;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ getAssignment(subject: string, flag: string): string;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  subject | string | an entity ID, e.g. userId |
-|  flag | string | experiment identifier |
+|  experimentKey | string | experiment identifier |
 
 <b>Returns:</b>
 
