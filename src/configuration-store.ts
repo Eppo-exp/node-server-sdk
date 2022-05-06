@@ -1,4 +1,4 @@
-import * as NodeCache from 'node-cache';
+import * as LRUCache from 'lru-cache';
 
 export interface IConfigurationStore<T> {
   getConfiguration(key: string): T;
@@ -9,9 +9,9 @@ export interface IConfigurationStore<T> {
  * Default ConfigurationStore implementation. Sets and retrieves entries from an in-memory cache.
  */
 export class InMemoryConfigurationStore<T> implements IConfigurationStore<T> {
-  private cache: NodeCache;
-  constructor(ttlMilliseconds: number) {
-    this.cache = new NodeCache({ stdTTL: ttlMilliseconds / 1000 }); // divide by 1000 because NodeCache uses seconds
+  private cache: LRUCache<string, T>;
+  constructor(maxEntries: number) {
+    this.cache = new LRUCache({ max: maxEntries });
   }
 
   getConfiguration(key: string): T {
@@ -19,10 +19,8 @@ export class InMemoryConfigurationStore<T> implements IConfigurationStore<T> {
   }
 
   setConfigurations(configs: Record<string, T>) {
-    const cacheEntries: NodeCache.ValueSetItem<T>[] = Object.entries(configs).map(([key, val]) => ({
-      key,
-      val,
-    }));
-    this.cache.mset(cacheEntries);
+    Object.entries(configs).forEach(([key, val]) => {
+      this.cache.set(key, val);
+    });
   }
 }

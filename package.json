@@ -1,6 +1,6 @@
 {
   "name": "@eppo/node-server-sdk",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "Eppo node server SDK",
   "main": "dist/index.js",
   "files": [
@@ -31,7 +31,7 @@
   "dependencies": {
     "axios": "^0.26.1",
     "http-status-codes": "^2.2.0",
-    "node-cache": "^5.1.2"
+    "lru-cache": "^7.9.0"
   },
   "devDependencies": {
     "@google-cloud/storage": "^5.19.3",
@@ -39,6 +39,7 @@
     "@microsoft/api-extractor": "^7.21.2",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.4.1",
+    "@types/lru-cache": "^7.6.1",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
     "eslint": "7.32.0",

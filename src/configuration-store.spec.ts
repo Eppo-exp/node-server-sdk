@@ -1,14 +1,19 @@
 import { InMemoryConfigurationStore } from './configuration-store';
 
 describe('InMemoryConfigurationStore', () => {
-  it('clears entries after TTL', () => {
-    jest.useFakeTimers();
-    const store = new InMemoryConfigurationStore<string>(1000);
-    store.setConfigurations({ key1: 'item1', key2: 'item2' });
-    expect(store.getConfiguration('key1')).toEqual('item1');
-    expect(store.getConfiguration('key2')).toEqual('item2');
-    jest.advanceTimersByTime(1011);
-    expect(store.getConfiguration('key1')).toEqual(undefined);
-    expect(store.getConfiguration('key2')).toEqual(undefined);
+  it('evicts entries when max size is exceeded', () => {
+    const maxSize = 1000;
+    const store = new InMemoryConfigurationStore<string>(maxSize);
+    store.setConfigurations({ toBeEvicted: 'item1' });
+    expect(store.getConfiguration('toBeEvicted')).toEqual('item1');
+    const otherConfigs = {};
+    for (let i = 0; i < maxSize; i++) {
+      otherConfigs[`key-${i}`] = `value-${i}`;
+    }
+    store.setConfigurations(otherConfigs);
+    expect(store.getConfiguration('toBeEvicted')).toEqual(undefined);
+    for (let i = 0; i < maxSize; i++) {
+      expect(store.getConfiguration(`key-${i}`)).toEqual(`value-${i}`);
+    }
   });
 });
