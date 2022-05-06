@@ -11,6 +11,11 @@
 * Describe deprecated APIs in this version
 -->
 
+## [0.3.7] - 2022-05-05
+
+#### Changed:
+* Changed the in-memory store implementation to use an LRU cache instead of a TTL cache. This allows the assignment function to continue serving stale results if a fatal error stops the polling process.
+
 ## [0.3.6] - 2022-05-03
 
 #### Changed:

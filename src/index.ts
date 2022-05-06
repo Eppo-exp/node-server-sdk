@@ -3,7 +3,7 @@ import axios from 'axios';
 import { InMemoryConfigurationStore } from './configuration-store';
 import {
   BASE_URL,
-  CACHE_TTL_MILLIS,
+  MAX_CACHE_ENTRIES,
   JITTER_MILLIS,
   POLL_INTERVAL_MILLIS,
   REQUEST_TIMEOUT_MILLIS,
@@ -47,7 +47,7 @@ let poller: IPoller = null;
 export function init(config: IClientConfig): IEppoClient {
   validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
-    CACHE_TTL_MILLIS,
+    MAX_CACHE_ENTRIES,
   );
   const axiosInstance = axios.create({
     baseURL: config.baseUrl || BASE_URL,
