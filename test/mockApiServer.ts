@@ -16,6 +16,7 @@ api.get('/randomized_assignment/config', (_req, res) => {
       enabled: true,
       subjectShards: 10000,
       variations,
+      overrides: {},
     };
   });
   res.json({

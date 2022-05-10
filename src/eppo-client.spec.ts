@@ -1,9 +1,12 @@
 import * as fs from 'fs';
 
+import * as td from 'testdouble';
+
 import apiServer from '../test/mockApiServer';
 import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers';
 
-import { IEppoClient } from './eppo-client';
+import EppoClient, { IEppoClient } from './eppo-client';
+import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { IVariation } from './experiment/variation';
 
 import { init } from '.';
@@ -56,6 +59,46 @@ describe('EppoClient E2E test', () => {
         });
       },
     );
+  });
+
+  it('returns subject from overrides', () => {
+    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const experiment = 'experiment_5';
+    td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
+      name: experiment,
+      percentExposure: 1,
+      enabled: true,
+      subjectShards: 100,
+      variations: [
+        {
+          name: 'control',
+          shardRange: {
+            start: 0,
+            end: 33,
+          },
+        },
+        {
+          name: 'variant-1',
+          shardRange: {
+            start: 34,
+            end: 66,
+          },
+        },
+        {
+          name: 'variant-2',
+          shardRange: {
+            start: 67,
+            end: 100,
+          },
+        },
+      ],
+      overrides: {
+        a90ea45116d251a43da56e03d3dd7275: 'variant-2',
+      },
+    });
+    client = new EppoClient(() => Promise.resolve(), mockConfigRequestor);
+    const assignment = client.getAssignment('subject-1', experiment);
+    expect(assignment).toEqual('variant-2');
   });
 
   /**

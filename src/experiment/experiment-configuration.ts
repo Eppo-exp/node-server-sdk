@@ -6,4 +6,5 @@ export interface IExperimentConfiguration {
   enabled: boolean;
   subjectShards: number;
   variations: IVariation[];
+  overrides: Record<string, string>;
 }
