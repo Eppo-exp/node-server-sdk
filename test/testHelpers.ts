@@ -10,6 +10,7 @@ export interface IAssignmentTestCase {
   variations: IVariation[];
   subjects: string[];
   expectedAssignments: string[];
+  overrides: Record<string, string>;
 }
 
 export function readAssignmentTestData(): IAssignmentTestCase[] {

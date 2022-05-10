@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { getShard, isShardInRange } from './shard';
@@ -29,12 +31,21 @@ export default class EppoClient implements IEppoClient {
   constructor(
     public waitForInitialization: () => Promise<void>,
     private configurationRequestor: ExperimentConfigurationRequestor,
-  ) {}
+  ) { }
 
   getAssignment(subject: string, experimentKey: string): string {
     validateNotBlank(subject, 'Invalid argument: subject cannot be blank');
     validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
     const experimentConfig = this.configurationRequestor.getConfiguration(experimentKey);
+
+    if (Object.keys(experimentConfig.overrides).length > 0) {
+      const hashedSubjectId = createHash('md5').update(subject).digest('hex')
+      const overriddenVariation = experimentConfig.overrides[hashedSubjectId];
+      if (overriddenVariation) {
+        return overriddenVariation;
+      }
+    }
+
     if (
       !experimentConfig?.enabled ||
       !this.isInExperimentSample(subject, experimentKey, experimentConfig)
