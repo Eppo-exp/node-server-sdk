@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { getShard, isShardInRange } from './shard';
@@ -41,9 +43,21 @@ export default class EppoClient implements IEppoClient {
     ) {
       return null;
     }
+    const override = this.getSubjectVariationOverride(subject, experimentConfig);
+    if (override) {
+      return override;
+    }
     const { variations, subjectShards } = experimentConfig;
     const shard = getShard(`assignment-${subject}-${experimentKey}`, subjectShards);
     return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
+  }
+
+  private getSubjectVariationOverride(
+    subject: string,
+    experimentConfig: IExperimentConfiguration,
+  ): string {
+    const subjectHash = createHash('md5').update(subject).digest('hex');
+    return experimentConfig.overrides[subjectHash];
   }
 
   /**
