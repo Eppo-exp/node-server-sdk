@@ -11,6 +11,11 @@
 * Describe deprecated APIs in this version
 -->
 
+## [0.4.0] - 2022-05-12
+
+#### New Features:
+* Allow list: the SDK will retrieve an allow list from Eppo's API. The allow list maps subjects to variations. If a subject is in the allow list for a given variation, the assignment function will return that variation instead of a random assignment.
+
 ## [0.3.7] - 2022-05-05
 
 #### Changed:
