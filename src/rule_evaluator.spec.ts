@@ -64,11 +64,6 @@ describe('matchesAnyRule', () => {
     expect(matchesAnyRule({ totalSales: '20' }, rules)).toEqual(false);
   });
 
-  it('returns false if using string operator with number', () => {
-    const rules = [numericRuleAnd, textRuleOr];
-    expect(matchesAnyRule({ user_id: 14 }, rules)).toEqual(false);
-  });
-
   it('handles rule with matches operator', () => {
     const rules = [textRuleOr];
     expect(matchesAnyRule({ user_id: '14' }, rules)).toEqual(true);
