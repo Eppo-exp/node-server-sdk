@@ -102,7 +102,7 @@ describe('EppoClient E2E test', () => {
     expect(assignment).toEqual('variant-2');
   });
 
-  it('returns null if subject does not match rules', () => {
+  it('only returns variation if subject matches rules', () => {
     const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
     const experiment = 'experiment_5';
     td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
@@ -141,8 +141,10 @@ describe('EppoClient E2E test', () => {
       ],
     });
     client = new EppoClient(() => Promise.resolve(), mockConfigRequestor);
-    const assignment = client.getAssignment('subject-1', experiment, { appVersion: 9 });
+    let assignment = client.getAssignment('subject-1', experiment, { appVersion: 9 });
     expect(assignment).toEqual(null);
+    assignment = client.getAssignment('subject-1', experiment, { appVersion: 11 });
+    expect(assignment).toEqual('control');
   });
 
   /**
