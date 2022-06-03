@@ -28,7 +28,7 @@ describe('matchesAnyRule', () => {
       {
         operator: OperatorType.MATCHES,
         attribute: 'user_id',
-        value: 'U[0-9]+',
+        value: '[0-9]+',
       },
     ],
   };
@@ -58,22 +58,20 @@ describe('matchesAnyRule', () => {
     expect(matchesAnyRule({ totalSales: 101 }, rules)).toEqual(true);
   });
 
-  it('throws error if invalid type for operator', () => {
+  it('returns false if using numeric operator with string', () => {
     const rules = [numericRuleAnd, textRuleOr];
-    expect(() => matchesAnyRule({ totalSales: 'stringValue' }, rules)).toThrow(
-      new InvalidArgumentError(
-        "Expected numeric value for operator GTE but attribute 'totalSales' has type string",
-      ),
-    );
-    expect(() => matchesAnyRule({ user_id: 99 }, rules)).toThrow(
-      new InvalidArgumentError(
-        "Expected string value for operator MATCHES but attribute 'user_id' has type number",
-      ),
-    );
+    expect(matchesAnyRule({ totalSales: 'stringValue' }, rules)).toEqual(false);
+    expect(matchesAnyRule({ totalSales: '20' }, rules)).toEqual(false);
+  });
+
+  it('returns false if using string operator with number', () => {
+    const rules = [numericRuleAnd, textRuleOr];
+    expect(matchesAnyRule({ user_id: 14 }, rules)).toEqual(false);
   });
 
   it('handles rule with matches operator', () => {
     const rules = [textRuleOr];
-    expect(matchesAnyRule({ user_id: 'U14' }, rules)).toEqual(true);
+    expect(matchesAnyRule({ user_id: '14' }, rules)).toEqual(true);
+    expect(matchesAnyRule({ user_id: 14 }, rules)).toEqual(true);
   });
 });

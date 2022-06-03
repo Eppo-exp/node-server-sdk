@@ -1,5 +1,4 @@
 import { Condition, OperatorType, Rule, RuleType, AttributeValueType } from './rule';
-import { InvalidArgumentError } from './validation';
 
 export function matchesAnyRule(
   targetingAttributes: Record<string, AttributeValueType>,
@@ -30,25 +29,21 @@ function evaluateRuleConditions(
   return conditions.map((condition) => evaluateCondition(targetingAttributes, condition));
 }
 
-const NUMERIC_OPERATORS = [OperatorType.GT, OperatorType.LT, OperatorType.GTE, OperatorType.LTE];
-const STRING_OPERATORS = [OperatorType.MATCHES];
-
 function evaluateCondition(
   targetingAttributes: Record<string, AttributeValueType>,
   condition: Condition,
 ): boolean {
   const value = targetingAttributes[condition.attribute];
   if (value) {
-    validateAttributeType(value, condition);
     switch (condition.operator) {
       case OperatorType.GTE:
-        return value >= condition.value;
+        return compareNumber(value, condition.value, (a, b) => a >= b);
       case OperatorType.GT:
-        return value > condition.value;
+        return compareNumber(value, condition.value, (a, b) => a > b);
       case OperatorType.LTE:
-        return value <= condition.value;
+        return compareNumber(value, condition.value, (a, b) => a <= b);
       case OperatorType.LT:
-        return value < condition.value;
+        return compareNumber(value, condition.value, (a, b) => a < b);
       case OperatorType.MATCHES:
         return new RegExp(condition.value as string).test(value as string);
     }
@@ -56,19 +51,14 @@ function evaluateCondition(
   return false;
 }
 
-function validateAttributeType(value: AttributeValueType, condition: Condition) {
-  if (typeof value !== 'number' && NUMERIC_OPERATORS.includes(condition.operator)) {
-    throw new InvalidArgumentError(
-      `Expected numeric value for operator ${condition.operator} but attribute '${
-        condition.attribute
-      }' has type ${typeof value}`,
-    );
-  }
-  if (typeof value !== 'string' && STRING_OPERATORS.includes(condition.operator)) {
-    throw new InvalidArgumentError(
-      `Expected string value for operator ${condition.operator} but attribute '${
-        condition.attribute
-      }' has type ${typeof value}`,
-    );
-  }
+function compareNumber(
+  attributeValue: AttributeValueType,
+  conditionValue: AttributeValueType,
+  compareFn: (a: number, b: number) => boolean,
+) {
+  return (
+    typeof attributeValue === 'number' &&
+    typeof conditionValue === 'number' &&
+    compareFn(attributeValue, conditionValue)
+  );
 }

@@ -11,6 +11,11 @@
 * Describe deprecated APIs in this version
 -->
 
+## [0.5.0] - 2022-06-03
+
+#### New Features:
+* Targeting Rules: pass targeting attributes to the assignment function. The assignment function only returns a variation if the attributes match at least one rule. Rules are defined on the experiment page.
+
 ## [0.4.0] - 2022-05-12
 
 #### New Features:
