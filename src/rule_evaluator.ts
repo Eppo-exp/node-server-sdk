@@ -56,7 +56,7 @@ function evaluateCondition(
   return false;
 }
 
-function validateAttributeType(value: any, condition: Condition) {
+function validateAttributeType(value: AttributeValueType, condition: Condition) {
   if (typeof value !== 'number' && NUMERIC_OPERATORS.includes(condition.operator)) {
     throw new InvalidArgumentError(
       `Expected numeric value for operator ${condition.operator} but attribute '${

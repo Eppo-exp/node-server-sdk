@@ -65,7 +65,10 @@ export default class EppoClient implements IEppoClient {
     return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
   }
 
-  private matchesTargetingAttributes(targetingAttributes?: Record<string, any>, rules?: Rule[]) {
+  private matchesTargetingAttributes(
+    targetingAttributes?: Record<string, AttributeValueType>,
+    rules?: Rule[],
+  ) {
     if (!targetingAttributes || !rules || rules.length === 0) {
       return true;
     }
