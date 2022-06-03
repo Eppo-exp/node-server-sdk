@@ -1,3 +1,5 @@
+import { Rule } from '../rule';
+
 import { IVariation } from './variation';
 
 export interface IExperimentConfiguration {
@@ -7,4 +9,5 @@ export interface IExperimentConfiguration {
   subjectShards: number;
   variations: IVariation[];
   overrides: Record<string, string>;
+  rules?: Rule[];
 }

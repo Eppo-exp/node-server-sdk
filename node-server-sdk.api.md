@@ -12,7 +12,7 @@ export interface IClientConfig {
 
 // @public
 export interface IEppoClient {
-    getAssignment(subject: string, experimentKey: string): string;
+    getAssignment(subject: string, experimentKey: string, targetingAttributes?: Record<string, any>): string;
     waitForInitialization: () => Promise<void>;
 }
 

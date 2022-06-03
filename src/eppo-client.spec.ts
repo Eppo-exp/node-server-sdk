@@ -8,6 +8,7 @@ import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers
 import EppoClient, { IEppoClient } from './eppo-client';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { IVariation } from './experiment/variation';
+import { OperatorType, RuleType } from './rule';
 
 import { init } from '.';
 
@@ -99,6 +100,49 @@ describe('EppoClient E2E test', () => {
     client = new EppoClient(() => Promise.resolve(), mockConfigRequestor);
     const assignment = client.getAssignment('subject-1', experiment);
     expect(assignment).toEqual('variant-2');
+  });
+
+  it('returns null if subject does not match rules', () => {
+    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const experiment = 'experiment_5';
+    td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
+      name: experiment,
+      percentExposure: 1,
+      enabled: true,
+      subjectShards: 100,
+      variations: [
+        {
+          name: 'control',
+          shardRange: {
+            start: 0,
+            end: 50,
+          },
+        },
+        {
+          name: 'treatment',
+          shardRange: {
+            start: 50,
+            end: 100,
+          },
+        },
+      ],
+      overrides: {},
+      rules: [
+        {
+          type: RuleType.AND,
+          conditions: [
+            {
+              operator: OperatorType.GT,
+              attribute: 'appVersion',
+              value: 10,
+            },
+          ],
+        },
+      ],
+    });
+    client = new EppoClient(() => Promise.resolve(), mockConfigRequestor);
+    const assignment = client.getAssignment('subject-1', experiment, { appVersion: 9 });
+    expect(assignment).toEqual(null);
   });
 
   /**

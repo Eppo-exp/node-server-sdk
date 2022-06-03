@@ -2,6 +2,8 @@ import { createHash } from 'crypto';
 
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
+import { Rule } from './rule';
+import { matchesAnyRule } from './rule_evaluator';
 import { getShard, isShardInRange } from './shard';
 import { validateNotBlank } from './validation';
 
@@ -15,10 +17,16 @@ export interface IEppoClient {
    *
    * @param subject an entity ID, e.g. userId
    * @param experimentKey experiment identifier
+   * @param targetingAttributes attributes to be evaluated by targeting rules.
+   * A variation is only assigned if the attributes match at least one rule.
    * @returns a variation value if the subject is part of the experiment sample, otherwise null
    * @public
    */
-  getAssignment(subject: string, experimentKey: string): string;
+  getAssignment(
+    subject: string,
+    experimentKey: string,
+    targetingAttributes?: Record<string, any>,
+  ): string;
 
   /**
    * Returns a Promise that resolves once the client polling process has started.
@@ -33,12 +41,17 @@ export default class EppoClient implements IEppoClient {
     private configurationRequestor: ExperimentConfigurationRequestor,
   ) {}
 
-  getAssignment(subject: string, experimentKey: string): string {
+  getAssignment(
+    subject: string,
+    experimentKey: string,
+    targetingAttributes?: Record<string, any>,
+  ): string {
     validateNotBlank(subject, 'Invalid argument: subject cannot be blank');
     validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
     const experimentConfig = this.configurationRequestor.getConfiguration(experimentKey);
     if (
       !experimentConfig?.enabled ||
+      !this.matchesTargetingAttributes(targetingAttributes, experimentConfig.rules) ||
       !this.isInExperimentSample(subject, experimentKey, experimentConfig)
     ) {
       return null;
@@ -50,6 +63,13 @@ export default class EppoClient implements IEppoClient {
     const { variations, subjectShards } = experimentConfig;
     const shard = getShard(`assignment-${subject}-${experimentKey}`, subjectShards);
     return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
+  }
+
+  private matchesTargetingAttributes(targetingAttributes?: Record<string, any>, rules?: Rule[]) {
+    if (!targetingAttributes || !rules || rules.length === 0) {
+      return true;
+    }
+    return matchesAnyRule(targetingAttributes, rules);
   }
 
   private getSubjectVariationOverride(
