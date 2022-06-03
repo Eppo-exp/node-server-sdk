@@ -1,3 +1,5 @@
+export type AttributeValueType = string | number;
+
 export enum OperatorType {
   MATCHES = 'MATCHES',
   GTE = 'GTE',
@@ -9,8 +11,7 @@ export enum OperatorType {
 export interface Condition {
   operator: OperatorType;
   attribute: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  value: any;
+  value: AttributeValueType;
 }
 
 export enum RuleType {

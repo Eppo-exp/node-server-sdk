@@ -4,6 +4,9 @@
 
 ```ts
 
+// @public (undocumented)
+export type AttributeValueType = string | number;
+
 // @public
 export interface IClientConfig {
     apiKey: string;
@@ -12,7 +15,7 @@ export interface IClientConfig {
 
 // @public
 export interface IEppoClient {
-    getAssignment(subject: string, experimentKey: string, targetingAttributes?: Record<string, any>): string;
+    getAssignment(subject: string, experimentKey: string, targetingAttributes?: Record<string, AttributeValueType>): string;
     waitForInitialization: () => Promise<void>;
 }
 

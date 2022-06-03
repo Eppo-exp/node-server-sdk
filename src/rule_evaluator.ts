@@ -1,7 +1,10 @@
-import { Condition, OperatorType, Rule, RuleType } from './rule';
+import { Condition, OperatorType, Rule, RuleType, AttributeValueType } from './rule';
 import { InvalidArgumentError } from './validation';
 
-export function matchesAnyRule(targetingAttributes: Record<string, any>, rules: Rule[]): boolean {
+export function matchesAnyRule(
+  targetingAttributes: Record<string, AttributeValueType>,
+  rules: Rule[],
+): boolean {
   for (const rule of rules) {
     if (matchesRule(targetingAttributes, rule)) {
       return true;
@@ -10,7 +13,7 @@ export function matchesAnyRule(targetingAttributes: Record<string, any>, rules: 
   return false;
 }
 
-function matchesRule(targetingAttributes: Record<string, any>, rule: Rule): boolean {
+function matchesRule(targetingAttributes: Record<string, AttributeValueType>, rule: Rule): boolean {
   const conditionEvaluations = evaluateRuleConditions(targetingAttributes, rule.conditions);
   switch (rule.type) {
     case RuleType.AND:
@@ -21,7 +24,7 @@ function matchesRule(targetingAttributes: Record<string, any>, rule: Rule): bool
 }
 
 function evaluateRuleConditions(
-  targetingAttributes: Record<string, any>,
+  targetingAttributes: Record<string, AttributeValueType>,
   conditions: Condition[],
 ): boolean[] {
   return conditions.map((condition) => evaluateCondition(targetingAttributes, condition));
@@ -31,7 +34,7 @@ const NUMERIC_OPERATORS = [OperatorType.GT, OperatorType.LT, OperatorType.GTE, O
 const STRING_OPERATORS = [OperatorType.MATCHES];
 
 function evaluateCondition(
-  targetingAttributes: Record<string, any>,
+  targetingAttributes: Record<string, AttributeValueType>,
   condition: Condition,
 ): boolean {
   const value = targetingAttributes[condition.attribute];
@@ -47,7 +50,7 @@ function evaluateCondition(
       case OperatorType.LT:
         return value < condition.value;
       case OperatorType.MATCHES:
-        return new RegExp(condition.value).test(value);
+        return new RegExp(condition.value as string).test(value as string);
     }
   }
   return false;

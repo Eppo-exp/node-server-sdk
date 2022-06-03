@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
-import { Rule } from './rule';
+import { Rule, AttributeValueType } from './rule';
 import { matchesAnyRule } from './rule_evaluator';
 import { getShard, isShardInRange } from './shard';
 import { validateNotBlank } from './validation';
@@ -25,7 +25,7 @@ export interface IEppoClient {
   getAssignment(
     subject: string,
     experimentKey: string,
-    targetingAttributes?: Record<string, any>,
+    targetingAttributes?: Record<string, AttributeValueType>,
   ): string;
 
   /**
@@ -44,7 +44,7 @@ export default class EppoClient implements IEppoClient {
   getAssignment(
     subject: string,
     experimentKey: string,
-    targetingAttributes?: Record<string, any>,
+    targetingAttributes?: Record<string, AttributeValueType>,
   ): string {
     validateNotBlank(subject, 'Invalid argument: subject cannot be blank');
     validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
