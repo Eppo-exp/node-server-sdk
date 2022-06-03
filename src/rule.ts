@@ -16,7 +16,6 @@ export interface Condition {
 
 export enum RuleType {
   AND = 'AND', // all conditions evaluate to true
-  OR = 'OR', // any condition evaluates as true
 }
 
 export interface Rule {

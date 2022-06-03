@@ -1,10 +1,9 @@
 import { OperatorType, Rule, RuleType } from './rule';
 import { matchesAnyRule } from './rule_evaluator';
-import { InvalidArgumentError } from './validation';
 
 describe('matchesAnyRule', () => {
   const emptyConditionsRule: Rule = {
-    type: RuleType.OR,
+    type: RuleType.AND,
     conditions: [],
   };
   const numericRuleAnd: Rule = {
@@ -23,7 +22,7 @@ describe('matchesAnyRule', () => {
     ],
   };
   const textRuleOr: Rule = {
-    type: RuleType.OR,
+    type: RuleType.AND,
     conditions: [
       {
         operator: OperatorType.MATCHES,

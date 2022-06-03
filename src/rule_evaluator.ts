@@ -17,8 +17,6 @@ function matchesRule(targetingAttributes: Record<string, AttributeValueType>, ru
   switch (rule.type) {
     case RuleType.AND:
       return !conditionEvaluations.includes(false);
-    case RuleType.OR:
-      return conditionEvaluations.length === 0 || conditionEvaluations.includes(true);
   }
 }
 
