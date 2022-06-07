@@ -8,7 +8,7 @@ import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers
 import EppoClient, { IEppoClient } from './eppo-client';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { IVariation } from './experiment/variation';
-import { OperatorType, RuleType } from './rule';
+import { OperatorType } from './rule';
 
 import { init } from '.';
 
@@ -129,7 +129,6 @@ describe('EppoClient E2E test', () => {
       overrides: {},
       rules: [
         {
-          type: RuleType.AND,
           conditions: [
             {
               operator: OperatorType.GT,

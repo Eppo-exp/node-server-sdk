@@ -14,11 +14,6 @@ export interface Condition {
   value: AttributeValueType;
 }
 
-export enum RuleType {
-  AND = 'AND', // all conditions evaluate to true
-}
-
 export interface Rule {
-  type: RuleType;
   conditions: Condition[];
 }

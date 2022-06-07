@@ -1,4 +1,4 @@
-import { Condition, OperatorType, Rule, RuleType, AttributeValueType } from './rule';
+import { Condition, OperatorType, Rule, AttributeValueType } from './rule';
 
 export function matchesAnyRule(
   targetingAttributes: Record<string, AttributeValueType>,
@@ -14,10 +14,7 @@ export function matchesAnyRule(
 
 function matchesRule(targetingAttributes: Record<string, AttributeValueType>, rule: Rule): boolean {
   const conditionEvaluations = evaluateRuleConditions(targetingAttributes, rule.conditions);
-  switch (rule.type) {
-    case RuleType.AND:
-      return !conditionEvaluations.includes(false);
-  }
+  return !conditionEvaluations.includes(false);
 }
 
 function evaluateRuleConditions(
