@@ -15,7 +15,7 @@ export interface IClientConfig {
 
 // @public
 export interface IEppoClient {
-    getAssignment(subject: string, experimentKey: string, targetingAttributes?: Record<string, AttributeValueType>): string;
+    getAssignment(subject: string, experimentKey: string, subjectAttributes?: Record<string, AttributeValueType>): string;
     waitForInitialization: () => Promise<void>;
 }
 

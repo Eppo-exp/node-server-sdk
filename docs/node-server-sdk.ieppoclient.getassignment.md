@@ -9,7 +9,7 @@ Maps a subject to a variation for a given experiment.
 <b>Signature:</b>
 
 ```typescript
-getAssignment(subject: string, experimentKey: string, targetingAttributes?: Record<string, AttributeValueType>): string;
+getAssignment(subject: string, experimentKey: string, subjectAttributes?: Record<string, AttributeValueType>): string;
 ```
 
 ## Parameters
@@ -18,7 +18,7 @@ getAssignment(subject: string, experimentKey: string, targetingAttributes?: Reco
 |  --- | --- | --- |
 |  subject | string | an entity ID, e.g. userId |
 |  experimentKey | string | experiment identifier |
-|  targetingAttributes | Record&lt;string, [AttributeValueType](./node-server-sdk.attributevaluetype.md)<!-- -->&gt; | <i>(Optional)</i> attributes to be evaluated by targeting rules. A variation is only assigned if the attributes match at least one rule. |
+|  subjectAttributes | Record&lt;string, [AttributeValueType](./node-server-sdk.attributevaluetype.md)<!-- -->&gt; | <i>(Optional)</i> attributes associated with the subject, e.g. name, email. These attributes are used to evaluate any targeting rules defined on the experiment. A variation is only assigned if the attributes match at least one rule. |
 
 <b>Returns:</b>
 

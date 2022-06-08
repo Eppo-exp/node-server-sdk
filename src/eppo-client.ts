@@ -17,15 +17,15 @@ export interface IEppoClient {
    *
    * @param subject an entity ID, e.g. userId
    * @param experimentKey experiment identifier
-   * @param targetingAttributes attributes to be evaluated by targeting rules.
-   * A variation is only assigned if the attributes match at least one rule.
+   * @param subjectAttributes attributes associated with the subject, e.g. name, email. These attributes are used to evaluate
+   * any targeting rules defined on the experiment. A variation is only assigned if the attributes match at least one rule.
    * @returns a variation value if the subject is part of the experiment sample, otherwise null
    * @public
    */
   getAssignment(
     subject: string,
     experimentKey: string,
-    targetingAttributes?: Record<string, AttributeValueType>,
+    subjectAttributes?: Record<string, AttributeValueType>,
   ): string;
 
   /**
@@ -44,14 +44,14 @@ export default class EppoClient implements IEppoClient {
   getAssignment(
     subject: string,
     experimentKey: string,
-    targetingAttributes?: Record<string, AttributeValueType>,
+    subjectAttributes?: Record<string, AttributeValueType>,
   ): string {
     validateNotBlank(subject, 'Invalid argument: subject cannot be blank');
     validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
     const experimentConfig = this.configurationRequestor.getConfiguration(experimentKey);
     if (
       !experimentConfig?.enabled ||
-      !this.matchesTargetingAttributes(targetingAttributes, experimentConfig.rules) ||
+      !this.subjectAttributesSatisfyRules(subjectAttributes, experimentConfig.rules) ||
       !this.isInExperimentSample(subject, experimentKey, experimentConfig)
     ) {
       return null;
@@ -65,14 +65,14 @@ export default class EppoClient implements IEppoClient {
     return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
   }
 
-  private matchesTargetingAttributes(
-    targetingAttributes?: Record<string, AttributeValueType>,
+  private subjectAttributesSatisfyRules(
+    subjectAttributes?: Record<string, AttributeValueType>,
     rules?: Rule[],
   ) {
-    if (!targetingAttributes || !rules || rules.length === 0) {
+    if (!subjectAttributes || !rules || rules.length === 0) {
       return true;
     }
-    return matchesAnyRule(targetingAttributes, rules);
+    return matchesAnyRule(subjectAttributes, rules);
   }
 
   private getSubjectVariationOverride(
