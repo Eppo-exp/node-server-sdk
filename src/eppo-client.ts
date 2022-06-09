@@ -8,6 +8,23 @@ import { getShard, isShardInRange } from './shard';
 import { validateNotBlank } from './validation';
 
 /**
+ * The subject of the experiment.
+ * @public
+ */
+export interface ISubject {
+  /**
+   * A subject ID, e.g. a user ID.
+   */
+  key: string;
+
+  /**
+   * Attributes associated with the subject, e.g. name, email. These attributes are used to evaluate
+   * any targeting rules defined on the experiment.
+   */
+  customAttributes?: Record<string, AttributeValueType>;
+}
+
+/**
  * Client for assigning experiment variations.
  * @public
  */
@@ -15,18 +32,12 @@ export interface IEppoClient {
   /**
    * Maps a subject to a variation for a given experiment.
    *
-   * @param subject an entity ID, e.g. userId
+   * @param subject an entity or user
    * @param experimentKey experiment identifier
-   * @param subjectAttributes attributes associated with the subject, e.g. name, email. These attributes are used to evaluate
-   * any targeting rules defined on the experiment. A variation is only assigned if the attributes match at least one rule.
    * @returns a variation value if the subject is part of the experiment sample, otherwise null
    * @public
    */
-  getAssignment(
-    subject: string,
-    experimentKey: string,
-    subjectAttributes?: Record<string, AttributeValueType>,
-  ): string;
+  getAssignment(subject: ISubject, experimentKey: string): string;
 
   /**
    * Returns a Promise that resolves once the client polling process has started.
@@ -41,27 +52,23 @@ export default class EppoClient implements IEppoClient {
     private configurationRequestor: ExperimentConfigurationRequestor,
   ) {}
 
-  getAssignment(
-    subject: string,
-    experimentKey: string,
-    subjectAttributes?: Record<string, AttributeValueType>,
-  ): string {
-    validateNotBlank(subject, 'Invalid argument: subject cannot be blank');
+  getAssignment(subject: ISubject, experimentKey: string): string {
+    validateNotBlank(subject.key, 'Invalid argument: subject cannot be blank');
     validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
     const experimentConfig = this.configurationRequestor.getConfiguration(experimentKey);
     if (
       !experimentConfig?.enabled ||
-      !this.subjectAttributesSatisfyRules(subjectAttributes, experimentConfig.rules) ||
-      !this.isInExperimentSample(subject, experimentKey, experimentConfig)
+      !this.subjectAttributesSatisfyRules(subject.customAttributes, experimentConfig.rules) ||
+      !this.isInExperimentSample(subject.key, experimentKey, experimentConfig)
     ) {
       return null;
     }
-    const override = this.getSubjectVariationOverride(subject, experimentConfig);
+    const override = this.getSubjectVariationOverride(subject.key, experimentConfig);
     if (override) {
       return override;
     }
     const { variations, subjectShards } = experimentConfig;
-    const shard = getShard(`assignment-${subject}-${experimentKey}`, subjectShards);
+    const shard = getShard(`assignment-${subject.key}-${experimentKey}`, subjectShards);
     return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
   }
 
@@ -76,10 +83,10 @@ export default class EppoClient implements IEppoClient {
   }
 
   private getSubjectVariationOverride(
-    subject: string,
+    subjectKey: string,
     experimentConfig: IExperimentConfiguration,
   ): string {
-    const subjectHash = createHash('md5').update(subject).digest('hex');
+    const subjectHash = createHash('md5').update(subjectKey).digest('hex');
     return experimentConfig.overrides[subjectHash];
   }
 
@@ -89,12 +96,12 @@ export default class EppoClient implements IEppoClient {
    * Given a hash function output (bucket), check whether the bucket is between 0 and exposure_percent * total_buckets.
    */
   private isInExperimentSample(
-    subject: string,
+    subjectKey: string,
     experimentKey: string,
     experimentConfig: IExperimentConfiguration,
   ): boolean {
     const { percentExposure, subjectShards } = experimentConfig;
-    const shard = getShard(`exposure-${subject}-${experimentKey}`, subjectShards);
+    const shard = getShard(`exposure-${subjectKey}-${experimentKey}`, subjectShards);
     return shard <= percentExposure * subjectShards;
   }
 }

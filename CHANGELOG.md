@@ -11,10 +11,10 @@
 * Describe deprecated APIs in this version
 -->
 
-## [0.5.0] - 2022-06-03
+## [1.0.0] - 2022-06-03
 
-#### New Features:
-* Targeting Rules: pass targeting attributes to the assignment function. The assignment function only returns a variation if the attributes match at least one rule. Rules are defined on the experiment page.
+#### Breaking Changes:
+* Subject attributes: the `subject` parameter of the assignment function was changed from a string to an object. The new `subject` contains a `key` field for the subject ID as well as an optional `customAttributes` property for any related metadata like name or email.
 
 ## [0.4.0] - 2022-05-12
 

@@ -15,12 +15,18 @@ export interface IClientConfig {
 
 // @public
 export interface IEppoClient {
-    getAssignment(subject: string, experimentKey: string, subjectAttributes?: Record<string, AttributeValueType>): string;
+    getAssignment(subject: ISubject, experimentKey: string): string;
     waitForInitialization: () => Promise<void>;
 }
 
 // @public
 export function init(config: IClientConfig): IEppoClient;
+
+// @public
+export interface ISubject {
+    customAttributes?: Record<string, AttributeValueType>;
+    key: string;
+}
 
 // (No @packageDocumentation comment for this package)
 

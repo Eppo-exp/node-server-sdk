@@ -33,7 +33,7 @@ export interface IClientConfig {
   baseUrl?: string;
 }
 
-export { IEppoClient } from './eppo-client';
+export { IEppoClient, ISubject } from './eppo-client';
 export { AttributeValueType } from './rule';
 
 let poller: IPoller = null;
