@@ -69,10 +69,10 @@ export default class EppoClient implements IEppoClient {
     subjectAttributes?: Record<string, AttributeValueType>,
     rules?: Rule[],
   ) {
-    if (!subjectAttributes || !rules || rules.length === 0) {
+    if (!rules || rules.length === 0) {
       return true;
     }
-    return matchesAnyRule(subjectAttributes, rules);
+    return matchesAnyRule(subjectAttributes || {}, rules);
   }
 
   private getSubjectVariationOverride(
