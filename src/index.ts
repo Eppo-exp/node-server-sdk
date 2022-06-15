@@ -37,6 +37,7 @@ export { IEppoClient, ISubject } from './eppo-client';
 export { AttributeValueType } from './rule';
 
 let poller: IPoller = null;
+let clientInstance: IEppoClient = null;
 
 /**
  * Initializes the Eppo client with configuration parameters.
@@ -45,7 +46,7 @@ let poller: IPoller = null;
  * @param config client configuration
  * @public
  */
-export function init(config: IClientConfig): IEppoClient {
+export async function init(config: IClientConfig): Promise<IEppoClient> {
   validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     MAX_CACHE_ENTRIES,
@@ -72,6 +73,19 @@ export function init(config: IClientConfig): IEppoClient {
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  const startedPolling = poller.start();
-  return new EppoClient(() => startedPolling, configurationRequestor);
+  await poller.start();
+  clientInstance = new EppoClient(configurationRequestor);
+  return clientInstance;
+}
+
+/**
+ * Used to access a singleton SDK client instance.
+ * Use the method after calling init() to initialize the client.
+ * @returns a singleton client instance
+ */
+export function getInstance(): IEppoClient {
+  if (!clientInstance) {
+    throw Error('Expected init() to be called to initialize a client instance');
+  }
+  return clientInstance;
 }
