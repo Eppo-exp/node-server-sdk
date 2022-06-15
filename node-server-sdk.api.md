@@ -8,6 +8,9 @@
 export type AttributeValueType = string | number;
 
 // @public
+export function getInstance(): IEppoClient;
+
+// @public
 export interface IClientConfig {
     apiKey: string;
     baseUrl?: string;
@@ -16,11 +19,10 @@ export interface IClientConfig {
 // @public
 export interface IEppoClient {
     getAssignment(subject: ISubject, experimentKey: string): string;
-    waitForInitialization: () => Promise<void>;
 }
 
 // @public
-export function init(config: IClientConfig): IEppoClient;
+export function init(config: IClientConfig): Promise<IEppoClient>;
 
 // @public
 export interface ISubject {
