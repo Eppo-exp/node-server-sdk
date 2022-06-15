@@ -96,7 +96,7 @@ describe('EppoClient E2E test', () => {
       },
     });
     const client = new EppoClient(mockConfigRequestor);
-    const assignment = client.getAssignment({ key: 'subject-1' }, experiment);
+    const assignment = client.getAssignment('subject-1', experiment);
     expect(assignment).toEqual('variant-2');
   });
 
@@ -138,17 +138,11 @@ describe('EppoClient E2E test', () => {
       ],
     });
     const client = new EppoClient(mockConfigRequestor);
-    let assignment = client.getAssignment(
-      { key: 'subject-1', customAttributes: { appVersion: 9 } },
-      experiment,
-    );
+    let assignment = client.getAssignment('subject-1', experiment, { appVersion: 9 });
     expect(assignment).toEqual(null);
-    assignment = client.getAssignment({ key: 'subject-1' }, experiment);
+    assignment = client.getAssignment('subject-1', experiment);
     expect(assignment).toEqual(null);
-    assignment = client.getAssignment(
-      { key: 'subject-1', customAttributes: { appVersion: 11 } },
-      experiment,
-    );
+    assignment = client.getAssignment('subject-1', experiment, { appVersion: 11 });
     expect(assignment).toEqual('control');
   });
 
@@ -182,8 +176,8 @@ describe('EppoClient E2E test', () => {
 
   function getAssignments(subjects: string[], experiment: string): string[] {
     const client = getInstance();
-    return subjects.map((subject) => {
-      return client.getAssignment({ key: subject }, experiment);
+    return subjects.map((subjectKey) => {
+      return client.getAssignment(subjectKey, experiment);
     });
   }
 });

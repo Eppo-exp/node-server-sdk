@@ -18,17 +18,11 @@ export interface IClientConfig {
 
 // @public
 export interface IEppoClient {
-    getAssignment(subject: ISubject, experimentKey: string): string;
+    getAssignment(subjectKey: string, experimentKey: string, subjectAttributes?: Record<string, AttributeValueType>): string;
 }
 
 // @public
 export function init(config: IClientConfig): Promise<IEppoClient>;
-
-// @public
-export interface ISubject {
-    customAttributes?: Record<string, AttributeValueType>;
-    key: string;
-}
 
 // (No @packageDocumentation comment for this package)
 

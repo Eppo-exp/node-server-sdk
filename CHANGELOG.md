@@ -13,12 +13,12 @@
 
 ## [1.0.0] - 2022-06-03
 
+#### New Features:
+* Subject attributes: an optional `subjectAttributes` param is added to the `getAssignment` function. The subject attributes may contains custom metadata about the subject. These attributes are used for evaluating any targeting rules defined on the experiment.
+```
+client.getAssignment("<SUBJECT_KEY">, "<EXPERIMENT_KEY>", { "email": "user@example.com" });
+```
 #### Breaking Changes:
-* Subject attributes: the `subject` parameter of the assignment function was changed from a string to an object. The new `subject` contains a `key` field for the subject ID as well as an optional `customAttributes` property for any related metadata like name or email:
-```
-const subject = { key: "<SUBJECT_KEY>" };
-client.getAssignment(subject, "<EXPERIMENT_KEY>");
-```
 * The `init` method is changed from sync to async:
 ```
 await init({ apiKey: "<API_KEY>" });

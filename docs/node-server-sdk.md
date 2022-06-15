@@ -17,7 +17,6 @@
 |  --- | --- |
 |  [IClientConfig](./node-server-sdk.iclientconfig.md) | Configuration used for initializing the Eppo client |
 |  [IEppoClient](./node-server-sdk.ieppoclient.md) | Client for assigning experiment variations. |
-|  [ISubject](./node-server-sdk.isubject.md) | The subject of the experiment. |
 
 ## Type Aliases
 

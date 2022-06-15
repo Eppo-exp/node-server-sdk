@@ -16,5 +16,5 @@ export interface IEppoClient
 
 |  Method | Description |
 |  --- | --- |
-|  [getAssignment(subject, experimentKey)](./node-server-sdk.ieppoclient.getassignment.md) | Maps a subject to a variation for a given experiment. |
+|  [getAssignment(subjectKey, experimentKey, subjectAttributes)](./node-server-sdk.ieppoclient.getassignment.md) | Maps a subject to a variation for a given experiment. |
 
