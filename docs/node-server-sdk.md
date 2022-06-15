@@ -8,6 +8,7 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [getInstance()](./node-server-sdk.getinstance.md) | Used to access a singleton SDK client instance. Use the method after calling init() to initialize the client. |
 |  [init(config)](./node-server-sdk.init.md) | Initializes the Eppo client with configuration parameters. This method should be called once on application startup. After invocation of this method, the SDK will poll Eppo's API at regular intervals to retrieve assignment configurations. |
 
 ## Interfaces
@@ -16,4 +17,10 @@
 |  --- | --- |
 |  [IClientConfig](./node-server-sdk.iclientconfig.md) | Configuration used for initializing the Eppo client |
 |  [IEppoClient](./node-server-sdk.ieppoclient.md) | Client for assigning experiment variations. |
+
+## Type Aliases
+
+|  Type Alias | Description |
+|  --- | --- |
+|  [AttributeValueType](./node-server-sdk.attributevaluetype.md) |  |
 

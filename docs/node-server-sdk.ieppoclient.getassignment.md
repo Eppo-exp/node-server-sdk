@@ -9,15 +9,16 @@ Maps a subject to a variation for a given experiment.
 <b>Signature:</b>
 
 ```typescript
-getAssignment(subject: string, experimentKey: string): string;
+getAssignment(subjectKey: string, experimentKey: string, subjectAttributes?: Record<string, AttributeValueType>): string;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  subject | string | an entity ID, e.g. userId |
+|  subjectKey | string | an identifier of the experiment subject, for example a user ID. |
 |  experimentKey | string | experiment identifier |
+|  subjectAttributes | Record&lt;string, [AttributeValueType](./node-server-sdk.attributevaluetype.md)<!-- -->&gt; | <i>(Optional)</i> optional attributes associated with the subject, for example name and email. The subject attributes are used for evaluating any targeting rules tied to the experiment. |
 
 <b>Returns:</b>
 

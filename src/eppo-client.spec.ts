@@ -5,20 +5,19 @@ import * as td from 'testdouble';
 import apiServer from '../test/mockApiServer';
 import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers';
 
-import EppoClient, { IEppoClient } from './eppo-client';
+import EppoClient from './eppo-client';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import { IVariation } from './experiment/variation';
+import { OperatorType } from './rule';
 
-import { init } from '.';
+import { getInstance, init } from '.';
 
 describe('EppoClient E2E test', () => {
-  let client: IEppoClient;
   const shouldLogAssignments = false;
   jest.useFakeTimers();
 
   beforeAll(async () => {
-    client = init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
-    await client.waitForInitialization();
+    await init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
   });
 
   afterAll(async () => {
@@ -96,9 +95,55 @@ describe('EppoClient E2E test', () => {
         a90ea45116d251a43da56e03d3dd7275: 'variant-2',
       },
     });
-    client = new EppoClient(() => Promise.resolve(), mockConfigRequestor);
+    const client = new EppoClient(mockConfigRequestor);
     const assignment = client.getAssignment('subject-1', experiment);
     expect(assignment).toEqual('variant-2');
+  });
+
+  it('only returns variation if subject matches rules', () => {
+    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const experiment = 'experiment_5';
+    td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
+      name: experiment,
+      percentExposure: 1,
+      enabled: true,
+      subjectShards: 100,
+      variations: [
+        {
+          name: 'control',
+          shardRange: {
+            start: 0,
+            end: 50,
+          },
+        },
+        {
+          name: 'treatment',
+          shardRange: {
+            start: 50,
+            end: 100,
+          },
+        },
+      ],
+      overrides: {},
+      rules: [
+        {
+          conditions: [
+            {
+              operator: OperatorType.GT,
+              attribute: 'appVersion',
+              value: 10,
+            },
+          ],
+        },
+      ],
+    });
+    const client = new EppoClient(mockConfigRequestor);
+    let assignment = client.getAssignment('subject-1', experiment, { appVersion: 9 });
+    expect(assignment).toEqual(null);
+    assignment = client.getAssignment('subject-1', experiment);
+    expect(assignment).toEqual(null);
+    assignment = client.getAssignment('subject-1', experiment, { appVersion: 11 });
+    expect(assignment).toEqual('control');
   });
 
   /**
@@ -130,8 +175,9 @@ describe('EppoClient E2E test', () => {
   }
 
   function getAssignments(subjects: string[], experiment: string): string[] {
-    return subjects.map((subject) => {
-      return client.getAssignment(subject, experiment);
+    const client = getInstance();
+    return subjects.map((subjectKey) => {
+      return client.getAssignment(subjectKey, experiment);
     });
   }
 });

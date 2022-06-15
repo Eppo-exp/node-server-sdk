@@ -4,6 +4,12 @@
 
 ```ts
 
+// @public (undocumented)
+export type AttributeValueType = string | number;
+
+// @public
+export function getInstance(): IEppoClient;
+
 // @public
 export interface IClientConfig {
     apiKey: string;
@@ -12,12 +18,11 @@ export interface IClientConfig {
 
 // @public
 export interface IEppoClient {
-    getAssignment(subject: string, experimentKey: string): string;
-    waitForInitialization: () => Promise<void>;
+    getAssignment(subjectKey: string, experimentKey: string, subjectAttributes?: Record<string, AttributeValueType>): string;
 }
 
 // @public
-export function init(config: IClientConfig): IEppoClient;
+export function init(config: IClientConfig): Promise<IEppoClient>;
 
 // (No @packageDocumentation comment for this package)
 
