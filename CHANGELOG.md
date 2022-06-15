@@ -14,7 +14,15 @@
 ## [1.0.0] - 2022-06-03
 
 #### Breaking Changes:
-* Subject attributes: the `subject` parameter of the assignment function was changed from a string to an object. The new `subject` contains a `key` field for the subject ID as well as an optional `customAttributes` property for any related metadata like name or email.
+* Subject attributes: the `subject` parameter of the assignment function was changed from a string to an object. The new `subject` contains a `key` field for the subject ID as well as an optional `customAttributes` property for any related metadata like name or email:
+```
+const subject = { key: "<SUBJECT_KEY>" };
+client.getAssignment(subject, "<EXPERIMENT_KEY>");
+```
+* The `init` method is changed from sync to async:
+```
+await init({ apiKey: "<API_KEY>" });
+```
 
 ## [0.4.0] - 2022-05-12
 
