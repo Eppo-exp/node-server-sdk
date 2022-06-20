@@ -65,4 +65,81 @@ describe('matchesAnyRule', () => {
     expect(matchesAnyRule({ user_id: '14' }, rules)).toEqual(true);
     expect(matchesAnyRule({ user_id: 14 }, rules)).toEqual(true);
   });
+
+  it('handles oneOf rule type with boolean', () => {
+    const oneOfRule: Rule = {
+      conditions: [
+        {
+          operator: OperatorType.ONE_OF,
+          value: ['true'],
+          attribute: 'enabled',
+        },
+      ],
+    };
+    const notOneOfRule: Rule = {
+      conditions: [
+        {
+          operator: OperatorType.NOT_ONE_OF,
+          value: ['true'],
+          attribute: 'enabled',
+        },
+      ],
+    };
+    expect(matchesAnyRule({ enabled: true }, [oneOfRule])).toEqual(true);
+    expect(matchesAnyRule({ enabled: false }, [oneOfRule])).toEqual(false);
+    expect(matchesAnyRule({ enabled: true }, [notOneOfRule])).toEqual(false);
+    expect(matchesAnyRule({ enabled: false }, [notOneOfRule])).toEqual(true);
+  });
+
+  it('handles oneOf rule type with string', () => {
+    const oneOfRule: Rule = {
+      conditions: [
+        {
+          operator: OperatorType.ONE_OF,
+          value: ['user1', 'user2'],
+          attribute: 'userId',
+        },
+      ],
+    };
+    const notOneOfRule: Rule = {
+      conditions: [
+        {
+          operator: OperatorType.NOT_ONE_OF,
+          value: ['user14'],
+          attribute: 'userId',
+        },
+      ],
+    };
+    expect(matchesAnyRule({ userId: 'user1' }, [oneOfRule])).toEqual(true);
+    expect(matchesAnyRule({ userId: 'user2' }, [oneOfRule])).toEqual(true);
+    expect(matchesAnyRule({ userId: 'user3' }, [oneOfRule])).toEqual(false);
+    expect(matchesAnyRule({ userId: 'user14' }, [notOneOfRule])).toEqual(false);
+    expect(matchesAnyRule({ userId: 'user15' }, [notOneOfRule])).toEqual(true);
+  });
+
+  it('handles oneOf rule with number', () => {
+    const oneOfRule: Rule = {
+      conditions: [
+        {
+          operator: OperatorType.ONE_OF,
+          value: ['1', '2'],
+          attribute: 'userId',
+        },
+      ],
+    };
+    const notOneOfRule: Rule = {
+      conditions: [
+        {
+          operator: OperatorType.NOT_ONE_OF,
+          value: ['14'],
+          attribute: 'userId',
+        },
+      ],
+    };
+    expect(matchesAnyRule({ userId: 1 }, [oneOfRule])).toEqual(true);
+    expect(matchesAnyRule({ userId: '2' }, [oneOfRule])).toEqual(true);
+    expect(matchesAnyRule({ userId: 3 }, [oneOfRule])).toEqual(false);
+    expect(matchesAnyRule({ userId: 14 }, [notOneOfRule])).toEqual(false);
+    expect(matchesAnyRule({ userId: '15' }, [notOneOfRule])).toEqual(true);
+  });
 });

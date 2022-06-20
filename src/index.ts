@@ -34,7 +34,6 @@ export interface IClientConfig {
 }
 
 export { IEppoClient } from './eppo-client';
-export { AttributeValueType } from './rule';
 
 let poller: IPoller = null;
 let clientInstance: IEppoClient = null;
