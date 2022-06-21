@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 
 import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
-import { Rule, AttributeValueType } from './rule';
+import { Rule } from './rule';
 import { matchesAnyRule } from './rule_evaluator';
 import { getShard, isShardInRange } from './shard';
 import { validateNotBlank } from './validation';
@@ -25,7 +25,8 @@ export interface IEppoClient {
   getAssignment(
     subjectKey: string,
     experimentKey: string,
-    subjectAttributes?: Record<string, AttributeValueType>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    subjectAttributes?: Record<string, any>,
   ): string;
 }
 
@@ -52,10 +53,8 @@ export default class EppoClient implements IEppoClient {
     return variations.find((variation) => isShardInRange(shard, variation.shardRange)).name;
   }
 
-  private subjectAttributesSatisfyRules(
-    subjectAttributes?: Record<string, AttributeValueType>,
-    rules?: Rule[],
-  ) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private subjectAttributesSatisfyRules(subjectAttributes?: Record<string, any>, rules?: Rule[]) {
     if (!rules || rules.length === 0) {
       return true;
     }
