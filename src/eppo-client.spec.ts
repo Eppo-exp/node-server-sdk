@@ -10,9 +10,32 @@ import ExperimentConfigurationRequestor from './experiment/experiment-configurat
 import { IVariation } from './experiment/variation';
 import { OperatorType } from './rule';
 
-import { getInstance, init } from '.';
+import { getInstance, IAssignmentLogger, init } from '.';
 
 describe('EppoClient E2E test', () => {
+  const mockVariations = [
+    {
+      name: 'control',
+      shardRange: {
+        start: 0,
+        end: 33,
+      },
+    },
+    {
+      name: 'variant-1',
+      shardRange: {
+        start: 34,
+        end: 66,
+      },
+    },
+    {
+      name: 'variant-2',
+      shardRange: {
+        start: 67,
+        end: 100,
+      },
+    },
+  ];
   const shouldLogAssignments = false;
   jest.useFakeTimers();
 
@@ -68,29 +91,7 @@ describe('EppoClient E2E test', () => {
       percentExposure: 1,
       enabled: true,
       subjectShards: 100,
-      variations: [
-        {
-          name: 'control',
-          shardRange: {
-            start: 0,
-            end: 33,
-          },
-        },
-        {
-          name: 'variant-1',
-          shardRange: {
-            start: 34,
-            end: 66,
-          },
-        },
-        {
-          name: 'variant-2',
-          shardRange: {
-            start: 67,
-            end: 100,
-          },
-        },
-      ],
+      variations: mockVariations,
       overrides: {
         a90ea45116d251a43da56e03d3dd7275: 'variant-2',
       },
@@ -98,6 +99,45 @@ describe('EppoClient E2E test', () => {
     const client = new EppoClient(mockConfigRequestor);
     const assignment = client.getAssignment('subject-1', experiment);
     expect(assignment).toEqual('variant-2');
+  });
+
+  it('logs variation assignment', () => {
+    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const mockLogger = td.object<IAssignmentLogger>();
+    const experiment = 'experiment_5';
+    td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
+      name: experiment,
+      percentExposure: 1,
+      enabled: true,
+      subjectShards: 100,
+      variations: mockVariations,
+      overrides: {},
+    });
+    const subjectAttributes = { foo: 3 };
+    const client = new EppoClient(mockConfigRequestor, mockLogger);
+    const assignment = client.getAssignment('subject-1', experiment, subjectAttributes);
+    expect(assignment).toEqual('control');
+    expect(td.explain(mockLogger.logAssignment).callCount).toEqual(1);
+    expect(td.explain(mockLogger.logAssignment).calls[0].args[0].subject).toEqual('subject-1');
+  });
+
+  it('handles logging exception', () => {
+    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const mockLogger = td.object<IAssignmentLogger>();
+    const experiment = 'experiment_5';
+    td.when(mockLogger.logAssignment(td.matchers.anything())).thenThrow(new Error('logging error'));
+    td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
+      name: experiment,
+      percentExposure: 1,
+      enabled: true,
+      subjectShards: 100,
+      variations: mockVariations,
+      overrides: {},
+    });
+    const subjectAttributes = { foo: 3 };
+    const client = new EppoClient(mockConfigRequestor, mockLogger);
+    const assignment = client.getAssignment('subject-1', experiment, subjectAttributes);
+    expect(assignment).toEqual('control');
   });
 
   it('only returns variation if subject matches rules', () => {
