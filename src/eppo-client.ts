@@ -63,7 +63,7 @@ export default class EppoClient implements IEppoClient {
         variation: assignedVariation,
         timestamp: new Date().toISOString(),
         subject: subjectKey,
-        ...subjectAttributes,
+        subjectAttributes,
       });
     } catch (error) {
       console.error(`[Eppo SDK] Error logging assignment event: ${error.message}`);
