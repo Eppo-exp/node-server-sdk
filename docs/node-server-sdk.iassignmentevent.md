@@ -18,6 +18,7 @@ export interface IAssignmentEvent
 |  --- | --- | --- |
 |  [experiment](./node-server-sdk.iassignmentevent.experiment.md) | string | An Eppo experiment key |
 |  [subject](./node-server-sdk.iassignmentevent.subject.md) | string | The entity or user that was assigned to a variation |
+|  [subjectAttributes](./node-server-sdk.iassignmentevent.subjectattributes.md) | Record&lt;string, any&gt; |  |
 |  [timestamp](./node-server-sdk.iassignmentevent.timestamp.md) | string | The time the subject was exposed to the variation. |
 |  [variation](./node-server-sdk.iassignmentevent.variation.md) | string | The assigned variation |
 

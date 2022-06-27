@@ -9,10 +9,10 @@ export function getInstance(): IEppoClient;
 
 // @public
 export interface IAssignmentEvent {
-    // (undocumented)
-    [key: string]: any;
     experiment: string;
     subject: string;
+    // (undocumented)
+    subjectAttributes: Record<string, any>;
     timestamp: string;
     variation: string;
 }
