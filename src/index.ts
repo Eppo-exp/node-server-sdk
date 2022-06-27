@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+import { IAssignmentLogger } from './assignment-logger';
 import { InMemoryConfigurationStore } from './configuration-store';
 import {
   BASE_URL,
@@ -31,8 +32,14 @@ export interface IClientConfig {
    * Clients should use the default setting in most cases.
    */
   baseUrl?: string;
+
+  /**
+   * Pass a logging implementation to send variation assignments to your data warehouse.
+   */
+  assignmentLogger?: IAssignmentLogger;
 }
 
+export { IAssignmentEvent, IAssignmentLogger } from './assignment-logger';
 export { IEppoClient } from './eppo-client';
 
 let poller: IPoller = null;
