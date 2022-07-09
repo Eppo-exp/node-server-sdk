@@ -119,6 +119,15 @@ describe('EppoClient E2E test', () => {
     expect(assignment).toEqual('variant-2');
   });
 
+  it('returns null when experiment config is absent', () => {
+    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const experiment = 'experiment_5';
+    td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn(null);
+    const client = new EppoClient(mockConfigRequestor);
+    const assignment = client.getAssignment('subject-1', experiment);
+    expect(assignment).toEqual(null);
+  });
+
   it('logs variation assignment', () => {
     const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
     const mockLogger = td.object<IAssignmentLogger>();
