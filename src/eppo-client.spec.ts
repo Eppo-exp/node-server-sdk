@@ -18,14 +18,14 @@ describe('EppoClient E2E test', () => {
       name: 'control',
       shardRange: {
         start: 0,
-        end: 33,
+        end: 34,
       },
     },
     {
       name: 'variant-1',
       shardRange: {
         start: 34,
-        end: 66,
+        end: 67,
       },
     },
     {
@@ -83,13 +83,31 @@ describe('EppoClient E2E test', () => {
     );
   });
 
-  it('returns subject from overrides', () => {
+  it('assigns subject from overrides when experiment is enabled', () => {
     const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
     const experiment = 'experiment_5';
     td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
       name: experiment,
       percentExposure: 1,
       enabled: true,
+      subjectShards: 100,
+      variations: mockVariations,
+      overrides: {
+        a90ea45116d251a43da56e03d3dd7275: 'variant-2',
+      },
+    });
+    const client = new EppoClient(mockConfigRequestor);
+    const assignment = client.getAssignment('subject-1', experiment);
+    expect(assignment).toEqual('variant-2');
+  });
+
+  it('assigns subject from overrides when experiment is not enabled', () => {
+    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const experiment = 'experiment_5';
+    td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
+      name: experiment,
+      percentExposure: 0,
+      enabled: false,
       subjectShards: 100,
       variations: mockVariations,
       overrides: {

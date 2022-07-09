@@ -41,16 +41,16 @@ export default class EppoClient implements IEppoClient {
     validateNotBlank(subjectKey, 'Invalid argument: subjectKey cannot be blank');
     validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
     const experimentConfig = this.configurationRequestor.getConfiguration(experimentKey);
+    const allowListOverride = this.getSubjectVariationOverride(subjectKey, experimentConfig);
+    if (allowListOverride) {
+      return allowListOverride;
+    }
     if (
       !experimentConfig?.enabled ||
       !this.subjectAttributesSatisfyRules(subjectAttributes, experimentConfig.rules) ||
       !this.isInExperimentSample(subjectKey, experimentKey, experimentConfig)
     ) {
       return null;
-    }
-    const override = this.getSubjectVariationOverride(subjectKey, experimentConfig);
-    if (override) {
-      return override;
     }
     const { variations, subjectShards } = experimentConfig;
     const shard = getShard(`assignment-${subjectKey}-${experimentKey}`, subjectShards);
@@ -84,7 +84,7 @@ export default class EppoClient implements IEppoClient {
     experimentConfig: IExperimentConfiguration,
   ): string {
     const subjectHash = createHash('md5').update(subjectKey).digest('hex');
-    return experimentConfig.overrides[subjectHash];
+    return experimentConfig?.overrides[subjectHash];
   }
 
   /**
