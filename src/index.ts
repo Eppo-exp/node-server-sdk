@@ -36,7 +36,7 @@ export interface IClientConfig {
   /**
    * Pass a logging implementation to send variation assignments to your data warehouse.
    */
-  assignmentLogger?: IAssignmentLogger;
+  assignmentLogger: IAssignmentLogger;
 }
 
 export { IAssignmentEvent, IAssignmentLogger } from './assignment-logger';

@@ -10,9 +10,14 @@ import ExperimentConfigurationRequestor from './experiment/experiment-configurat
 import { IVariation } from './experiment/variation';
 import { OperatorType } from './rule';
 
-import { getInstance, IAssignmentLogger, init } from '.';
+import { getInstance, IAssignmentEvent, IAssignmentLogger, init } from '.';
 
 describe('EppoClient E2E test', () => {
+  const mockLogger: IAssignmentLogger = {
+    logAssignment(assignment: IAssignmentEvent) {
+      console.log(`Logged assignment for subject ${assignment.subject}`);
+    },
+  };
   const mockVariations = [
     {
       name: 'control',
@@ -40,7 +45,7 @@ describe('EppoClient E2E test', () => {
   jest.useFakeTimers();
 
   beforeAll(async () => {
-    await init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000' });
+    await init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000', assignmentLogger: mockLogger });
   });
 
   afterAll(async () => {
