@@ -19,6 +19,8 @@ jobs:
       - name: Install root dependencies
         run: yarn --frozen-lockfile
         working-directory: ./
+      - name: 'Set up GCP SDK for downloading test data'
+        uses: 'google-github-actions/setup-gcloud@v0'
       - name: Install sdk dependencies
         run: yarn --frozen-lockfile
         working-directory: ./

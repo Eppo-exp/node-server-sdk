@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-
 import * as td from 'testdouble';
 
 import apiServer from '../test/mockApiServer';
@@ -7,7 +5,6 @@ import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers
 
 import EppoClient from './eppo-client';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
-import { IVariation } from './experiment/variation';
 import { OperatorType } from './rule';
 
 import { getInstance, IAssignmentEvent, IAssignmentLogger, init } from '.';
@@ -41,7 +38,6 @@ describe('EppoClient E2E test', () => {
       },
     },
   ];
-  const shouldLogAssignments = false;
   jest.useFakeTimers();
 
   beforeAll(async () => {
@@ -65,25 +61,16 @@ describe('EppoClient E2E test', () => {
     it.each(readAssignmentTestData())(
       'test variation assignment splits',
       async ({
-        variations,
         experiment,
-        percentExposure,
         subjects,
+        subjectsWithAttributes,
         expectedAssignments,
       }: IAssignmentTestCase) => {
         console.log(`---- Test Case for ${experiment} Experiment ----`);
-        const assignments = getAssignments(subjects, experiment);
-        if (shouldLogAssignments) {
-          logAssignments(experiment, assignments);
-        }
-        // verify the assingments don't change across test runs (deterministic)
+        const assignments = subjectsWithAttributes
+          ? getAssignmentsWithSubjectAttributes(subjectsWithAttributes, experiment)
+          : getAssignments(subjects, experiment);
         expect(assignments).toEqual(expectedAssignments);
-        const expectedVariationSplitPercentage = percentExposure / variations.length;
-        const unassignedCount = assignments.filter((assignment) => assignment == null).length;
-        expectToBeCloseToPercentage(unassignedCount / assignments.length, 1 - percentExposure);
-        variations.forEach((variation) => {
-          validateAssignmentCounts(assignments, expectedVariationSplitPercentage, variation);
-        });
       },
     );
   });
@@ -218,38 +205,24 @@ describe('EppoClient E2E test', () => {
     expect(assignment).toEqual('control');
   });
 
-  /**
-   * Write subject assignments to output file for debugging purposes.
-   */
-  function logAssignments(experiment: string, assignments: string[]) {
-    const path = `./test/assignmentTestData/experiment-${experiment}-assignments.json`;
-    fs.writeFileSync(path, JSON.stringify(assignments));
-  }
-
-  function validateAssignmentCounts(
-    assignments: string[],
-    expectedPercentage: number,
-    variation: IVariation,
-  ) {
-    const assignedCount = assignments.filter((assignment) => assignment === variation.name).length;
-    console.log(
-      `Expect variation ${variation.name} percentage of ${
-        assignedCount / assignments.length
-      } to be close to ${expectedPercentage}`,
-    );
-    expectToBeCloseToPercentage(assignedCount / assignments.length, expectedPercentage);
-  }
-
-  // expect assignment count to be within 5 percentage points of the expected count (because the hash output is random)
-  function expectToBeCloseToPercentage(percentage: number, expectedPercentage: number) {
-    expect(percentage).toBeGreaterThanOrEqual(expectedPercentage - 0.05);
-    expect(percentage).toBeLessThanOrEqual(expectedPercentage + 0.05);
-  }
-
   function getAssignments(subjects: string[], experiment: string): string[] {
     const client = getInstance();
     return subjects.map((subjectKey) => {
       return client.getAssignment(subjectKey, experiment);
+    });
+  }
+
+  function getAssignmentsWithSubjectAttributes(
+    subjectsWithAttributes: {
+      subjectKey: string;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      subjectAttributes: Record<string, any>;
+    }[],
+    experiment: string,
+  ): string[] {
+    const client = getInstance();
+    return subjectsWithAttributes.map((subject) => {
+      return client.getAssignment(subject.subjectKey, experiment, subject.subjectAttributes);
     });
   }
 });
