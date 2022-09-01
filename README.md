@@ -5,4 +5,4 @@
 
 ## Getting Started
 
-Refer to our [SDK documentation](https://docs.geteppo.com/feature-flagging/randomization-sdk) for how to install and use the SDK.
+Refer to our [SDK documentation](https://docs.geteppo.com/prerequisites/feature-flagging/randomization-sdk/server-sdks/node) for how to install and use the SDK.
