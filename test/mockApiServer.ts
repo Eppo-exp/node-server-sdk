@@ -4,7 +4,7 @@ import { readMockRacResponse } from './testHelpers';
 
 const api = express();
 
-api.get('/randomized_assignment/config', (_req, res) => {
+api.get('/randomized_assignment/v2/config', (_req, res) => {
   const mockRacResponse = readMockRacResponse();
   res.json(mockRacResponse);
 });
