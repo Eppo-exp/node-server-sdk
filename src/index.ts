@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 import { IAssignmentLogger } from './assignment-logger';
+import EppoClient, { IEppoClient } from './client/eppo-client';
 import { InMemoryConfigurationStore } from './configuration-store';
 import {
   BASE_URL,
@@ -10,8 +11,7 @@ import {
   REQUEST_TIMEOUT_MILLIS,
 } from './constants';
 import { IExperimentConfiguration } from './dto/experiment-configuration-dto';
-import EppoClient, { IEppoClient } from './eppo-client';
-import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
+import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
 import HttpClient from './http-client';
 import initPoller, { IPoller } from './poller';
 import { sdkName, sdkVersion } from './sdk-data';
@@ -40,7 +40,7 @@ export interface IClientConfig {
 }
 
 export { IAssignmentEvent, IAssignmentLogger } from './assignment-logger';
-export { IEppoClient } from './eppo-client';
+export { IEppoClient } from './client/eppo-client';
 
 let poller: IPoller = null;
 let clientInstance: IEppoClient = null;

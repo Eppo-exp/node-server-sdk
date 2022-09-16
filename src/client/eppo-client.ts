@@ -1,13 +1,13 @@
 import { createHash } from 'crypto';
 
-import { IAssignmentLogger } from './assignment-logger';
-import { IAllocation } from './dto/allocation-dto';
-import { IExperimentConfiguration } from './dto/experiment-configuration-dto';
-import { IRule } from './dto/rule-dto';
-import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
-import { findMatchingRule } from './rule_evaluator';
-import { getShard, isShardInRange } from './shard';
-import { validateNotBlank } from './validation';
+import { IAssignmentLogger } from '../assignment-logger';
+import { IAllocation } from '../dto/allocation-dto';
+import { IExperimentConfiguration } from '../dto/experiment-configuration-dto';
+import { IRule } from '../dto/rule-dto';
+import ExperimentConfigurationRequestor from '../experiment-configuration-requestor';
+import { findMatchingRule } from '../rule_evaluator';
+import { getShard, isShardInRange } from '../shard';
+import { validateNotBlank } from '../validation';
 
 /**
  * Client for assigning experiment variations.
