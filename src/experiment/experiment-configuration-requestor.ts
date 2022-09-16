@@ -1,7 +1,7 @@
 import { IConfigurationStore } from '../configuration-store';
+import { IExperimentConfiguration } from '../dto/experiment-configuration-dto';
 import HttpClient from '../http-client';
 
-import { IExperimentConfiguration } from './experiment-configuration';
 
 const RAC_ENDPOINT = '/randomized_assignment/config';
 

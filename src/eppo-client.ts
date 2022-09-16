@@ -1,9 +1,9 @@
 import { createHash } from 'crypto';
 
 import { IAssignmentLogger } from './assignment-logger';
-import { IExperimentConfiguration } from './experiment/experiment-configuration';
+import { IExperimentConfiguration } from './dto/experiment-configuration-dto';
+import { IRule } from './dto/rule-dto';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
-import { Rule } from './rule';
 import { matchesAnyRule } from './rule_evaluator';
 import { getShard, isShardInRange } from './shard';
 import { validateNotBlank } from './validation';
@@ -72,7 +72,7 @@ export default class EppoClient implements IEppoClient {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private subjectAttributesSatisfyRules(subjectAttributes?: Record<string, any>, rules?: Rule[]) {
+  private subjectAttributesSatisfyRules(subjectAttributes?: Record<string, any>, rules?: IRule[]) {
     if (!rules || rules.length === 0) {
       return true;
     }

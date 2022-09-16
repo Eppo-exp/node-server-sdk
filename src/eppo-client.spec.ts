@@ -3,9 +3,9 @@ import * as td from 'testdouble';
 import apiServer from '../test/mockApiServer';
 import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers';
 
+import { OperatorType } from './dto/rule-dto';
 import EppoClient from './eppo-client';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
-import { OperatorType } from './rule';
 
 import { getInstance, IAssignmentEvent, IAssignmentLogger, init } from '.';
 

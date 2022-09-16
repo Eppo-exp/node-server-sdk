@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Condition, OperatorType, Rule } from './rule';
+import { Condition, OperatorType, Rule } from './dto/rule-dto';
 
 export function matchesAnyRule(subjectAttributes: Record<string, any>, rules: Rule[]): boolean {
   for (const rule of rules) {

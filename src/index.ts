@@ -9,8 +9,8 @@ import {
   POLL_INTERVAL_MILLIS,
   REQUEST_TIMEOUT_MILLIS,
 } from './constants';
+import { IExperimentConfiguration } from './dto/experiment-configuration-dto';
 import EppoClient, { IEppoClient } from './eppo-client';
-import { IExperimentConfiguration } from './experiment/experiment-configuration';
 import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
 import HttpClient from './http-client';
 import initPoller, { IPoller } from './poller';
