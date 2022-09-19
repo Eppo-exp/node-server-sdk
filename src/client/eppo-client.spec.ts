@@ -93,6 +93,7 @@ describe('EppoClient E2E test', () => {
         const assignments = subjectsWithAttributes
           ? getAssignmentsWithSubjectAttributes(subjectsWithAttributes, experiment)
           : getAssignments(subjects, experiment);
+
         expect(assignments).toEqual(expectedAssignments);
       },
     );
@@ -100,15 +101,14 @@ describe('EppoClient E2E test', () => {
 
   it('assigns subject from overrides when experiment is enabled', () => {
     const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
-    const experiment = 'experiment_5';
-    td.when(mockConfigRequestor.getConfiguration(experiment)).thenReturn({
+    td.when(mockConfigRequestor.getConfiguration(experimentName)).thenReturn({
       ...mockExperimentConfig,
       overrides: {
         '1b50f33aef8f681a13f623963da967ed': 'variant-2',
       },
     });
     const client = new EppoClient(mockConfigRequestor);
-    const assignment = client.getAssignment('subject-10', experiment);
+    const assignment = client.getAssignment('subject-10', experimentName);
     expect(assignment).toEqual('variant-2');
   });
 
