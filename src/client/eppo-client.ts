@@ -1,12 +1,13 @@
 import { createHash } from 'crypto';
 
-import { IAssignmentLogger } from './assignment-logger';
-import { IExperimentConfiguration } from './experiment/experiment-configuration';
-import ExperimentConfigurationRequestor from './experiment/experiment-configuration-requestor';
-import { Rule } from './rule';
-import { matchesAnyRule } from './rule_evaluator';
-import { getShard, isShardInRange } from './shard';
-import { validateNotBlank } from './validation';
+import { IAssignmentLogger } from '../assignment-logger';
+import { IAllocation } from '../dto/allocation-dto';
+import { IExperimentConfiguration } from '../dto/experiment-configuration-dto';
+import { IRule } from '../dto/rule-dto';
+import ExperimentConfigurationRequestor from '../experiment-configuration-requestor';
+import { findMatchingRule } from '../rule_evaluator';
+import { getShard, isShardInRange } from '../shard';
+import { validateNotBlank } from '../validation';
 
 /**
  * Client for assigning experiment variations.
@@ -42,21 +43,32 @@ export default class EppoClient implements IEppoClient {
     validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
     const experimentConfig = this.configurationRequestor.getConfiguration(experimentKey);
     const allowListOverride = this.getSubjectVariationOverride(subjectKey, experimentConfig);
-    if (allowListOverride) {
-      return allowListOverride;
-    }
-    if (
-      !experimentConfig?.enabled ||
-      !this.subjectAttributesSatisfyRules(subjectAttributes, experimentConfig.rules) ||
-      !this.isInExperimentSample(subjectKey, experimentKey, experimentConfig)
-    ) {
+
+    if (allowListOverride) return allowListOverride;
+
+    // Check for disabled flag.
+    if (!experimentConfig?.enabled) return null;
+
+    // Attempt to match a rule from the list.
+    const matchedRule = findMatchingRule(subjectAttributes || {}, experimentConfig.rules);
+    if (!matchedRule) return null;
+
+    // Check if subject is in allocation sample.
+    const allocation = experimentConfig.allocations[matchedRule.allocationKey];
+    if (!this.isInExperimentSample(subjectKey, experimentKey, experimentConfig, allocation)) {
       return null;
     }
-    const { variations, subjectShards } = experimentConfig;
+
+    // Compute variation for subject.
+    const { subjectShards } = experimentConfig;
+    const { variations } = allocation;
+
     const shard = getShard(`assignment-${subjectKey}-${experimentKey}`, subjectShards);
     const assignedVariation = variations.find((variation) =>
       isShardInRange(shard, variation.shardRange),
-    ).name;
+    ).value;
+
+    // Finally, log assignment and return assignment.
     try {
       this.assignmentLogger?.logAssignment({
         experiment: experimentKey,
@@ -69,14 +81,6 @@ export default class EppoClient implements IEppoClient {
       console.error(`[Eppo SDK] Error logging assignment event: ${error.message}`);
     }
     return assignedVariation;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private subjectAttributesSatisfyRules(subjectAttributes?: Record<string, any>, rules?: Rule[]) {
-    if (!rules || rules.length === 0) {
-      return true;
-    }
-    return matchesAnyRule(subjectAttributes || {}, rules);
   }
 
   private getSubjectVariationOverride(
@@ -96,8 +100,10 @@ export default class EppoClient implements IEppoClient {
     subjectKey: string,
     experimentKey: string,
     experimentConfig: IExperimentConfiguration,
+    allocation: IAllocation,
   ): boolean {
-    const { percentExposure, subjectShards } = experimentConfig;
+    const { subjectShards } = experimentConfig;
+    const { percentExposure } = allocation;
     const shard = getShard(`exposure-${subjectKey}-${experimentKey}`, subjectShards);
     return shard <= percentExposure * subjectShards;
   }

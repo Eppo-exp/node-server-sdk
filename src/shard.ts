@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 
-import { IShardRange } from './experiment/variation';
+import { IShardRange } from './dto/variation-dto';
 
 export function getShard(input: string, subjectShards: number): number {
   const hashOutput = createHash('md5').update(input).digest('hex');

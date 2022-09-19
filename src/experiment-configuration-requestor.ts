@@ -1,12 +1,11 @@
-import { IConfigurationStore } from '../configuration-store';
-import HttpClient from '../http-client';
+import { IConfigurationStore } from './configuration-store';
+import { IExperimentConfiguration } from './dto/experiment-configuration-dto';
+import HttpClient from './http-client';
 
-import { IExperimentConfiguration } from './experiment-configuration';
-
-const RAC_ENDPOINT = '/randomized_assignment/config';
+const RAC_ENDPOINT = '/randomized_assignment/v2/config';
 
 interface IRandomizedAssignmentConfig {
-  experiments: Record<string, IExperimentConfiguration>;
+  flags: Record<string, IExperimentConfiguration>;
 }
 
 class InvalidApiKeyError extends Error {}
@@ -26,7 +25,7 @@ export default class ExperimentConfigurationRequestor {
 
   async fetchAndStoreConfigurations(): Promise<Record<string, IExperimentConfiguration>> {
     const responseData = await this.httpClient.get<IRandomizedAssignmentConfig>(RAC_ENDPOINT);
-    this.configurationStore.setConfigurations(responseData.experiments);
-    return responseData.experiments;
+    this.configurationStore.setConfigurations(responseData.flags);
+    return responseData.flags;
   }
 }
