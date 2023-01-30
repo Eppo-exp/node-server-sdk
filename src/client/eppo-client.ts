@@ -85,7 +85,7 @@ export default class EppoClient implements IEppoClient {
     return assignedVariation;
   }
 
-  public stopClient() {
+  public stopPolling() {
     this.poller.stop();
   }
 
