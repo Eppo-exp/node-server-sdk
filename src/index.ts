@@ -79,7 +79,7 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  clientInstance = new EppoClient(configurationRequestor, config.assignmentLogger);
+  clientInstance = new EppoClient(configurationRequestor, poller, config.assignmentLogger);
   await poller.start();
   return clientInstance;
 }

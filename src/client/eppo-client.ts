@@ -5,6 +5,7 @@ import { IAllocation } from '../dto/allocation-dto';
 import { IExperimentConfiguration } from '../dto/experiment-configuration-dto';
 import { IRule } from '../dto/rule-dto';
 import ExperimentConfigurationRequestor from '../experiment-configuration-requestor';
+import { IPoller } from '../poller';
 import { findMatchingRule } from '../rule_evaluator';
 import { getShard, isShardInRange } from '../shard';
 import { validateNotBlank } from '../validation';
@@ -35,6 +36,7 @@ export interface IEppoClient {
 export default class EppoClient implements IEppoClient {
   constructor(
     private configurationRequestor: ExperimentConfigurationRequestor,
+    private poller: IPoller,
     private assignmentLogger?: IAssignmentLogger,
   ) {}
 
@@ -81,6 +83,10 @@ export default class EppoClient implements IEppoClient {
       console.error(`[Eppo SDK] Error logging assignment event: ${error.message}`);
     }
     return assignedVariation;
+  }
+
+  public stopClient() {
+    this.poller.stop();
   }
 
   private getSubjectVariationOverride(
