@@ -3,7 +3,6 @@ import { createHash } from 'crypto';
 import { IAssignmentLogger } from '../assignment-logger';
 import { IAllocation } from '../dto/allocation-dto';
 import { IExperimentConfiguration } from '../dto/experiment-configuration-dto';
-import { IRule } from '../dto/rule-dto';
 import ExperimentConfigurationRequestor from '../experiment-configuration-requestor';
 import { IPoller } from '../poller';
 import { findMatchingRule } from '../rule_evaluator';
@@ -31,6 +30,11 @@ export interface IEppoClient {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     subjectAttributes?: Record<string, any>,
   ): string;
+
+  /**
+   * Used to manually stop the polling of Eppo servers.
+   */
+  stopPolling(): void;
 }
 
 export default class EppoClient implements IEppoClient {
