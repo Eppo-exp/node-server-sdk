@@ -32,6 +32,7 @@ export interface IClientConfig {
 // @public
 export interface IEppoClient {
     getAssignment(subjectKey: string, experimentKey: string, subjectAttributes?: Record<string, any>): string;
+    stopPolling(): void;
 }
 
 // @public
