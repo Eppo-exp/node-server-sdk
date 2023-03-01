@@ -17,4 +17,5 @@ export interface IEppoClient
 |  Method | Description |
 |  --- | --- |
 |  [getAssignment(subjectKey, experimentKey, subjectAttributes)](./node-server-sdk.ieppoclient.getassignment.md) | Maps a subject to a variation for a given experiment. |
+|  [stopPolling()](./node-server-sdk.ieppoclient.stoppolling.md) | Used to manually stop the polling of Eppo servers. |
 
