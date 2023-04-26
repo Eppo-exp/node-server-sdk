@@ -1,4 +1,4 @@
-import * as LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 
 export interface IConfigurationStore<T> {
   getConfiguration(key: string): T;
@@ -15,7 +15,7 @@ export class InMemoryConfigurationStore<T> implements IConfigurationStore<T> {
   }
 
   getConfiguration(key: string): T {
-    return this.cache.get<T>(key);
+    return this.cache.get(key);
   }
 
   setConfigurations(configs: Record<string, T>) {
