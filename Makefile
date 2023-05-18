@@ -32,6 +32,11 @@ test-data:
 	gsutil cp gs://sdk-test-data/rac-experiments-v2.json $(testDataDir)
 	gsutil cp -r gs://sdk-test-data/assignment-v2 $(testDataDir)
 
+## test
+.PHONY: test
+test: test
+	yarn test:unit
+
 ## prepare
 .PHONY: prepare
 prepare: test-data
