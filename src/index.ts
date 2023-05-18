@@ -6,7 +6,6 @@ import { InMemoryConfigurationStore } from './configuration-store';
 import {
   BASE_URL,
   MAX_CACHE_ENTRIES,
-  JITTER_MILLIS,
   POLL_INTERVAL_MILLIS,
   REQUEST_TIMEOUT_MILLIS,
 } from './constants';
@@ -76,7 +75,6 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   }
   poller = initPoller(
     POLL_INTERVAL_MILLIS,
-    JITTER_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
   clientInstance = new EppoClient(configurationRequestor, poller, config.assignmentLogger);

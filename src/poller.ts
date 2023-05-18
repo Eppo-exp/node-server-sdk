@@ -5,7 +5,6 @@ export interface IPoller {
 
 export default function initPoller(
   interval: number,
-  jitterMillis: number,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback: () => Promise<any>,
 ): IPoller {
@@ -26,8 +25,7 @@ export default function initPoller(
       }
       console.error(`Error polling configurations: ${error.message}`);
     }
-    const intervalWithJitter = interval - Math.random() * jitterMillis;
-    setTimeout(poll, intervalWithJitter);
+    setTimeout(poll, interval);
   }
 
   return {
