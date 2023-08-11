@@ -17,12 +17,13 @@ export default class HttpClient {
   public isUnauthorized = false;
   constructor(private axiosInstance: AxiosInstance, private sdkParams: ISdkParams) {}
 
-  async get<T>(resource: string): Promise<T> {
+  async get<T>(resource: string): Promise<T | null> {
     try {
       const response = await this.axiosInstance.get<T>(resource, { params: this.sdkParams });
       return response.data;
     } catch (error) {
       this.handleHttpError(error);
+      return null;
     }
   }
 

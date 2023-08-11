@@ -11,7 +11,7 @@ describe('InMemoryConfigurationStore', () => {
       otherConfigs[`key-${i}`] = `value-${i}`;
     }
     store.setConfigurations(otherConfigs);
-    expect(store.getConfiguration('toBeEvicted')).toEqual(undefined);
+    expect(store.getConfiguration('toBeEvicted')).toEqual(null);
     for (let i = 0; i < maxSize; i++) {
       expect(store.getConfiguration(`key-${i}`)).toEqual(`value-${i}`);
     }

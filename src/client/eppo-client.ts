@@ -21,7 +21,7 @@ export interface IEppoClient {
    * @param experimentKey experiment identifier
    * @param subjectAttributes optional attributes associated with the subject, for example name and email.
    * The subject attributes are used for evaluating any targeting rules tied to the experiment.
-   * @returns a variation value if the subject is part of the experiment sample, otherwise null
+   * @returns a variation value if the subject is part of the experiment sample, otherwise undefined
    * @public
    */
   getAssignment(
@@ -29,7 +29,7 @@ export interface IEppoClient {
     experimentKey: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     subjectAttributes?: Record<string, any>,
-  ): string;
+  ): string | null;
 
   /**
    * Used to manually stop the polling of Eppo servers.
@@ -44,10 +44,12 @@ export default class EppoClient implements IEppoClient {
     private assignmentLogger?: IAssignmentLogger,
   ) {}
 
-  getAssignment(subjectKey: string, experimentKey: string, subjectAttributes = {}): string {
+  getAssignment(subjectKey: string, experimentKey: string, subjectAttributes = {}): string | null {
     validateNotBlank(subjectKey, 'Invalid argument: subjectKey cannot be blank');
     validateNotBlank(experimentKey, 'Invalid argument: experimentKey cannot be blank');
     const experimentConfig = this.configurationRequestor.getConfiguration(experimentKey);
+    if (!experimentConfig) return null;
+
     const allowListOverride = this.getSubjectVariationOverride(subjectKey, experimentConfig);
 
     if (allowListOverride) return allowListOverride;
@@ -72,7 +74,7 @@ export default class EppoClient implements IEppoClient {
     const shard = getShard(`assignment-${subjectKey}-${experimentKey}`, subjectShards);
     const assignedVariation = variations.find((variation) =>
       isShardInRange(shard, variation.shardRange),
-    ).value;
+    )?.value;
 
     // Finally, log assignment and return assignment.
     try {

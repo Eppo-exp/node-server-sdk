@@ -41,8 +41,8 @@ export interface IClientConfig {
 export { IAssignmentEvent, IAssignmentLogger } from './assignment-logger';
 export { IEppoClient } from './client/eppo-client';
 
-let poller: IPoller = null;
-let clientInstance: IEppoClient = null;
+let poller: IPoller;
+let clientInstance: IEppoClient;
 
 /**
  * Initializes the Eppo client with configuration parameters.

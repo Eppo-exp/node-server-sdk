@@ -212,7 +212,7 @@ describe('EppoClient E2E test', () => {
     expect(assignment).toEqual('control');
   });
 
-  function getAssignments(subjects: string[], experiment: string): string[] {
+  function getAssignments(subjects: string[], experiment: string): (string | null)[] {
     const client = getInstance();
     return subjects.map((subjectKey) => {
       return client.getAssignment(subjectKey, experiment);
@@ -226,7 +226,7 @@ describe('EppoClient E2E test', () => {
       subjectAttributes: Record<string, any>;
     }[],
     experiment: string,
-  ): string[] {
+  ): (string | null)[] {
     const client = getInstance();
     return subjectsWithAttributes.map((subject) => {
       return client.getAssignment(subject.subjectKey, experiment, subject.subjectAttributes);
