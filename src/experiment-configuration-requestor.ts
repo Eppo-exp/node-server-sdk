@@ -16,7 +16,7 @@ export default class ExperimentConfigurationRequestor {
     private httpClient: HttpClient,
   ) {}
 
-  getConfiguration(experiment: string): IExperimentConfiguration {
+  getConfiguration(experiment: string): IExperimentConfiguration | null {
     if (this.httpClient.isUnauthorized) {
       throw new InvalidApiKeyError('Unauthorized: please check your API key');
     }
@@ -25,7 +25,8 @@ export default class ExperimentConfigurationRequestor {
 
   async fetchAndStoreConfigurations(): Promise<Record<string, IExperimentConfiguration>> {
     const responseData = await this.httpClient.get<IRandomizedAssignmentConfig>(RAC_ENDPOINT);
-    this.configurationStore.setConfigurations(responseData.flags);
-    return responseData.flags;
+
+    this.configurationStore.setConfigurations(responseData?.flags ?? {});
+    return responseData?.flags ?? {};
   }
 }
