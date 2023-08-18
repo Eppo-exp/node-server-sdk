@@ -21,7 +21,7 @@ export interface IEppoClient {
    * @param experimentKey experiment identifier
    * @param subjectAttributes optional attributes associated with the subject, for example name and email.
    * The subject attributes are used for evaluating any targeting rules tied to the experiment.
-   * @returns a variation value if the subject is part of the experiment sample, otherwise undefined
+   * @returns a variation value if the subject is part of the experiment sample, otherwise null
    * @public
    */
   getAssignment(
