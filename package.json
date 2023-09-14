@@ -31,7 +31,8 @@
   "dependencies": {
     "axios": "^0.26.1",
     "http-status-codes": "^2.2.0",
-    "lru-cache": "^9.1.1"
+    "lru-cache": "^9.1.1",
+    "@eppo/js-client-sdk-common": "^1.4.1"
   },
   "devDependencies": {
     "@google-cloud/storage": "^6.9.3",
