@@ -1,20 +1,21 @@
+import {
+  IAssignmentLogger,
+  validation,
+  constants,
+  ExperimentConfigurationRequestor,
+  IEppoClient,
+  EppoClient,
+  HttpClient,
+  IConfigurationStore,
+} from '@eppo/js-client-sdk-common';
 import axios from 'axios';
 
-import { IAssignmentLogger } from './assignment-logger';
-import EppoClient, { IEppoClient } from './client/eppo-client';
+// import EppoClient, { IEppoClient } from './client/eppo-client';
 import { InMemoryConfigurationStore } from './configuration-store';
-import {
-  BASE_URL,
-  MAX_CACHE_ENTRIES,
-  POLL_INTERVAL_MILLIS,
-  REQUEST_TIMEOUT_MILLIS,
-} from './constants';
+import { MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
 import { IExperimentConfiguration } from './dto/experiment-configuration-dto';
-import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
-import HttpClient from './http-client';
 import initPoller, { IPoller } from './poller';
 import { sdkName, sdkVersion } from './sdk-data';
-import { validateNotBlank } from './validation';
 
 /**
  * Configuration used for initializing the Eppo client
@@ -38,11 +39,28 @@ export interface IClientConfig {
   assignmentLogger: IAssignmentLogger;
 }
 
-export { IAssignmentEvent, IAssignmentLogger } from './assignment-logger';
-export { IEppoClient } from './client/eppo-client';
+export { IAssignmentLogger, IAssignmentEvent, IEppoClient } from '@eppo/js-client-sdk-common';
 
 let poller: IPoller;
-let clientInstance: IEppoClient;
+let clientInstance: IEppoServerClient;
+
+interface IEppoServerClient extends EppoServerClient {
+  /**
+   * Used to manually stop the polling of Eppo servers.
+   */
+  stopPolling(): void;
+}
+
+class EppoServerClient extends EppoClient implements IEppoClient {
+  constructor(configurationStore: IConfigurationStore, private poller: IPoller) {
+    super(configurationStore);
+    this.poller = poller;
+  }
+
+  public stopPolling() {
+    this.poller.stop();
+  }
+}
 
 /**
  * Initializes the Eppo client with configuration parameters.
@@ -52,13 +70,13 @@ let clientInstance: IEppoClient;
  * @public
  */
 export async function init(config: IClientConfig): Promise<IEppoClient> {
-  validateNotBlank(config.apiKey, 'API key required');
+  validation.validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
     MAX_CACHE_ENTRIES,
   );
   const axiosInstance = axios.create({
-    baseURL: config.baseUrl || BASE_URL,
-    timeout: REQUEST_TIMEOUT_MILLIS,
+    baseURL: config.baseUrl || constants.BASE_URL,
+    timeout: constants.REQUEST_TIMEOUT_MILLIS,
   });
   const httpClient = new HttpClient(axiosInstance, {
     apiKey: config.apiKey,
@@ -77,7 +95,8 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     POLL_INTERVAL_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  clientInstance = new EppoClient(configurationRequestor, poller, config.assignmentLogger);
+  clientInstance = new EppoServerClient(configurationStore, poller);
+  clientInstance.setLogger(config.assignmentLogger);
   await poller.start();
   return clientInstance;
 }
