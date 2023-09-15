@@ -5,10 +5,11 @@ import { IVariation } from '../src/dto/variation-dto';
 
 export const TEST_DATA_DIR = './test/data/';
 export const ASSIGNMENT_TEST_DATA_DIR = TEST_DATA_DIR + 'assignment-v2/';
-export const MOCK_RAC_RESPONSE_FILE = 'rac-experiments-v2.json';
+export const MOCK_RAC_RESPONSE_FILE = 'rac-experiments-v3.json';
 
 export interface IAssignmentTestCase {
   experiment: string;
+  valueType: string;
   percentExposure: number;
   variations: IVariation[];
   subjects: string[];
