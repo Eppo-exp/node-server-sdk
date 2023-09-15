@@ -1,15 +1,25 @@
+import { IExperimentConfiguration } from '@eppo/js-client-sdk-common/dist/dto/experiment-configuration-dto';
+import { OperatorType } from '@eppo/js-client-sdk-common/dist/dto/rule-dto';
 import * as td from 'testdouble';
 
-import { getInstance, IAssignmentEvent, IAssignmentLogger, init } from '..';
-import apiServer from '../../test/mockApiServer';
-import { IAssignmentTestCase, readAssignmentTestData } from '../../test/testHelpers';
-import { OperatorType } from '../dto/rule-dto';
-import ExperimentConfigurationRequestor from '../experiment-configuration-requestor';
-import { IPoller } from '../poller';
+import apiServer from '../test/mockApiServer';
+import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers';
 
-import EppoClient from './eppo-client';
+import { InMemoryConfigurationStore } from './configuration-store';
+import { IPoller } from './poller';
+
+import {
+  EppoServerClient,
+  getInstance,
+  IAssignmentEvent,
+  IAssignmentLogger,
+  init,
+  IEppoClient,
+} from '.';
 
 describe('EppoClient E2E test', () => {
+  let client: IEppoClient;
+
   const mockLogger: IAssignmentLogger = {
     logAssignment(assignment: IAssignmentEvent) {
       console.log(`Logged assignment for subject ${assignment.subject}`);
@@ -65,7 +75,11 @@ describe('EppoClient E2E test', () => {
   jest.useFakeTimers();
 
   beforeAll(async () => {
-    await init({ apiKey: 'dummy', baseUrl: 'http://127.0.0.1:4000', assignmentLogger: mockLogger });
+    client = await init({
+      apiKey: 'dummy',
+      baseUrl: 'http://127.0.0.1:4000',
+      assignmentLogger: mockLogger,
+    });
   });
 
   afterAll(async () => {
@@ -101,49 +115,56 @@ describe('EppoClient E2E test', () => {
   });
 
   it('assigns subject from overrides when experiment is enabled', () => {
-    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const mockConfigStore = td.object<InMemoryConfigurationStore<IExperimentConfiguration>>();
     const mockPoller = td.object<IPoller>();
-    td.when(mockConfigRequestor.getConfiguration(experimentName)).thenReturn({
+    td.when(mockConfigStore.get(experimentName)).thenReturn({
       ...mockExperimentConfig,
       overrides: {
         '1b50f33aef8f681a13f623963da967ed': 'variant-2',
       },
+      typedOverrides: {
+        '1b50f33aef8f681a13f623963da967ed': 'variant-2',
+      },
     });
-    const client = new EppoClient(mockConfigRequestor, mockPoller);
+    const client = new EppoServerClient(mockConfigStore, mockPoller);
     const assignment = client.getAssignment('subject-10', experimentName);
     expect(assignment).toEqual('variant-2');
   });
 
   it('assigns subject from overrides when experiment is not enabled', () => {
-    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const mockConfigStore = td.object<InMemoryConfigurationStore<IExperimentConfiguration>>();
     const mockPoller = td.object<IPoller>();
-    td.when(mockConfigRequestor.getConfiguration(experimentName)).thenReturn({
+    td.when(mockConfigStore.get(experimentName)).thenReturn({
       ...mockExperimentConfig,
       overrides: {
         '1b50f33aef8f681a13f623963da967ed': 'variant-2',
       },
+      typedOverrides: {
+        '1b50f33aef8f681a13f623963da967ed': 'variant-2',
+      },
     });
-    const client = new EppoClient(mockConfigRequestor, mockPoller);
+    const client = new EppoServerClient(mockConfigStore, mockPoller);
     const assignment = client.getAssignment('subject-10', experimentName);
     expect(assignment).toEqual('variant-2');
   });
 
   it('returns null when experiment config is absent', () => {
-    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const mockConfigStore = td.object<InMemoryConfigurationStore<IExperimentConfiguration>>();
     const mockPoller = td.object<IPoller>();
-    td.when(mockConfigRequestor.getConfiguration(experimentName)).thenReturn(null);
-    const client = new EppoClient(mockConfigRequestor, mockPoller);
+    td.when(mockConfigStore.get(experimentName)).thenReturn(null);
+    const client = new EppoServerClient(mockConfigStore, mockPoller);
     const assignment = client.getAssignment('subject-10', experimentName);
     expect(assignment).toEqual(null);
   });
 
   it('logs variation assignment', () => {
-    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const mockConfigStore = td.object<InMemoryConfigurationStore<IExperimentConfiguration>>();
     const mockLogger = td.object<IAssignmentLogger>();
     const mockPoller = td.object<IPoller>();
-    td.when(mockConfigRequestor.getConfiguration(experimentName)).thenReturn(mockExperimentConfig);
+    td.when(mockConfigStore.get(experimentName)).thenReturn(mockExperimentConfig);
     const subjectAttributes = { foo: 3 };
-    const client = new EppoClient(mockConfigRequestor, mockPoller, mockLogger);
+    const client = new EppoServerClient(mockConfigStore, mockPoller);
+    client.setLogger(mockLogger);
     const assignment = client.getAssignment('subject-10', experimentName, subjectAttributes);
     expect(assignment).toEqual('control');
     expect(td.explain(mockLogger.logAssignment).callCount).toEqual(1);
@@ -151,21 +172,22 @@ describe('EppoClient E2E test', () => {
   });
 
   it('handles logging exception', () => {
-    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const mockConfigStore = td.object<InMemoryConfigurationStore<IExperimentConfiguration>>();
     const mockLogger = td.object<IAssignmentLogger>();
     const mockPoller = td.object<IPoller>();
     td.when(mockLogger.logAssignment(td.matchers.anything())).thenThrow(new Error('logging error'));
-    td.when(mockConfigRequestor.getConfiguration(experimentName)).thenReturn(mockExperimentConfig);
+    td.when(mockConfigStore.get(experimentName)).thenReturn(mockExperimentConfig);
     const subjectAttributes = { foo: 3 };
-    const client = new EppoClient(mockConfigRequestor, mockPoller, mockLogger);
+    const client = new EppoServerClient(mockConfigStore, mockPoller);
+    client.setLogger(mockLogger);
     const assignment = client.getAssignment('subject-10', experimentName, subjectAttributes);
     expect(assignment).toEqual('control');
   });
 
   it('only returns variation if subject matches rules', () => {
-    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
+    const mockConfigStore = td.object<InMemoryConfigurationStore<IExperimentConfiguration>>();
     const mockPoller = td.object<IPoller>();
-    td.when(mockConfigRequestor.getConfiguration(experimentName)).thenReturn({
+    td.when(mockConfigStore.get(experimentName)).thenReturn({
       ...mockExperimentConfig,
       rules: [
         {
@@ -203,7 +225,7 @@ describe('EppoClient E2E test', () => {
         },
       },
     });
-    const client = new EppoClient(mockConfigRequestor, mockPoller);
+    const client = new EppoServerClient(mockConfigStore, mockPoller);
     let assignment = client.getAssignment('subject-10', experimentName, { appVersion: 9 });
     expect(assignment).toEqual(null);
     assignment = client.getAssignment('subject-10', experimentName);

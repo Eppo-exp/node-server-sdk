@@ -51,7 +51,7 @@ interface IEppoServerClient extends EppoServerClient {
   stopPolling(): void;
 }
 
-class EppoServerClient extends EppoClient implements IEppoClient {
+export class EppoServerClient extends EppoClient implements IEppoClient {
   constructor(configurationStore: IConfigurationStore, private poller: IPoller) {
     super(configurationStore);
     this.poller = poller;
