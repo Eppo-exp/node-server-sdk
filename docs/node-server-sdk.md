@@ -4,6 +4,12 @@
 
 ## node-server-sdk package
 
+## Classes
+
+|  Class | Description |
+|  --- | --- |
+|  [EppoServerClient](./node-server-sdk.epposerverclient.md) |  |
+
 ## Functions
 
 |  Function | Description |
@@ -15,8 +21,5 @@
 
 |  Interface | Description |
 |  --- | --- |
-|  [IAssignmentEvent](./node-server-sdk.iassignmentevent.md) | Holds data about the variation a subject was assigned to. |
-|  [IAssignmentLogger](./node-server-sdk.iassignmentlogger.md) | Implement this interface log variation assignments to your data warehouse. |
 |  [IClientConfig](./node-server-sdk.iclientconfig.md) | Configuration used for initializing the Eppo client |
-|  [IEppoClient](./node-server-sdk.ieppoclient.md) | Client for assigning experiment variations. |
 

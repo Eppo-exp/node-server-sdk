@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
-import { IExperimentConfiguration } from '../src/dto/experiment-configuration-dto';
-import { IVariation } from '../src/dto/variation-dto';
+import { IExperimentConfiguration } from '@eppo/js-client-sdk-common/dist/dto/experiment-configuration-dto';
+import { IVariation } from '@eppo/js-client-sdk-common/dist/dto/variation-dto';
 
 export const TEST_DATA_DIR = './test/data/';
 export const ASSIGNMENT_TEST_DATA_DIR = TEST_DATA_DIR + 'assignment-v2/';
