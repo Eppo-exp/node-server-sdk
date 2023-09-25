@@ -11,7 +11,6 @@ import {
 import { IExperimentConfiguration } from '@eppo/js-client-sdk-common/dist/dto/experiment-configuration-dto';
 import axios from 'axios';
 
-// import EppoClient, { IEppoClient } from './client/eppo-client';
 import { InMemoryConfigurationStore } from './configuration-store';
 import { MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
 import initPoller, { IPoller } from './poller';
