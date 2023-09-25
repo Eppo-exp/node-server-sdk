@@ -2,17 +2,16 @@ import {
   IAssignmentLogger,
   validation,
   constants,
-  ExperimentConfigurationRequestor,
   IEppoClient,
   EppoClient,
-  HttpClient,
-  IConfigurationStore,
 } from '@eppo/js-client-sdk-common';
 import { IExperimentConfiguration } from '@eppo/js-client-sdk-common/dist/dto/experiment-configuration-dto';
 import axios from 'axios';
 
 import { InMemoryConfigurationStore } from './configuration-store';
 import { MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
+import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
+import HttpClient from './http-client';
 import initPoller, { IPoller } from './poller';
 import { sdkName, sdkVersion } from './sdk-data';
 
@@ -50,9 +49,9 @@ interface IEppoServerClient extends EppoNodeClient {
   stopPolling(): void;
 }
 
-export class EppoNodeClient extends EppoClient implements IEppoClient {
-  constructor(configurationStore: IConfigurationStore, private poller: IPoller) {
-    super(configurationStore);
+class EppoNodeClient extends EppoClient implements IEppoClient {
+  constructor(configurationRequestor: ExperimentConfigurationRequestor, private poller: IPoller) {
+    super(configurationRequestor.configStore);
     this.poller = poller;
   }
 
@@ -94,11 +93,13 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     POLL_INTERVAL_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  clientInstance = new EppoNodeClient(configurationStore, poller);
+  clientInstance = new EppoNodeClient(configurationRequestor, poller);
   clientInstance.setLogger(config.assignmentLogger);
   await poller.start();
   return clientInstance;
 }
+
+export { ExperimentConfigurationRequestor, EppoNodeClient, EppoNodeClient as EppoClient };
 
 /**
  * Used to access a singleton SDK client instance.
