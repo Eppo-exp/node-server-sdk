@@ -44,14 +44,14 @@ export { IAssignmentLogger, IAssignmentEvent, IEppoClient } from '@eppo/js-clien
 let poller: IPoller;
 let clientInstance: IEppoServerClient;
 
-interface IEppoServerClient extends EppoServerClient {
+interface IEppoServerClient extends EppoNodeClient {
   /**
    * Used to manually stop the polling of Eppo servers.
    */
   stopPolling(): void;
 }
 
-export class EppoServerClient extends EppoClient implements IEppoClient {
+export class EppoNodeClient extends EppoClient implements IEppoClient {
   constructor(configurationStore: IConfigurationStore, private poller: IPoller) {
     super(configurationStore);
     this.poller = poller;
@@ -95,7 +95,7 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     POLL_INTERVAL_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  clientInstance = new EppoServerClient(configurationStore, poller);
+  clientInstance = new EppoNodeClient(configurationStore, poller);
   clientInstance.setLogger(config.assignmentLogger);
   await poller.start();
   return clientInstance;
