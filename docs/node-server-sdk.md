@@ -4,13 +4,6 @@
 
 ## node-server-sdk package
 
-## Classes
-
-|  Class | Description |
-|  --- | --- |
-|  [EppoClient](./node-server-sdk.eppoclient.md) |  |
-|  [ExperimentConfigurationRequestor](./node-server-sdk.experimentconfigurationrequestor.md) |  |
-
 ## Functions
 
 |  Function | Description |
@@ -23,4 +16,5 @@
 |  Interface | Description |
 |  --- | --- |
 |  [IClientConfig](./node-server-sdk.iclientconfig.md) | Configuration used for initializing the Eppo client |
+|  [IEppoClient](./node-server-sdk.ieppoclient.md) |  |
 
