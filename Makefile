@@ -49,4 +49,3 @@ prepare: test-data
 	 husky install
 	 rm -rf dist/
 	 tsc
-	 api-extractor run --local
