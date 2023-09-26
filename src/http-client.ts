@@ -14,6 +14,7 @@ export class HttpRequestError extends Error {
   }
 }
 
+// Extends HttpClient from common to surface errors for polling
 export default class EppoHttpClient extends HttpClient {
   public isUnauthorized = false;
   constructor(axiosInstance: AxiosInstance, sdkParams: ISdkParams) {

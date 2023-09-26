@@ -32,7 +32,7 @@ export interface IClientConfig {
   assignmentLogger: IAssignmentLogger;
 }
 
-export { IAssignmentLogger, IAssignmentEvent } from '@eppo/js-client-sdk-common';
+export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
 export { IEppoClient } from './client/eppo-client';
 
 let poller: IPoller;
