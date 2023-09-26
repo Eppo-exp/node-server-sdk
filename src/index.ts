@@ -1,5 +1,4 @@
 import { IAssignmentLogger, validation, constants } from '@eppo/js-client-sdk-common';
-import { IExperimentConfiguration } from '@eppo/js-client-sdk-common/dist/dto/experiment-configuration-dto';
 import axios from 'axios';
 
 import EppoClient, { IEppoClient } from './client/eppo-client';
