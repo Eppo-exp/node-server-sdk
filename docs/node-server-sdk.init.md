@@ -20,5 +20,5 @@ export declare function init(config: IClientConfig): Promise<IEppoClient>;
 
 <b>Returns:</b>
 
-Promise&lt;[IEppoClient](./node-server-sdk.ieppoclient.md)<!-- -->&gt;
+Promise&lt;IEppoClient&gt;
 
