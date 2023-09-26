@@ -12,7 +12,6 @@ import { IAssignmentEvent } from '@eppo/js-client-sdk-common';
 import { IAssignmentLogger } from '@eppo/js-client-sdk-common';
 import { IConfigurationStore } from '@eppo/js-client-sdk-common';
 import { IEppoClient as IEppoClient_2 } from '@eppo/js-client-sdk-common';
-import { IExperimentConfiguration } from '@eppo/js-client-sdk-common/dist/dto/experiment-configuration-dto';
 
 // @public
 export function getInstance(): IEppoClient;
