@@ -4,16 +4,11 @@ import * as td from 'testdouble';
 import apiServer from '../test/mockApiServer';
 import { IAssignmentTestCase, readAssignmentTestData } from '../test/testHelpers';
 
+import EppoClient from './client/eppo-client';
+import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
 import { IPoller } from './poller';
 
-import {
-  EppoClient,
-  ExperimentConfigurationRequestor,
-  getInstance,
-  IAssignmentEvent,
-  IAssignmentLogger,
-  init,
-} from '.';
+import { getInstance, IAssignmentEvent, IAssignmentLogger, init } from '.';
 
 describe('EppoClient E2E test', () => {
   const mockLogger: IAssignmentLogger = {

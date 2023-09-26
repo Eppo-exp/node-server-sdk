@@ -1,13 +1,8 @@
-import {
-  IAssignmentLogger,
-  validation,
-  constants,
-  IEppoClient,
-  EppoClient,
-} from '@eppo/js-client-sdk-common';
+import { IAssignmentLogger, validation, constants } from '@eppo/js-client-sdk-common';
 import { IExperimentConfiguration } from '@eppo/js-client-sdk-common/dist/dto/experiment-configuration-dto';
 import axios from 'axios';
 
+import EppoClient, { IEppoClient } from './client/eppo-client';
 import { InMemoryConfigurationStore } from './configuration-store';
 import { MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
 import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
@@ -37,28 +32,11 @@ export interface IClientConfig {
   assignmentLogger: IAssignmentLogger;
 }
 
-export { IAssignmentLogger, IAssignmentEvent, IEppoClient } from '@eppo/js-client-sdk-common';
+export { IAssignmentLogger, IAssignmentEvent } from '@eppo/js-client-sdk-common';
+export { IEppoClient } from './client/eppo-client';
 
 let poller: IPoller;
-let clientInstance: IEppoServerClient;
-
-interface IEppoServerClient extends EppoNodeClient {
-  /**
-   * Used to manually stop the polling of Eppo servers.
-   */
-  stopPolling(): void;
-}
-
-class EppoNodeClient extends EppoClient implements IEppoClient {
-  constructor(configurationRequestor: ExperimentConfigurationRequestor, private poller: IPoller) {
-    super(configurationRequestor.configStore);
-    this.poller = poller;
-  }
-
-  public stopPolling() {
-    this.poller.stop();
-  }
-}
+let clientInstance: IEppoClient;
 
 /**
  * Initializes the Eppo client with configuration parameters.
@@ -93,13 +71,11 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     POLL_INTERVAL_MILLIS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
-  clientInstance = new EppoNodeClient(configurationRequestor, poller);
+  clientInstance = new EppoClient(configurationRequestor, poller);
   clientInstance.setLogger(config.assignmentLogger);
   await poller.start();
   return clientInstance;
 }
-
-export { ExperimentConfigurationRequestor, EppoNodeClient, EppoNodeClient as EppoClient };
 
 /**
  * Used to access a singleton SDK client instance.

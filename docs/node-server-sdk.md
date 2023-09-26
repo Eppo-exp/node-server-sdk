@@ -8,7 +8,8 @@
 
 |  Class | Description |
 |  --- | --- |
-|  [EppoServerClient](./node-server-sdk.epposerverclient.md) |  |
+|  [EppoClient](./node-server-sdk.eppoclient.md) |  |
+|  [ExperimentConfigurationRequestor](./node-server-sdk.experimentconfigurationrequestor.md) |  |
 
 ## Functions
 

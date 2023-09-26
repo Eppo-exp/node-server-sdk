@@ -5,33 +5,14 @@
 ```ts
 
 import { AxiosInstance } from 'axios';
-import { EppoClient as EppoClient_2 } from '@eppo/js-client-sdk-common';
-import { ExperimentConfigurationRequestor as ExperimentConfigurationRequestor_2 } from '@eppo/js-client-sdk-common';
+import { EppoClient } from '@eppo/js-client-sdk-common';
+import { ExperimentConfigurationRequestor } from '@eppo/js-client-sdk-common';
 import { HttpClient } from '@eppo/js-client-sdk-common';
 import { IAssignmentEvent } from '@eppo/js-client-sdk-common';
 import { IAssignmentLogger } from '@eppo/js-client-sdk-common';
 import { IConfigurationStore } from '@eppo/js-client-sdk-common';
-import { IEppoClient } from '@eppo/js-client-sdk-common';
+import { IEppoClient as IEppoClient_2 } from '@eppo/js-client-sdk-common';
 import { IExperimentConfiguration } from '@eppo/js-client-sdk-common/dist/dto/experiment-configuration-dto';
-
-// @public (undocumented)
-export class EppoClient extends EppoClient_2 implements IEppoClient {
-    // Warning: (ae-forgotten-export) The symbol "IPoller" needs to be exported by the entry point index.d.ts
-    constructor(configurationRequestor: ExperimentConfigurationRequestor, poller: IPoller);
-    // (undocumented)
-    stopPolling(): void;
-}
-
-// @public (undocumented)
-export class ExperimentConfigurationRequestor extends ExperimentConfigurationRequestor_2 {
-    // Warning: (ae-forgotten-export) The symbol "IEppoConfigurationStore" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "EppoHttpClient" needs to be exported by the entry point index.d.ts
-    constructor(configurationStore: IEppoConfigurationStore<IExperimentConfiguration>, httpClient: EppoHttpClient);
-    // (undocumented)
-    eppoConfigurationStore: IConfigurationStore;
-    // (undocumented)
-    getConfiguration(experiment: string): IExperimentConfiguration | null;
-}
 
 // @public
 export function getInstance(): IEppoClient;
@@ -47,7 +28,12 @@ export interface IClientConfig {
     baseUrl?: string;
 }
 
-export { IEppoClient }
+// Warning: (ae-forgotten-export) The symbol "EppoNodeClient" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export interface IEppoClient extends EppoNodeClient {
+    stopPolling(): void;
+}
 
 // @public
 export function init(config: IClientConfig): Promise<IEppoClient>;
