@@ -47,9 +47,7 @@ let clientInstance: IEppoClient;
  */
 export async function init(config: IClientConfig): Promise<IEppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
-  const configurationStore = new InMemoryConfigurationStore<IExperimentConfiguration>(
-    MAX_CACHE_ENTRIES,
-  );
+  const configurationStore = new InMemoryConfigurationStore(MAX_CACHE_ENTRIES);
   const axiosInstance = axios.create({
     baseURL: config.baseUrl || constants.BASE_URL,
     timeout: constants.REQUEST_TIMEOUT_MILLIS,

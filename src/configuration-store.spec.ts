@@ -3,7 +3,7 @@ import { InMemoryConfigurationStore } from './configuration-store';
 describe('InMemoryConfigurationStore', () => {
   it('evicts entries when max size is exceeded', () => {
     const maxSize = 1000;
-    const store = new InMemoryConfigurationStore<string>(maxSize);
+    const store = new InMemoryConfigurationStore(maxSize);
     store.setConfigurations({ toBeEvicted: 'item1' });
     expect(store.getConfiguration('toBeEvicted')).toEqual('item1');
     const otherConfigs = {};

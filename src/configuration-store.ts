@@ -1,7 +1,7 @@
 import { IConfigurationStore } from '@eppo/js-client-sdk-common';
 import { LRUCache } from 'lru-cache';
 
-export interface IEppoConfigurationStore<T> {
+export interface IEppoConfigurationStore {
   getConfiguration<T>(key: string): T;
   setConfigurations<T>(entries: Record<string, T>): void;
 }
@@ -9,7 +9,7 @@ export interface IEppoConfigurationStore<T> {
 /**
  * Default ConfigurationStore implementation. Sets and retrieves entries from an in-memory cache.
  */
-export class InMemoryConfigurationStore<T> implements IEppoConfigurationStore<T> {
+export class InMemoryConfigurationStore implements IEppoConfigurationStore {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private cache: LRUCache<string, any>;
 
@@ -28,10 +28,10 @@ export class InMemoryConfigurationStore<T> implements IEppoConfigurationStore<T>
   }
 }
 
-export class commonCompatibleConfigurationStore<T> implements IConfigurationStore {
-  private store: IEppoConfigurationStore<T>;
+export class commonCompatibleConfigurationStore implements IConfigurationStore {
+  private store: IEppoConfigurationStore;
 
-  constructor(store: IEppoConfigurationStore<T>) {
+  constructor(store: IEppoConfigurationStore) {
     this.store = store;
   }
 
