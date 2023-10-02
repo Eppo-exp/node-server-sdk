@@ -102,9 +102,14 @@ describe('EppoClient E2E test', () => {
         expectedAssignments,
       }: IAssignmentTestCase) => {
         console.log(`---- Test Case for ${experiment} Experiment ----`);
-        const assignments = subjectsWithAttributes
-          ? getAssignmentsWithSubjectAttributes(subjectsWithAttributes, experiment, valueType)
-          : getAssignments(subjects, experiment, valueType);
+
+        const assignments = getAssignmentsWithSubjectAttributes(
+          subjectsWithAttributes
+            ? subjectsWithAttributes
+            : subjects.map((subject) => ({ subjectKey: subject })),
+          experiment,
+          valueType,
+        );
 
         switch (valueType) {
           case ValueTestType.BoolType: {
@@ -236,44 +241,11 @@ describe('EppoClient E2E test', () => {
     expect(assignment).toEqual('control');
   });
 
-  function getAssignments(
-    subjects: string[],
-    experiment: string,
-    valueTestType: ValueTestType = ValueTestType.StringType,
-  ): (EppoValue | null)[] {
-    const client = getInstance();
-    return subjects.map((subjectKey) => {
-      switch (valueTestType) {
-        case ValueTestType.BoolType: {
-          const ba = client.getBoolAssignment(subjectKey, experiment);
-          if (ba === null) return null;
-          return EppoValue.Bool(ba);
-        }
-        case ValueTestType.NumericType: {
-          const na = client.getNumericAssignment(subjectKey, experiment);
-          if (na === null) return null;
-          return EppoValue.Numeric(na);
-        }
-        case ValueTestType.StringType: {
-          const sa = client.getStringAssignment(subjectKey, experiment);
-          if (sa === null) return null;
-          return EppoValue.String(sa);
-        }
-        case ValueTestType.JSONType: {
-          const sa = client.getJSONStringAssignment(subjectKey, experiment);
-          const oa = client.getParsedJSONAssignment(subjectKey, experiment);
-          if (oa == null || sa === null) return null;
-          return EppoValue.JSON(sa, oa);
-        }
-      }
-    });
-  }
-
   function getAssignmentsWithSubjectAttributes(
     subjectsWithAttributes: {
       subjectKey: string;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      subjectAttributes: Record<string, any>;
+      subjectAttributes?: Record<string, any>;
     }[],
     experiment: string,
     valueTestType: ValueTestType = ValueTestType.StringType,
