@@ -292,10 +292,10 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@eppo/js-client-sdk-common@^1.5.1":
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-1.5.1.tgz#f4f86c17aaf8da565613a85ffc6b5f133a382a6a"
-  integrity sha512-cO7lkqO1I0d3aOu43+jeiUTNFn4Rkrg95Fc6ADhLFwYjV3b0hI7KRUPE66YadjgP3Db3J2XgBWtQps2XFbfe5Q==
+"@eppo/js-client-sdk-common@^1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-1.5.2.tgz#b5746b9d6cd501a82453aac129f8154b57765f03"
+  integrity sha512-4PvoYwBh5WiJnwZ1udmXs+XpWqyQjl+uE9XiAfVEeeoRFSCdaFAhFQ0qe55F+pW2XBCAvByxrYc8RZRLV8jw0w==
   dependencies:
     axios "^0.27.2"
     md5 "^2.3.0"
