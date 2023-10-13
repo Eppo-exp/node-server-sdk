@@ -292,12 +292,11 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@eppo/js-client-sdk-common@^1.5.2":
-  version "1.5.2"
-  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-1.5.2.tgz#b5746b9d6cd501a82453aac129f8154b57765f03"
-  integrity sha512-4PvoYwBh5WiJnwZ1udmXs+XpWqyQjl+uE9XiAfVEeeoRFSCdaFAhFQ0qe55F+pW2XBCAvByxrYc8RZRLV8jw0w==
+"@eppo/js-client-sdk-common@file:../js-client-sdk-common":
+  version "1.6.1"
   dependencies:
     axios "^0.27.2"
+    lru-cache "^10.0.1"
     md5 "^2.3.0"
 
 "@eslint/eslintrc@^0.4.3":
@@ -3431,6 +3430,11 @@ log-update@^4.0.0:
     cli-cursor "^3.1.0"
     slice-ansi "^4.0.0"
     wrap-ansi "^6.2.0"
+
+lru-cache@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.0.1.tgz#0a3be479df549cca0e5d693ac402ff19537a6b7a"
+  integrity sha512-IJ4uwUTi2qCccrioU6g9g/5rvvVl13bsdczUUcqbciD9iLr095yj8DQKdObriEvuNSx325N1rV1O0sJFszx75g==
 
 lru-cache@^6.0.0:
   version "6.0.0"

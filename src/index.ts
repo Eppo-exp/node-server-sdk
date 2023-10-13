@@ -1,9 +1,17 @@
 import { IAssignmentLogger, validation, constants } from '@eppo/js-client-sdk-common';
+import {
+  IAssignmentCache,
+  LRUAssignmentCache,
+} from '@eppo/js-client-sdk-common/dist/assignment-cache';
 import axios from 'axios';
 
 import EppoClient, { IEppoClient } from './client/eppo-client';
 import { InMemoryConfigurationStore } from './configuration-store';
-import { MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
+import {
+  ASSIGNMENT_CACHE_MAX_ENTRIES as ASSIGNMENT_CACHE_DEFAULT_MAX_ENTRIES,
+  CONFIGURATION_STORE_MAX_CACHE_ENTRIES,
+  POLL_INTERVAL_MILLIS,
+} from './constants';
 import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
 import HttpClient from './http-client';
 import initPoller, { IPoller } from './poller';
@@ -29,6 +37,11 @@ export interface IClientConfig {
    * Pass a logging implementation to send variation assignments to your data warehouse.
    */
   assignmentLogger: IAssignmentLogger;
+
+  /**
+   * Pass an assignment cache implementation to cache assignments.
+   */
+  assignmentCache?: IAssignmentCache;
 }
 
 export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
@@ -46,7 +59,7 @@ let clientInstance: IEppoClient;
  */
 export async function init(config: IClientConfig): Promise<IEppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
-  const configurationStore = new InMemoryConfigurationStore(MAX_CACHE_ENTRIES);
+  const configurationStore = new InMemoryConfigurationStore(CONFIGURATION_STORE_MAX_CACHE_ENTRIES);
   const axiosInstance = axios.create({
     baseURL: config.baseUrl || constants.BASE_URL,
     timeout: constants.REQUEST_TIMEOUT_MILLIS,
@@ -70,6 +83,11 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   );
   clientInstance = new EppoClient(configurationRequestor, poller);
   clientInstance.setLogger(config.assignmentLogger);
+
+  clientInstance.setAssignmentCache(
+    config.assignmentCache ?? new LRUAssignmentCache(ASSIGNMENT_CACHE_DEFAULT_MAX_ENTRIES),
+  );
+
   await poller.start();
   return clientInstance;
 }
