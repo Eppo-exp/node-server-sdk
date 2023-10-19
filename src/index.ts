@@ -3,7 +3,7 @@ import axios from 'axios';
 
 import EppoClient, { IEppoClient } from './client/eppo-client';
 import { InMemoryConfigurationStore } from './configuration-store';
-import { CONFIGURATION_STORE_MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
+import { MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
 import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
 import HttpClient from './http-client';
 import initPoller, { IPoller } from './poller';
@@ -46,7 +46,7 @@ let clientInstance: IEppoClient;
  */
 export async function init(config: IClientConfig): Promise<IEppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
-  const configurationStore = new InMemoryConfigurationStore(CONFIGURATION_STORE_MAX_CACHE_ENTRIES);
+  const configurationStore = new InMemoryConfigurationStore(MAX_CACHE_ENTRIES);
   const axiosInstance = axios.create({
     baseURL: config.baseUrl || constants.BASE_URL,
     timeout: constants.REQUEST_TIMEOUT_MILLIS,
