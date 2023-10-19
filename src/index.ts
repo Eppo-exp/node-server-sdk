@@ -1,17 +1,9 @@
 import { IAssignmentLogger, validation, constants } from '@eppo/js-client-sdk-common';
-import {
-  IAssignmentCache,
-  LRUAssignmentCache,
-} from '@eppo/js-client-sdk-common/dist/assignment-cache';
 import axios from 'axios';
 
 import EppoClient, { IEppoClient } from './client/eppo-client';
 import { InMemoryConfigurationStore } from './configuration-store';
-import {
-  ASSIGNMENT_CACHE_MAX_ENTRIES as ASSIGNMENT_CACHE_DEFAULT_MAX_ENTRIES,
-  CONFIGURATION_STORE_MAX_CACHE_ENTRIES,
-  POLL_INTERVAL_MILLIS,
-} from './constants';
+import { CONFIGURATION_STORE_MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
 import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
 import HttpClient from './http-client';
 import initPoller, { IPoller } from './poller';
@@ -37,11 +29,6 @@ export interface IClientConfig {
    * Pass a logging implementation to send variation assignments to your data warehouse.
    */
   assignmentLogger: IAssignmentLogger;
-
-  /**
-   * Pass an assignment cache implementation to cache assignments.
-   */
-  assignmentCache?: IAssignmentCache;
 }
 
 export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
@@ -84,9 +71,10 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   clientInstance = new EppoClient(configurationRequestor, poller);
   clientInstance.setLogger(config.assignmentLogger);
 
-  clientInstance.setAssignmentCache(
-    config.assignmentCache ?? new LRUAssignmentCache(ASSIGNMENT_CACHE_DEFAULT_MAX_ENTRIES),
-  );
+  // default to LRU cache with 50_000 entries.
+  // we estimate this will use no more than 10 MB of memory
+  // and should be appropriate for most server-side use cases.
+  clientInstance.useLRUAssignmentCache(50_000);
 
   await poller.start();
   return clientInstance;
