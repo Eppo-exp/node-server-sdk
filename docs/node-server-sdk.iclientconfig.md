@@ -6,7 +6,7 @@
 
 Configuration used for initializing the Eppo client
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export interface IClientConfig 
@@ -14,9 +14,9 @@ export interface IClientConfig
 
 ## Properties
 
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [apiKey](./node-server-sdk.iclientconfig.apikey.md) | string | Eppo API key |
-|  [assignmentLogger](./node-server-sdk.iclientconfig.assignmentlogger.md) | IAssignmentLogger | Pass a logging implementation to send variation assignments to your data warehouse. |
-|  [baseUrl?](./node-server-sdk.iclientconfig.baseurl.md) | string | <i>(Optional)</i> Base URL of the Eppo API. Clients should use the default setting in most cases. |
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [apiKey](./node-server-sdk.iclientconfig.apikey.md) |  | string | Eppo API key |
+|  [assignmentLogger](./node-server-sdk.iclientconfig.assignmentlogger.md) |  | IAssignmentLogger | Pass a logging implementation to send variation assignments to your data warehouse. |
+|  [baseUrl?](./node-server-sdk.iclientconfig.baseurl.md) |  | string | _(Optional)_ Base URL of the Eppo API. Clients should use the default setting in most cases. |
 

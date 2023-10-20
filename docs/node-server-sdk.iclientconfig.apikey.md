@@ -6,7 +6,7 @@
 
 Eppo API key
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 apiKey: string;

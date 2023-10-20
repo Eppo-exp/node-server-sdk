@@ -6,7 +6,7 @@
 
 Pass a logging implementation to send variation assignments to your data warehouse.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 assignmentLogger: IAssignmentLogger;

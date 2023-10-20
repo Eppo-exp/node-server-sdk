@@ -6,12 +6,12 @@
 
 Used to manually stop the polling of Eppo servers for testing.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 stopPolling(): void;
 ```
-<b>Returns:</b>
+**Returns:**
 
 void
 
