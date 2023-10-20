@@ -70,6 +70,12 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   );
   clientInstance = new EppoClient(configurationRequestor, poller);
   clientInstance.setLogger(config.assignmentLogger);
+
+  // default to LRU cache with 50_000 entries.
+  // we estimate this will use no more than 10 MB of memory
+  // and should be appropriate for most server-side use cases.
+  clientInstance.useLRUAssignmentCache(50_000);
+
   await poller.start();
   return clientInstance;
 }

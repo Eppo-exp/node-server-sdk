@@ -1,6 +1,3 @@
----
-labels: mergeable
----
 [//]: #  (Link to the issue corresponding to this chunk of work)
 Fixes: #__issue__
 
