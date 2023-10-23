@@ -4,12 +4,12 @@
 
 ## IEppoClient interface
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 interface IEppoNodeClient extends EppoNodeClient 
 ```
-<b>Extends:</b> EppoNodeClient
+**Extends:** EppoNodeClient
 
 ## Methods
 

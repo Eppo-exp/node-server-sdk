@@ -6,14 +6,14 @@
 
 Used to access a singleton SDK client instance. Use the method after calling init() to initialize the client.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 export declare function getInstance(): IEppoClient;
 ```
-<b>Returns:</b>
+**Returns:**
 
-IEppoClient
+[IEppoClient](./node-server-sdk.ieppoclient.md)
 
 a singleton client instance
 

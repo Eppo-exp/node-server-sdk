@@ -6,7 +6,7 @@
 
 Base URL of the Eppo API. Clients should use the default setting in most cases.
 
-<b>Signature:</b>
+**Signature:**
 
 ```typescript
 baseUrl?: string;
