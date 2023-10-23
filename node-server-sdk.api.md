@@ -4,23 +4,21 @@
 
 ```ts
 
+import { AxiosInstance } from 'axios';
+import { EppoClient } from '@eppo/js-client-sdk-common';
+import { ExperimentConfigurationRequestor } from '@eppo/js-client-sdk-common';
+import { HttpClient } from '@eppo/js-client-sdk-common';
+import { IAssignmentEvent } from '@eppo/js-client-sdk-common';
+import { IAssignmentLogger } from '@eppo/js-client-sdk-common';
+import { IConfigurationStore } from '@eppo/js-client-sdk-common';
+import { IEppoClient as IEppoClient_2 } from '@eppo/js-client-sdk-common';
+
 // @public
 export function getInstance(): IEppoClient;
 
-// @public
-export interface IAssignmentEvent {
-    experiment: string;
-    subject: string;
-    // (undocumented)
-    subjectAttributes: Record<string, any>;
-    timestamp: string;
-    variation: string;
-}
+export { IAssignmentEvent }
 
-// @public
-export interface IAssignmentLogger {
-    logAssignment(assignment: IAssignmentEvent): void;
-}
+export { IAssignmentLogger }
 
 // @public
 export interface IClientConfig {
@@ -29,9 +27,10 @@ export interface IClientConfig {
     baseUrl?: string;
 }
 
-// @public
-export interface IEppoClient {
-    getAssignment(subjectKey: string, experimentKey: string, subjectAttributes?: Record<string, any>): string;
+// Warning: (ae-forgotten-export) The symbol "EppoNodeClient" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export interface IEppoClient extends EppoNodeClient {
     stopPolling(): void;
 }
 

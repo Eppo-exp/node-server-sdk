@@ -4,7 +4,7 @@
 
 ## IEppoClient.stopPolling() method
 
-Used to manually stop the polling of Eppo servers.
+Used to manually stop the polling of Eppo servers for testing.
 
 <b>Signature:</b>
 

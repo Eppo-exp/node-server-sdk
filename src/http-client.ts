@@ -1,3 +1,4 @@
+import { HttpClient } from '@eppo/js-client-sdk-common';
 import { AxiosInstance } from 'axios';
 import { StatusCodes } from 'http-status-codes';
 
@@ -13,21 +14,23 @@ export class HttpRequestError extends Error {
   }
 }
 
-export default class HttpClient {
+// Extends HttpClient from common to surface errors for polling
+export default class EppoHttpClient extends HttpClient {
   public isUnauthorized = false;
-  constructor(private axiosInstance: AxiosInstance, private sdkParams: ISdkParams) {}
+  constructor(axiosInstance: AxiosInstance, sdkParams: ISdkParams) {
+    super(axiosInstance, sdkParams);
+  }
 
-  async get<T>(resource: string): Promise<T> {
+  async get<T>(resource: string): Promise<T | undefined> {
     try {
-      const response = await this.axiosInstance.get<T>(resource, { params: this.sdkParams });
-      return response.data;
+      return super.get(resource);
     } catch (error) {
-      this.handleHttpError(error);
+      this._handleHttpError(error);
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private handleHttpError(error: any) {
+  private _handleHttpError(error: any) {
     const status = error?.response?.status;
     this.isUnauthorized = status === StatusCodes.UNAUTHORIZED;
     const isRecoverable = isHttpErrorRecoverable(status);
