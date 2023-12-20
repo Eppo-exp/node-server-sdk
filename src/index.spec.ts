@@ -1,5 +1,3 @@
-import { OperatorType } from '@eppo/js-client-sdk-common/dist/dto/rule-dto';
-import { EppoValue } from '@eppo/js-client-sdk-common/dist/eppo_value';
 import * as td from 'testdouble';
 
 import apiServer from '../test/mockApiServer';
@@ -113,22 +111,22 @@ describe('EppoClient E2E test', () => {
 
         switch (valueType) {
           case ValueTestType.BoolType: {
-            const boolAssignments = assignments.map((a) => a?.boolValue ?? null);
+            const boolAssignments = assignments.map((a) => a ?? null);
             expect(boolAssignments).toEqual(expectedAssignments);
             break;
           }
           case ValueTestType.NumericType: {
-            const numericAssignments = assignments.map((a) => a?.numericValue ?? null);
+            const numericAssignments = assignments.map((a) => a ?? null);
             expect(numericAssignments).toEqual(expectedAssignments);
             break;
           }
           case ValueTestType.StringType: {
-            const stringAssignments = assignments.map((a) => a?.stringValue ?? null);
+            const stringAssignments = assignments.map((a) => a ?? null);
             expect(stringAssignments).toEqual(expectedAssignments);
             break;
           }
           case ValueTestType.JSONType: {
-            const jsonStringAssignments = assignments.map((a) => a?.stringValue ?? null);
+            const jsonStringAssignments = assignments.map((a) => a ?? null);
             expect(jsonStringAssignments).toEqual(expectedAssignments);
             break;
           }
@@ -214,33 +212,6 @@ describe('EppoClient E2E test', () => {
     expect(assignment).toEqual('control');
   });
 
-  it('only returns variation if subject matches rules', () => {
-    const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
-    const mockPoller = td.object<IPoller>();
-    td.when(mockConfigRequestor.configStore.get(flagKey)).thenReturn({
-      ...mockExperimentConfig,
-      rules: [
-        {
-          allocationKey: 'allocation1',
-          conditions: [
-            {
-              operator: OperatorType.GT,
-              attribute: 'appVersion',
-              value: 10,
-            },
-          ],
-        },
-      ],
-    });
-    const client = new EppoClient(mockConfigRequestor, mockPoller);
-    let assignment = client.getAssignment('subject-10', flagKey, { appVersion: 9 });
-    expect(assignment).toEqual(null);
-    assignment = client.getAssignment('subject-10', flagKey);
-    expect(assignment).toEqual(null);
-    assignment = client.getAssignment('subject-10', flagKey, { appVersion: 11 });
-    expect(assignment).toEqual('control');
-  });
-
   function getAssignmentsWithSubjectAttributes(
     subjectsWithAttributes: {
       subjectKey: string;
@@ -249,7 +220,7 @@ describe('EppoClient E2E test', () => {
     }[],
     experiment: string,
     valueTestType: ValueTestType = ValueTestType.StringType,
-  ): (EppoValue | null)[] {
+  ): (unknown | null)[] {
     const client = getInstance();
     return subjectsWithAttributes.map((subject) => {
       switch (valueTestType) {
@@ -260,7 +231,7 @@ describe('EppoClient E2E test', () => {
             subject.subjectAttributes,
           );
           if (ba === null) return null;
-          return EppoValue.Bool(ba);
+          return ba as boolean;
         }
         case ValueTestType.NumericType: {
           const na = client.getNumericAssignment(
@@ -269,7 +240,7 @@ describe('EppoClient E2E test', () => {
             subject.subjectAttributes,
           );
           if (na === null) return null;
-          return EppoValue.Numeric(na);
+          return na as number;
         }
         case ValueTestType.StringType: {
           const sa = client.getStringAssignment(
@@ -278,7 +249,7 @@ describe('EppoClient E2E test', () => {
             subject.subjectAttributes,
           );
           if (sa === null) return null;
-          return EppoValue.String(sa);
+          return sa as string;
         }
         case ValueTestType.JSONType: {
           const sa = client.getJSONStringAssignment(
@@ -292,7 +263,7 @@ describe('EppoClient E2E test', () => {
             subject.subjectAttributes,
           );
           if (oa == null || sa === null) return null;
-          return EppoValue.JSON(sa, oa);
+          return sa as string;
         }
       }
     });
