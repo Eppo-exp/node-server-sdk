@@ -13,6 +13,10 @@ describe('initPoller', () => {
     jest.clearAllTimers();
   });
 
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('starts polling at interval', async () => {
     const poller = initPoller(testInterval, pollerRetries, noOpCallback);
     await poller.start();

@@ -13,17 +13,27 @@ export default function initPoller(
   let failedAttempts = 0;
   let nextPollMs = intervalMs;
 
-  const stop = () => {
-    console.log('Eppo SDK Polling stopped');
-    stopped = true;
+  const start = async () => {
+    // TODO: some kind of synchronous retries for start()
+    stopped = false;
+    await poll(true);
   };
 
-  async function poll() {
+  const stop = () => {
+    if (!stopped) {
+      stopped = true;
+      console.log('Eppo SDK polling stopped');
+    }
+  };
+
+  async function poll(throwOnError = false) {
     if (stopped) {
       return;
     }
     try {
+      console.log('>>>>> TRYING POLLER CALLBACK');
       await callback();
+      console.log('>>>>> POLLER CALLBACK SUCCESS');
       // If no error, reset any retrying
       failedAttempts = 0;
       nextPollMs = intervalMs;
@@ -46,7 +56,7 @@ export default function initPoller(
   }
 
   return {
-    start: poll,
+    start,
     stop,
   };
 }

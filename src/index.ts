@@ -108,17 +108,20 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   clientInstance.useLRUInMemoryAssignmentCache(50_000);
 
   let initialConfigFetchSuccess = false;
-  let initialConfigAttemptsRemaining = config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES;
-  while (!initialConfigFetchSuccess && initialConfigAttemptsRemaining >= 0) {
+  let initialConfigAttemptsRemaining =
+    1 + (config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
+  while (!initialConfigFetchSuccess && initialConfigAttemptsRemaining > 0) {
     try {
+      console.log('>>>>>> poler start');
       await poller.start();
+      console.log('>>>>> start success');
       initialConfigFetchSuccess = true;
     } catch (pollingError) {
       if (--initialConfigAttemptsRemaining > 0) {
         const jitterMs = Math.floor(Math.random() * POLL_INTERVAL_MS * 0.1);
-        console.warn(`Eppo SDK will try fetching configuration again in ${jitterMs} seconds`);
-        await new Promise((resolve) => setTimeout(resolve, jitterMs));
+        console.warn(`Eppo SDK will try fetching configuration again in ${jitterMs} ms`);
         poller.stop(); // Hold off on retrying
+        await new Promise((resolve) => setTimeout(resolve, jitterMs));
       } else if (config.throwOnFailedInitialization) {
         console.error(
           'Eppo SDK initial configuration request failed. No configurations will be loaded.',
@@ -128,7 +131,10 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
         console.warn('Eppo SDK initial configuration request failed; will attempt to load later');
       }
     }
+    console.log('>>>> ', { initialConfigFetchSuccess, initialConfigAttemptsRemaining });
   }
+
+  console.log('>>>> done attempting');
 
   return clientInstance;
 }
