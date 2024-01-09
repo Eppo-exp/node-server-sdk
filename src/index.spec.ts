@@ -1,6 +1,6 @@
 import * as td from 'testdouble';
 
-import apiServer from '../test/mockApiServer';
+import apiServer, { TEST_SERVER_PORT } from '../test/mockApiServer';
 import { IAssignmentTestCase, readAssignmentTestData, ValueTestType } from '../test/testHelpers';
 
 import EppoClient from './client/eppo-client';
@@ -71,7 +71,7 @@ describe('EppoClient E2E test', () => {
   beforeAll(async () => {
     await init({
       apiKey: 'dummy',
-      baseUrl: 'http://127.0.0.1:4000',
+      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
       assignmentLogger: mockLogger,
     });
   });

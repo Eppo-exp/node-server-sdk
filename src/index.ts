@@ -116,12 +116,16 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     } catch (pollingError) {
       if (--initialConfigAttemptsRemaining > 0) {
         const jitterMs = Math.floor(Math.random() * POLL_INTERVAL_MS * 0.1);
-        console.warn(`Will try fetching configuration again in ${jitterMs} seconds`);
+        console.warn(`Eppo SDK will try fetching configuration again in ${jitterMs} seconds`);
         await new Promise((resolve) => setTimeout(resolve, jitterMs));
+        poller.stop(); // Hold off on retrying
       } else if (config.throwOnFailedInitialization) {
+        console.error(
+          'Eppo SDK initial configuration request failed. No configurations will be loaded.',
+        );
         throw pollingError;
       } else {
-        console.warn('Initial configuration request failed');
+        console.warn('Eppo SDK initial configuration request failed; will attempt to load later');
       }
     }
   }
