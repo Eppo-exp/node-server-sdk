@@ -3,7 +3,12 @@ import axios from 'axios';
 
 import EppoClient, { IEppoClient } from './client/eppo-client';
 import { InMemoryConfigurationStore } from './configuration-store';
-import { MAX_CACHE_ENTRIES, POLL_INTERVAL_MILLIS } from './constants';
+import {
+  DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
+  DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
+  MAX_CACHE_ENTRIES,
+  POLL_INTERVAL_MS,
+} from './constants';
 import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
 import HttpClient from './http-client';
 import initPoller, { IPoller } from './poller';
@@ -29,6 +34,31 @@ export interface IClientConfig {
    * Pass a logging implementation to send variation assignments to your data warehouse.
    */
   assignmentLogger: IAssignmentLogger;
+
+  /***
+   * Timeout in milliseconds for the HTTPS request for the experiment configuration. (Default: 5000)
+   */
+  requestTimeoutMs?: number;
+
+  /**
+   * Number of additional times the initial configuration request will be attempted if it fails. 
+   * This is the request servers typically synchronously wait for completion. A small wait will be
+   * done between requests. (Default: 1)
+   */
+  numInitialRequestRetries?: number;
+
+  /**
+   * Throw on error if unable to fetch an initial configuration during initialization. If false,
+   * no error will be thrown and configurations may be loaded on later successful polling.
+   */
+  throwOnFailedInitialization?: boolean;
+
+  /**
+   * Number of additional times polling for updated configurations will be attempted before giving up.
+   * Polling is done after a successful initial request. Subsequent attempts are done using an exponential
+   * backoff. (Default: 7)
+   */
+  numPollRequestRetries?: number;
 }
 
 export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
@@ -49,7 +79,7 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   const configurationStore = new InMemoryConfigurationStore(MAX_CACHE_ENTRIES);
   const axiosInstance = axios.create({
     baseURL: config.baseUrl || constants.BASE_URL,
-    timeout: constants.REQUEST_TIMEOUT_MILLIS,
+    timeout: config.requestTimeoutMs || constants.REQUEST_TIMEOUT_MILLIS,
   });
   const httpClient = new HttpClient(axiosInstance, {
     apiKey: config.apiKey,
@@ -65,7 +95,8 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     poller.stop();
   }
   poller = initPoller(
-    POLL_INTERVAL_MILLIS,
+    POLL_INTERVAL_MS,
+    config.numPollRequestRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
   );
   clientInstance = new EppoClient(configurationRequestor, poller);
@@ -76,7 +107,25 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   // and should be appropriate for most server-side use cases.
   clientInstance.useLRUInMemoryAssignmentCache(50_000);
 
-  await poller.start();
+  let initialConfigFetchSuccess = false;
+  let initialConfigAttemptsRemaining = config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES;
+  while (!initialConfigFetchSuccess && initialConfigAttemptsRemaining >= 0) {
+    try {
+      await poller.start();
+      initialConfigFetchSuccess = true;
+    } catch (pollingError) {
+      if (--initialConfigAttemptsRemaining > 0) {
+        const jitterMs = Math.floor(Math.random() * POLL_INTERVAL_MS * 0.1);
+        console.warn(`Will try fetching configuration again in ${jitterMs} seconds`);
+        await new Promise((resolve) => setTimeout(resolve, jitterMs));
+      } else if (config.throwOnFailedInitialization) {
+        throw pollingError;
+      } else {
+        console.warn('Initial configuration request failed');
+      }
+    }
+  }
+
   return clientInstance;
 }
 
