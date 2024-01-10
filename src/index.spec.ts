@@ -347,5 +347,40 @@ describe('EppoClient E2E test', () => {
       // Expect no further calls
       expect(callCount).toBe(1 + DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
     });
+
+    it('gives up initial request but still polls later', async () => {
+      td.replace(HttpClient.prototype, 'get');
+      let callCount = 0;
+      td.when(HttpClient.prototype.get(td.matchers.anything())).thenDo(() => {
+        callCount += 1;
+        throw new Error('Intentional Thrown Error For Test');
+      });
+
+      // Set a (real) timer to advance (fake) time while the initializing is sleeping between retries
+      jest.useRealTimers();
+      setTimeout(() => {
+        for (let i = DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES; i > 0; i -= 1) {
+          jest.advanceTimersByTime(POLL_INTERVAL_MS * 0.1);
+        }
+      }, 30);
+      jest.useFakeTimers();
+
+      await init({
+        apiKey: 'dummy',
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: mockLogger,
+        throwOnFailedInitialization: false,
+      });
+
+      expect(callCount).toBe(1 + DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
+
+      const client = getInstance();
+      expect(client.getStringAssignment('subject', flagKey)).toBeNull();
+
+      jest.advanceTimersByTime(POLL_INTERVAL_MS);
+
+      // Expect a call from poller
+      expect(callCount).toBe(2 + DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
+    });
   });
 });

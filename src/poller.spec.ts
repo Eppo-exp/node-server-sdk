@@ -128,6 +128,112 @@ describe('initPoller', () => {
     expect(callCount).toBe(5);
   });
 
+  it('retries startup poll within same promise', async () => {
+    const pollerRetries = 3;
+    let callCount = 0;
+    const errorThrowingCallback = async () => {
+      if (++callCount < pollerRetries) {
+        throw new Error('Intentional Error For Test');
+      }
+    };
+
+    const poller = initPoller(testInterval, errorThrowingCallback, {
+      maxStartRetries: pollerRetries,
+    });
+
+    jest.useRealTimers();
+    setTimeout(async () => {
+      // first call failed
+      expect(callCount).toBe(1);
+
+      jest.advanceTimersByTime(testInterval);
+      await flushPromises(); // fail
+      expect(callCount).toBe(2);
+
+      jest.advanceTimersByTime(testInterval);
+      await flushPromises(); // fail & stop
+      expect(callCount).toBe(3);
+
+      jest.advanceTimersByTime(testInterval);
+      await flushPromises(); // no more calls
+      expect(callCount).toBe(3);
+    });
+    jest.useFakeTimers();
+
+    await poller.start();
+    // By this point, all of the above failures will have happened
+    expect(callCount).toBe(3);
+  });
+
+  it('gives up initial request after hitting all retries', async () => {
+    const pollerRetries = 1;
+    let callCount = 0;
+    const errorThrowingCallback = async () => {
+      ++callCount;
+      throw new Error('Intentional Error For Test');
+    };
+
+    const poller = initPoller(testInterval, errorThrowingCallback, {
+      maxStartRetries: pollerRetries,
+    });
+
+    jest.useRealTimers();
+    setTimeout(async () => {
+      // first call failed
+      expect(callCount).toBe(1);
+
+      jest.advanceTimersByTime(testInterval);
+      await flushPromises(); // fail & stop
+      expect(callCount).toBe(2);
+    });
+    jest.useFakeTimers();
+
+    await poller.start();
+    // By this point, both initial failed requests will have happened
+    expect(callCount).toBe(2);
+
+    // There should be no more polling
+    jest.advanceTimersByTime(testInterval * 2);
+    await flushPromises();
+    expect(callCount).toBe(2);
+  });
+
+  it('still polls after initial request fails (if configured)', async () => {
+    const pollerRetries = 1;
+    let callCount = 0;
+    const errorThrowingCallback = async () => {
+      ++callCount;
+      throw new Error('Intentional Error For Test');
+    };
+
+    const poller = initPoller(testInterval, errorThrowingCallback, {
+      maxStartRetries: pollerRetries,
+      errorOnFailedStart: false,
+      pollAfterFailedStart: true,
+    });
+
+    jest.useRealTimers();
+    setTimeout(async () => {
+      // first call failed
+      expect(callCount).toBe(1);
+      console.log('real timeout ADVANCING TIME', testInterval);
+      jest.advanceTimersByTime(testInterval);
+      await flushPromises(); // fail & stop
+      console.log('Promised flushed');
+      expect(callCount).toBe(2);
+    }, 30);
+    jest.useFakeTimers();
+
+    await poller.start();
+    // By this point, both initial failed requests will have happened
+    expect(callCount).toBe(2);
+
+    console.log('sync test ADVANCING TIME', testInterval);
+    jest.advanceTimersByTime(testInterval);
+    await flushPromises(); // regular polling has begun
+    expect(callCount).toBe(3);
+  });
+
   async function verifyPoll(numIntervals: number) {
     jest.advanceTimersByTime(testInterval * numIntervals);
     await flushPromises();

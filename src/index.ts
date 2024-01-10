@@ -48,17 +48,21 @@ export interface IClientConfig {
   numInitialRequestRetries?: number;
 
   /**
-   * Throw on error if unable to fetch an initial configuration during initialization. If false,
-   * no error will be thrown and configurations may be loaded on later successful polling.
-   */
-  throwOnFailedInitialization?: boolean;
-
-  /**
    * Number of additional times polling for updated configurations will be attempted before giving up.
    * Polling is done after a successful initial request. Subsequent attempts are done using an exponential
    * backoff. (Default: 7)
    */
   numPollRequestRetries?: number;
+
+  /**
+   * Throw on error if unable to fetch an initial configuration during initialization. (default: true)
+   */
+  throwOnFailedInitialization?: boolean;
+
+  /**
+   * Poll for new configurations even if the initial configuration request failed. (default: false)
+   */
+  pollAfterFailedInitialization?: boolean;
 }
 
 export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
@@ -94,17 +98,15 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     // if a client was already initialized, stop the polling process from the previous init call
     poller.stop();
   }
-  const pollAfterFailedStart =
-    typeof config.throwOnFailedInitialization === 'boolean'
-      ? !config.throwOnFailedInitialization
-      : false;
+
   poller = initPoller(
     POLL_INTERVAL_MS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
     {
       maxStartRetries: config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
       maxPollRetries: config.numPollRequestRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
-      pollAfterFailedStart,
+      pollAfterFailedStart: config.pollAfterFailedInitialization,
+      errorOnFailedStart: config.throwOnFailedInitialization,
     },
   );
   clientInstance = new EppoClient(configurationRequestor, poller);
@@ -115,18 +117,7 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   // and should be appropriate for most server-side use cases.
   clientInstance.useLRUInMemoryAssignmentCache(50_000);
 
-  try {
-    await poller.start();
-  } catch (pollingError) {
-    if (pollAfterFailedStart) {
-      console.warn('Eppo SDK initial configuration request failed; will attempt to load later');
-    } else {
-      console.error(
-        'Eppo SDK initial configuration request failed. No configurations will be loaded.',
-      );
-      throw pollingError;
-    }
-  }
+  await poller.start();
 
   return clientInstance;
 }

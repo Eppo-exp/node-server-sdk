@@ -1,4 +1,7 @@
-import { DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES, DEFAULT_POLL_CONFIG_REQUEST_RETRIES } from "./constants";
+import {
+  DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
+  DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
+} from './constants';
 
 export interface IPoller {
   start: () => Promise<void>;
@@ -12,6 +15,7 @@ export default function initPoller(
   options?: {
     maxPollRetries?: number;
     maxStartRetries?: number;
+    errorOnFailedStart?: boolean;
     pollAfterFailedStart?: boolean;
   },
 ): IPoller {
@@ -39,12 +43,17 @@ export default function initPoller(
           const jitterMs = Math.floor(Math.random() * intervalMs * 0.1);
           console.warn(`Eppo SDK will retry the initial poll again in ${jitterMs} ms`);
           await new Promise((resolve) => setTimeout(resolve, jitterMs));
-        } else if (options?.pollAfterFailedStart) {
-          console.warn('Eppo SDK initial poll failed; will attempt regular polling');
         } else {
-          console.error('Eppo SDK initial poll failed. Aborting polling');
-          stop();
-          throw pollingError;
+          if (options?.pollAfterFailedStart) {
+            console.warn('Eppo SDK initial poll failed; will attempt regular polling');
+          } else {
+            console.error('Eppo SDK initial poll failed. Aborting polling');
+            stop();
+          }
+
+          if (options?.errorOnFailedStart) {
+            throw pollingError;
+          }
         }
       }
       console.log({ startRequestSuccess, startAttemptsRemaining });
@@ -52,6 +61,7 @@ export default function initPoller(
 
     console.log('>>> done loop');
 
+    console.log(`Eppo SDK starting regularly polling every ${intervalMs} ms`);
     setTimeout(poll, intervalMs);
   };
 
