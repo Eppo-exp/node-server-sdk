@@ -1,6 +1,7 @@
 import {
   DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
   DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
+  POLL_JITTER_PCT,
 } from './constants';
 
 export interface IPoller {
@@ -33,6 +34,7 @@ export default function initPoller(
       try {
         console.log('>>>> TRYING CALLBACK');
         await callback();
+        console.log('>>>> CALLBACK SUCCESS');
         startRequestSuccess = true;
       } catch (pollingError) {
         console.log('>>>> CALLBACK FAIL');
@@ -40,8 +42,10 @@ export default function initPoller(
           `Eppo SDK encountered an error with initial poll of configurations: ${pollingError.message}`,
         );
         if (--startAttemptsRemaining > 0) {
-          const jitterMs = Math.floor(Math.random() * intervalMs * 0.1);
-          console.warn(`Eppo SDK will retry the initial poll again in ${jitterMs} ms`);
+          const jitterMs = randomJitterMs(intervalMs);
+          console.warn(
+            `Eppo SDK will retry the initial poll again in ${jitterMs} ms (${startAttemptsRemaining} attempts remaining)`,
+          );
           await new Promise((resolve) => setTimeout(resolve, jitterMs));
         } else {
           if (options?.pollAfterFailedStart) {
@@ -87,12 +91,16 @@ export default function initPoller(
       nextPollMs = intervalMs;
     } catch (error) {
       console.warn(`Eppo SDK encountered an error polling configurations: ${error.message}`);
-      const maxRetries = options?.maxPollRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES;
-      if (++failedAttempts <= maxRetries) {
-        const failureWait = Math.pow(2, failedAttempts);
-        const jitter = Math.floor(Math.random() * intervalMs * 0.1);
-        nextPollMs = failureWait * intervalMs + jitter;
-        console.warn(`Eppo SDK will try polling again in ${nextPollMs} ms`);
+      const maxTries = 1 + (options?.maxPollRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES);
+      if (++failedAttempts < maxTries) {
+        const failureWaitMultiplier = Math.pow(2, failedAttempts);
+        const jitterMs = randomJitterMs(intervalMs);
+        nextPollMs = failureWaitMultiplier * intervalMs + jitterMs;
+        console.warn(
+          `Eppo SDK will try polling again in ${nextPollMs} ms (${
+            maxTries - failedAttempts
+          } attempts remaining)`,
+        );
       } else {
         console.error(
           `Eppo SDK reached maximum of ${failedAttempts} failed polling attempts. Stopping polling`,
@@ -108,4 +116,19 @@ export default function initPoller(
     start,
     stop,
   };
+}
+
+/**
+ * Compute a random jitter as a percentage of the polling interval.
+ * Will be (5%,10%) of the interval assuming POLL_JITTER_PCT = 0.1
+ */
+function randomJitterMs(intervalMs: number) {
+  const halfPossibleJitter = (intervalMs * POLL_JITTER_PCT) / 2;
+  // We want the randomly chosen jitter to be at least 1ms so total jitter is slightly more than half the max possible.
+  // This makes things easy for automated tests as two polls cannot execute within the maximum possible time waiting for one.
+  const randomOtherHalfJitter = Math.max(
+    Math.floor((Math.random() * intervalMs * POLL_JITTER_PCT) / 2),
+    1,
+  );
+  return halfPossibleJitter + randomOtherHalfJitter;
 }

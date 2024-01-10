@@ -41,7 +41,7 @@ export interface IClientConfig {
   requestTimeoutMs?: number;
 
   /**
-   * Number of additional times the initial configuration request will be attempted if it fails. 
+   * Number of additional times the initial configuration request will be attempted if it fails.
    * This is the request servers typically synchronously wait for completion. A small wait will be
    * done between requests. (Default: 1)
    */
