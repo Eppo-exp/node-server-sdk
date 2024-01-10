@@ -43,6 +43,7 @@ export default function initPoller(
           console.warn('Eppo SDK initial poll failed; will attempt regular polling');
         } else {
           console.error('Eppo SDK initial poll failed. Aborting polling');
+          stop();
           throw pollingError;
         }
       }
@@ -67,6 +68,7 @@ export default function initPoller(
     }
 
     try {
+      console.log('>>>>> poll callback');
       await callback();
       // If no error, reset any retrying
       failedAttempts = 0;

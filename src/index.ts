@@ -116,9 +116,7 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   clientInstance.useLRUInMemoryAssignmentCache(50_000);
 
   try {
-    console.log('>>>>>> poler start');
     await poller.start();
-    console.log('>>>>> start success');
   } catch (pollingError) {
     if (pollAfterFailedStart) {
       console.warn('Eppo SDK initial configuration request failed; will attempt to load later');
@@ -129,8 +127,6 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
       throw pollingError;
     }
   }
-
-  console.log('>>>> done attempting');
 
   return clientInstance;
 }

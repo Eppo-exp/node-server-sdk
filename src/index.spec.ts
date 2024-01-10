@@ -211,7 +211,9 @@ describe('EppoClient E2E test', () => {
       const mockConfigRequestor = td.object<ExperimentConfigurationRequestor>();
       const mockLogger = td.object<IAssignmentLogger>();
       const mockPoller = td.object<IPoller>();
-      td.when(mockLogger.logAssignment(td.matchers.anything())).thenThrow(new Error('logging error'));
+      td.when(mockLogger.logAssignment(td.matchers.anything())).thenThrow(
+        new Error('logging error'),
+      );
       td.when(mockConfigRequestor.configStore.get(flagKey)).thenReturn(mockExperimentConfig);
       const subjectAttributes = { foo: 3 };
       const client = new EppoClient(mockConfigRequestor, mockPoller);
@@ -307,7 +309,6 @@ describe('EppoClient E2E test', () => {
         assignmentLogger: mockLogger,
       });
       const client = getInstance();
-      console.log('>>>> getting assignment');
       expect(client.getStringAssignment('subject', flagKey)).toBe('control');
     });
 
@@ -323,7 +324,6 @@ describe('EppoClient E2E test', () => {
       jest.useRealTimers();
       setTimeout(() => {
         for (let i = DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES; i > 0; i -= 1) {
-          console.log('>>>> advancing timers');
           jest.advanceTimersByTime(POLL_INTERVAL_MS * 0.1);
         }
       }, 30);
@@ -337,18 +337,15 @@ describe('EppoClient E2E test', () => {
         }),
       ).rejects.toThrow();
 
-      console.log('>>>> done init expect');
-
       expect(callCount).toBe(1 + DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
 
       const client = getInstance();
-      console.log('>>>> getting assignment');
       expect(client.getStringAssignment('subject', flagKey)).toBeNull();
 
       jest.advanceTimersByTime(POLL_INTERVAL_MS * 2);
 
-      // Expect another request from later polling
-      expect(callCount).toBe(2 + DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
+      // Expect no further calls
+      expect(callCount).toBe(1 + DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
     });
   });
 });
