@@ -322,19 +322,27 @@ describe('EppoClient E2E test', () => {
       // Set a (real) timer to advance (fake) time while the initializing is sleeping between retries
       jest.useRealTimers();
       setTimeout(() => {
-        for (let i = DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES; i >= 0; i -= 1) {
+        for (let i = DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES; i > 0; i -= 1) {
+          console.log('>>>> advancing timers');
           jest.advanceTimersByTime(POLL_INTERVAL_MS * 0.1);
         }
       }, 30);
       jest.useFakeTimers();
 
-      await init({
-        apiKey: 'dummy',
-        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
-        assignmentLogger: mockLogger,
-      });
-      const client = getInstance();
+      await expect(
+        init({
+          apiKey: 'dummy',
+          baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+          assignmentLogger: mockLogger,
+        }),
+      ).rejects.toThrow();
+
+      console.log('>>>> done init expect');
+
       expect(callCount).toBe(1 + DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
+
+      const client = getInstance();
+      console.log('>>>> getting assignment');
       expect(client.getStringAssignment('subject', flagKey)).toBeNull();
 
       jest.advanceTimersByTime(POLL_INTERVAL_MS * 2);

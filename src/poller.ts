@@ -27,9 +27,11 @@ export default function initPoller(
 
     while (!startRequestSuccess && startAttemptsRemaining > 0) {
       try {
+        console.log('>>>> TRYING CALLBACK');
         await callback();
         startRequestSuccess = true;
       } catch (pollingError) {
+        console.log('>>>> CALLBACK FAIL');
         console.warn(
           `Eppo SDK encountered an error with initial poll of configurations: ${pollingError.message}`,
         );
@@ -44,7 +46,10 @@ export default function initPoller(
           throw pollingError;
         }
       }
+      console.log({ startRequestSuccess, startAttemptsRemaining });
     }
+
+    console.log('>>> done loop');
 
     setTimeout(poll, intervalMs);
   };

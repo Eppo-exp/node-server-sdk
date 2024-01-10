@@ -94,12 +94,17 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     // if a client was already initialized, stop the polling process from the previous init call
     poller.stop();
   }
+  const pollAfterFailedStart =
+    typeof config.throwOnFailedInitialization === 'boolean'
+      ? !config.throwOnFailedInitialization
+      : false;
   poller = initPoller(
     POLL_INTERVAL_MS,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
     {
       maxStartRetries: config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
       maxPollRetries: config.numPollRequestRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
+      pollAfterFailedStart,
     },
   );
   clientInstance = new EppoClient(configurationRequestor, poller);
@@ -110,31 +115,19 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   // and should be appropriate for most server-side use cases.
   clientInstance.useLRUInMemoryAssignmentCache(50_000);
 
-  let initialConfigFetchSuccess = false;
-  let initialConfigAttemptsRemaining =
-    1 + (config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
-  while (!initialConfigFetchSuccess && initialConfigAttemptsRemaining > 0) {
-    try {
-      console.log('>>>>>> poler start');
-      await poller.start();
-      console.log('>>>>> start success');
-      initialConfigFetchSuccess = true;
-    } catch (pollingError) {
-      if (--initialConfigAttemptsRemaining > 0) {
-        const jitterMs = Math.floor(Math.random() * POLL_INTERVAL_MS * 0.1);
-        console.warn(`Eppo SDK will try fetching configuration again in ${jitterMs} ms`);
-        poller.stop(); // Hold off on retrying
-        await new Promise((resolve) => setTimeout(resolve, jitterMs));
-      } else if (config.throwOnFailedInitialization) {
-        console.error(
-          'Eppo SDK initial configuration request failed. No configurations will be loaded.',
-        );
-        throw pollingError;
-      } else {
-        console.warn('Eppo SDK initial configuration request failed; will attempt to load later');
-      }
+  try {
+    console.log('>>>>>> poler start');
+    await poller.start();
+    console.log('>>>>> start success');
+  } catch (pollingError) {
+    if (pollAfterFailedStart) {
+      console.warn('Eppo SDK initial configuration request failed; will attempt to load later');
+    } else {
+      console.error(
+        'Eppo SDK initial configuration request failed. No configurations will be loaded.',
+      );
+      throw pollingError;
     }
-    console.log('>>>> ', { initialConfigFetchSuccess, initialConfigAttemptsRemaining });
   }
 
   console.log('>>>> done attempting');
