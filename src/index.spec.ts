@@ -364,7 +364,7 @@ describe('EppoClient E2E test', () => {
       console.log('setting advance time timer');
       setTimeout(() => {
         for (let i = DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES; i > 0; i -= 1) {
-          await jest.advanceTimersToNextTimerAsync();
+          jest.advanceTimersToNextTimerAsync();
         }
       }, 30);
       jest.useFakeTimers();

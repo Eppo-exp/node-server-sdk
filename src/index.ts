@@ -105,8 +105,8 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     {
       maxStartRetries: config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
       maxPollRetries: config.numPollRequestRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
-      pollAfterFailedStart: config.pollAfterFailedInitialization,
-      errorOnFailedStart: config.throwOnFailedInitialization,
+      pollAfterFailedStart: config.pollAfterFailedInitialization ?? false,
+      errorOnFailedStart: config.throwOnFailedInitialization ?? true,
     },
   );
   clientInstance = new EppoClient(configurationRequestor, poller);

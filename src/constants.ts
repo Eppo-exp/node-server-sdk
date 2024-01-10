@@ -1,6 +1,6 @@
-const SECOND_MILLIS = 1000;
+const SECOND_MS = 1000;
 
-export const POLL_INTERVAL_MS = 30 * SECOND_MILLIS;
+export const POLL_INTERVAL_MS = 30 * SECOND_MS;
 export const POLL_JITTER_PCT = 0.1;
 export const MAX_CACHE_ENTRIES = 1000;
 
