@@ -212,6 +212,8 @@ describe('initPoller', () => {
       pollAfterFailedStart: true,
     });
 
+    // TODO: try having jest advance to next timer instead of flush promises
+
     jest.useRealTimers();
     setTimeout(async () => {
       // first call failed
