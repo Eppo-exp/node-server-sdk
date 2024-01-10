@@ -1,3 +1,5 @@
+import { DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES, DEFAULT_POLL_CONFIG_REQUEST_RETRIES } from "./constants";
+
 export interface IPoller {
   start: () => Promise<void>;
   stop: () => void;
@@ -5,18 +7,46 @@ export interface IPoller {
 
 export default function initPoller(
   intervalMs: number,
-  maxRetries: number,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback: () => Promise<any>,
+  options?: {
+    maxPollRetries?: number;
+    maxStartRetries?: number;
+    pollAfterFailedStart?: boolean;
+  },
 ): IPoller {
   let stopped = false;
   let failedAttempts = 0;
   let nextPollMs = intervalMs;
 
   const start = async () => {
-    // TODO: some kind of synchronous retries for start()
     stopped = false;
-    await poll(true);
+    let startRequestSuccess = false;
+    let startAttemptsRemaining =
+      1 + (options?.maxStartRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
+
+    while (!startRequestSuccess && startAttemptsRemaining > 0) {
+      try {
+        await callback();
+        startRequestSuccess = true;
+      } catch (pollingError) {
+        console.warn(
+          `Eppo SDK encountered an error with initial poll of configurations: ${pollingError.message}`,
+        );
+        if (--startAttemptsRemaining > 0) {
+          const jitterMs = Math.floor(Math.random() * intervalMs * 0.1);
+          console.warn(`Eppo SDK will retry the initial poll again in ${jitterMs} ms`);
+          await new Promise((resolve) => setTimeout(resolve, jitterMs));
+        } else if (options?.pollAfterFailedStart) {
+          console.warn('Eppo SDK initial poll failed; will attempt regular polling');
+        } else {
+          console.error('Eppo SDK initial poll failed. Aborting polling');
+          throw pollingError;
+        }
+      }
+    }
+
+    setTimeout(poll, intervalMs);
   };
 
   const stop = () => {
@@ -26,19 +56,19 @@ export default function initPoller(
     }
   };
 
-  async function poll(throwOnError = false) {
+  async function poll() {
     if (stopped) {
       return;
     }
+
     try {
-      console.log('>>>>> TRYING POLLER CALLBACK');
       await callback();
-      console.log('>>>>> POLLER CALLBACK SUCCESS');
       // If no error, reset any retrying
       failedAttempts = 0;
       nextPollMs = intervalMs;
     } catch (error) {
-      console.warn(`Eppo SDK encountered error polling configurations: ${error.message}`);
+      console.warn(`Eppo SDK encountered an error polling configurations: ${error.message}`);
+      const maxRetries = options?.maxPollRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES;
       if (++failedAttempts <= maxRetries) {
         const failureWait = Math.pow(2, failedAttempts);
         const jitter = Math.floor(Math.random() * intervalMs * 0.1);

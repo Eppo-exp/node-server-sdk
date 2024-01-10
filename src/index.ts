@@ -96,8 +96,11 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   }
   poller = initPoller(
     POLL_INTERVAL_MS,
-    config.numPollRequestRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
     configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
+    {
+      maxStartRetries: config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
+      maxPollRetries: config.numPollRequestRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
+    },
   );
   clientInstance = new EppoClient(configurationRequestor, poller);
   clientInstance.setLogger(config.assignmentLogger);
