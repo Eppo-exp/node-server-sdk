@@ -56,13 +56,14 @@ export default function initPoller(
           }
         }
       }
-      console.log({ startRequestSuccess, startAttemptsRemaining });
     }
 
     console.log('>>> done loop');
 
-    console.log(`Eppo SDK starting regularly polling every ${intervalMs} ms`);
-    setTimeout(poll, intervalMs);
+    if (!stopped) {
+      console.log(`Eppo SDK starting regularly polling every ${intervalMs} ms`, { stopped });
+      setTimeout(poll, intervalMs);
+    }
   };
 
   const stop = () => {
@@ -73,6 +74,7 @@ export default function initPoller(
   };
 
   async function poll() {
+    console.log('>>>> POLL');
     if (stopped) {
       return;
     }

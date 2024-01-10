@@ -321,6 +321,7 @@ describe('EppoClient E2E test', () => {
       });
 
       // Set a (real) timer to advance (fake) time while the initializing is sleeping between retries
+      console.log('===== REAL TIMERS =====');
       jest.useRealTimers();
       setTimeout(() => {
         for (let i = DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES; i > 0; i -= 1) {
@@ -328,6 +329,7 @@ describe('EppoClient E2E test', () => {
         }
       }, 30);
       jest.useFakeTimers();
+      console.log('===== FAKE TIMERS =====');
 
       await expect(
         init({
@@ -357,13 +359,16 @@ describe('EppoClient E2E test', () => {
       });
 
       // Set a (real) timer to advance (fake) time while the initializing is sleeping between retries
+      console.log('===== REAL TIMERS =====');
       jest.useRealTimers();
+      console.log('setting advance time timer');
       setTimeout(() => {
         for (let i = DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES; i > 0; i -= 1) {
-          jest.advanceTimersByTime(POLL_INTERVAL_MS * 0.1);
+          await jest.advanceTimersToNextTimerAsync();
         }
       }, 30);
       jest.useFakeTimers();
+      console.log('===== FAKE TIMERS =====');
 
       await init({
         apiKey: 'dummy',

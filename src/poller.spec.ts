@@ -212,27 +212,22 @@ describe('initPoller', () => {
       pollAfterFailedStart: true,
     });
 
-    // TODO: try having jest advance to next timer instead of flush promises
+    // By not awaiting (yet) only the first call should be fired off before execution below resumes
+    const startPromise = poller.start();
+    expect(callCount).toBe(1);
+    // Advance timers to trigger the retry
+    jest.advanceTimersByTimeAsync(testInterval);
+    // Await poller.start() so it can finish its execution before this test proceeds
+    await startPromise;
 
-    jest.useRealTimers();
-    setTimeout(async () => {
-      // first call failed
-      expect(callCount).toBe(1);
-      console.log('real timeout ADVANCING TIME', testInterval);
-      jest.advanceTimersByTime(testInterval);
-      await flushPromises(); // fail & stop
-      console.log('Promised flushed');
-      expect(callCount).toBe(2);
-    }, 30);
-    jest.useFakeTimers();
-
-    await poller.start();
-    // By this point, both initial failed requests will have happened
+    // When poller.start() has completed, both initial failed requests will have happened
     expect(callCount).toBe(2);
 
-    console.log('sync test ADVANCING TIME', testInterval);
-    jest.advanceTimersByTime(testInterval);
-    await flushPromises(); // regular polling has begun
+    // Advance time enough for regular polling to have begun
+    jest.advanceTimersByTimeAsync(testInterval);
+    // Wait for event loop to finish, processing the first regular poll
+    await flushPromises();
+
     expect(callCount).toBe(3);
   });
 
