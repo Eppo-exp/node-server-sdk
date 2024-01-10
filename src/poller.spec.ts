@@ -102,7 +102,7 @@ describe('poller', () => {
         errorOnFailedStart: true,
       });
 
-      expect(poller.start()).rejects.toThrow();
+      await expect(poller.start()).rejects.toThrow();
       expect(callCount).toBe(1); // The call failed
 
       await jest.advanceTimersByTimeAsync(maxRetryDelay);
