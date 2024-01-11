@@ -90,6 +90,8 @@ describe('poller', () => {
     });
 
     it('throws an error on failed start (if configured to do so)', async () => {
+      // Fake time does not play well with errors bubbled up after setTimeout (event loop,
+      // timeout queue, message queue stuff) so we don't allow retries when rethrowing.
       const pollerRetries = 0;
       let callCount = 0;
       const errorThrowingCallback = async () => {
