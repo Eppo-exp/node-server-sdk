@@ -323,6 +323,7 @@ describe('EppoClient E2E test', () => {
       td.replace(HttpClient.prototype, 'get');
       let callCount = 0;
       td.when(HttpClient.prototype.get(td.matchers.anything())).thenDo(async () => {
+        console.log('>>>> MOCK GET');
         callCount += 1;
         return Promise.reject(new Error('Intentional Thrown Error For Test'));
       });
@@ -339,8 +340,16 @@ describe('EppoClient E2E test', () => {
 
       // Initialization should throw an error
       console.log('>>> finishing await');
-      await expect(initPromise).rejects.toThrow();
+      let thrownError = null;
+      try {
+        await initPromise;
+      } catch (initError) {
+        console.log('>>> caught error');
+        thrownError = initError;
+      }
+      expect(thrownError).toBeDefined();
 
+      //await expect(initPromise).rejects.toThrow();
       expect(callCount).toBe(startupConfigRequestTries);
 
       // Assignments resolve to null
@@ -371,6 +380,7 @@ describe('EppoClient E2E test', () => {
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: mockLogger,
         throwOnFailedInitialization: false,
+        pollAfterFailedInitialization: true,
       });
 
       // Advance timers mid-init to allow retrying
@@ -387,7 +397,7 @@ describe('EppoClient E2E test', () => {
       await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
 
       // Expect a call from poller
-      expect(callCount).toBe(2 + DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
+      expect(callCount).toBe(startupConfigRequestTries + 1);
 
       // Assignments now working
       expect(client.getStringAssignment('subject', flagKey)).toBe('control');

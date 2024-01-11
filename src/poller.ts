@@ -30,6 +30,8 @@ export default function initPoller(
     let startAttemptsRemaining =
       1 + (options?.maxStartRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES);
 
+    let startError = null;
+
     while (!startRequestSuccess && startAttemptsRemaining > 0) {
       try {
         await callback();
@@ -53,7 +55,7 @@ export default function initPoller(
           }
 
           if (options?.errorOnFailedStart) {
-            throw pollingError;
+            startError = pollingError;
           }
         }
       }
@@ -62,6 +64,11 @@ export default function initPoller(
     if (!stopped) {
       console.log(`Eppo SDK starting regularly polling every ${intervalMs} ms`, { stopped });
       setTimeout(poll, intervalMs);
+    }
+
+    if (startError) {
+      console.log('Eppo SDK rethrowing start error');
+      throw startError;
     }
   };
 
