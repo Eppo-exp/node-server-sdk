@@ -244,16 +244,16 @@ describe('poller', () => {
       await jest.advanceTimersByTimeAsync(testIntervalMs);
       expect(callCount).toBe(2); // first regular poll fails
 
-      await jest.advanceTimersByTimeAsync(testIntervalMs * 3); // 2^1 backoff plus jitter
+      await jest.advanceTimersByTimeAsync(testIntervalMs * 2 + maxRetryDelay); // 2^1 backoff plus jitter
       expect(callCount).toBe(3); // second poll fails
 
-      await jest.advanceTimersByTimeAsync(testIntervalMs * 5); // 2^2 backoff plus jitter
+      await jest.advanceTimersByTimeAsync(testIntervalMs * 4 + maxRetryDelay); // 2^2 backoff plus jitter
       expect(callCount).toBe(4); // third poll fails
 
-      await jest.advanceTimersByTimeAsync(testIntervalMs * 9); // 2^3 backoff plus jitter
+      await jest.advanceTimersByTimeAsync(testIntervalMs * 8 + maxRetryDelay); // 2^3 backoff plus jitter
       expect(callCount).toBe(5); // fourth poll fails and stops
 
-      await jest.advanceTimersByTimeAsync(testIntervalMs * 17); // 2^4 backoff plus jitter
+      await jest.advanceTimersByTimeAsync(testIntervalMs * 16 + maxRetryDelay); // 2^4 backoff plus jitter
       expect(callCount).toBe(5); // no new polls
     });
   });

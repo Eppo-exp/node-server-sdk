@@ -5,11 +5,7 @@ import apiServer, { TEST_SERVER_PORT } from '../test/mockApiServer';
 import { IAssignmentTestCase, readAssignmentTestData, ValueTestType } from '../test/testHelpers';
 
 import EppoClient from './client/eppo-client';
-import {
-  POLL_INTERVAL_MS,
-  DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
-  POLL_JITTER_PCT,
-} from './constants';
+import { POLL_INTERVAL_MS, POLL_JITTER_PCT } from './constants';
 import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
 import { IPoller } from './poller';
 
@@ -327,7 +323,7 @@ describe('EppoClient E2E test', () => {
       let callCount = 0;
       td.when(HttpClient.prototype.get(td.matchers.anything())).thenDo(async () => {
         callCount += 1;
-        return Promise.reject(new Error('Intentional Thrown Error For Test'));
+        throw new Error('Intentional Thrown Error For Test');
       });
 
       // Note: fake time does not play well with errors bubbled up after setTimeout (event loop,
