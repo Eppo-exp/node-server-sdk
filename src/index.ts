@@ -1,17 +1,13 @@
-import { IAssignmentLogger, validation, constants } from '@eppo/js-client-sdk-common';
-import axios from 'axios';
-
-import EppoClient, { IEppoClient } from './client/eppo-client';
-import { InMemoryConfigurationStore } from './configuration-store';
 import {
-  DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
-  DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
-  MAX_CACHE_ENTRIES,
-  POLL_INTERVAL_MS,
-} from './constants';
-import ExperimentConfigurationRequestor from './experiment-configuration-requestor';
-import HttpClient from './http-client';
-import initPoller, { IPoller } from './poller';
+  IAssignmentLogger,
+  validation,
+  EppoClient,
+  IEppoClient,
+  ExperimentConfigurationRequestParameters,
+} from '@eppo/js-client-sdk-common';
+
+import { InMemoryConfigurationStore } from './configuration-store';
+import { MAX_CACHE_ENTRIES } from './constants';
 import { sdkName, sdkVersion } from './sdk-data';
 
 /**
@@ -66,9 +62,7 @@ export interface IClientConfig {
 }
 
 export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
-export { IEppoClient } from './client/eppo-client';
 
-let poller: IPoller;
 let clientInstance: IEppoClient;
 
 /**
@@ -81,35 +75,21 @@ let clientInstance: IEppoClient;
 export async function init(config: IClientConfig): Promise<IEppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore(MAX_CACHE_ENTRIES);
-  const axiosInstance = axios.create({
-    baseURL: config.baseUrl || constants.BASE_URL,
-    timeout: config.requestTimeoutMs || constants.REQUEST_TIMEOUT_MILLIS,
-  });
-  const httpClient = new HttpClient(axiosInstance, {
+
+  const requestConfiguration: ExperimentConfigurationRequestParameters = {
     apiKey: config.apiKey,
     sdkName,
     sdkVersion,
-  });
-  const configurationRequestor = new ExperimentConfigurationRequestor(
-    configurationStore,
-    httpClient,
-  );
-  if (poller) {
-    // if a client was already initialized, stop the polling process from the previous init call
-    poller.stop();
-  }
+    baseUrl: config.baseUrl ?? undefined,
+    requestTimeoutMs: config.requestTimeoutMs ?? undefined,
+    numInitialRequestRetries: config.numInitialRequestRetries ?? undefined,
+    numPollRequestRetries: config.numPollRequestRetries ?? undefined,
+    pollAfterSuccessfulInitialization: true, // For servers we always want to keep polling for the life of the server
+    pollAfterFailedInitialization: config.pollAfterFailedInitialization ?? false,
+    throwOnFailedInitialization: config.throwOnFailedInitialization ?? true,
+  };
 
-  poller = initPoller(
-    POLL_INTERVAL_MS,
-    configurationRequestor.fetchAndStoreConfigurations.bind(configurationRequestor),
-    {
-      maxStartRetries: config.numInitialRequestRetries ?? DEFAULT_INITIAL_CONFIG_REQUEST_RETRIES,
-      maxPollRetries: config.numPollRequestRetries ?? DEFAULT_POLL_CONFIG_REQUEST_RETRIES,
-      pollAfterFailedStart: config.pollAfterFailedInitialization ?? false,
-      errorOnFailedStart: config.throwOnFailedInitialization ?? true,
-    },
-  );
-  clientInstance = new EppoClient(configurationRequestor, poller);
+  clientInstance = new EppoClient(configurationStore, requestConfiguration);
   clientInstance.setLogger(config.assignmentLogger);
 
   // default to LRU cache with 50_000 entries.
@@ -117,7 +97,8 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   // and should be appropriate for most server-side use cases.
   clientInstance.useLRUInMemoryAssignmentCache(50_000);
 
-  await poller.start();
+  // Fetch configurations (which will also start regular polling per requestConfiguration)
+  await clientInstance.fetchFlagConfigurations();
 
   return clientInstance;
 }

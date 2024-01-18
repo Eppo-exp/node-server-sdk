@@ -25,6 +25,11 @@ export interface IClientConfig {
     apiKey: string;
     assignmentLogger: IAssignmentLogger;
     baseUrl?: string;
+    numInitialRequestRetries?: number;
+    numPollRequestRetries?: number;
+    pollAfterFailedInitialization?: boolean;
+    requestTimeoutMs?: number;
+    throwOnFailedInitialization?: boolean;
 }
 
 // Warning: (ae-forgotten-export) The symbol "EppoNodeClient" needs to be exported by the entry point index.d.ts
