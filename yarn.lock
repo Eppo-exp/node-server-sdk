@@ -460,10 +460,8 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@eppo/js-client-sdk-common@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-2.0.0.tgz#562006a128fb33653ca8c5e17df7680f7d91d0b4"
-  integrity sha512-yHi4BFb6N7jISPK4y++N9OwjJBQAONSLqqCoCUHAyFSlNmUm+aNc/a+j/HHPsnXYZ1GUBWAZJOIQDNne4svfPg==
+"@eppo/js-client-sdk-common@file:../js-client-sdk-common":
+  version "2.1.0"
   dependencies:
     axios "^1.6.0"
     lru-cache "^10.0.1"
