@@ -89,8 +89,6 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     throwOnFailedInitialization: config.throwOnFailedInitialization ?? true,
   };
 
-  console.log('>>> SDK REQUEST CONFIG', requestConfiguration);
-
   clientInstance = new EppoClient(configurationStore, requestConfiguration);
   clientInstance.setLogger(config.assignmentLogger);
 
