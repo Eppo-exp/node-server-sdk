@@ -71,23 +71,25 @@ describe('EppoClient E2E test', () => {
     },
   };
 
-  jest.useFakeTimers({
-    advanceTimers: true,
-    doNotFake: [
-      'Date',
-      'hrtime',
-      'nextTick',
-      'performance',
-      'queueMicrotask',
-      'requestAnimationFrame',
-      'cancelAnimationFrame',
-      'requestIdleCallback',
-      'cancelIdleCallback',
-      'setImmediate',
-      'clearImmediate',
-      'setInterval',
-      'clearInterval',
-    ],
+  beforeAll(() => {
+    jest.useFakeTimers({
+      advanceTimers: true,
+      doNotFake: [
+        'Date',
+        'hrtime',
+        'nextTick',
+        'performance',
+        'queueMicrotask',
+        'requestAnimationFrame',
+        'cancelAnimationFrame',
+        'requestIdleCallback',
+        'cancelIdleCallback',
+        'setImmediate',
+        'clearImmediate',
+        'setInterval',
+        'clearInterval',
+      ],
+    });
   });
 
   afterEach(() => {
@@ -118,7 +120,6 @@ describe('EppoClient E2E test', () => {
         assignmentLogger: mockLogger,
       });
     });
-
 
     describe('getAssignment', () => {
       it.each(readAssignmentTestData())(
@@ -337,12 +338,10 @@ describe('EppoClient E2E test', () => {
     });
 
     it('gives up initial request and throws error after hitting max retries', async () => {
-      console.log('======= TEST I CARE ABOUT =========');
       td.replace(HttpClient.prototype, 'get');
       let callCount = 0;
       td.when(HttpClient.prototype.get(td.matchers.anything())).thenDo(async () => {
         callCount += 1;
-        console.log('>>>> HERE IS A CALL');
         throw new Error('Intentional Thrown Error For Test');
       });
 
@@ -365,9 +364,7 @@ describe('EppoClient E2E test', () => {
 
       // Expect no further configuration requests
       await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
-      console.log('======= ALMOST END OF TEST I CARE ABOUT =========');
       expect(callCount).toBe(1);
-      console.log('======= END OF TEST I CARE ABOUT =========');
     });
 
     it('gives up initial request but still polls later if configured to do so', async () => {
