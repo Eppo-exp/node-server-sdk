@@ -4,14 +4,9 @@
 
 ```ts
 
-import { AxiosInstance } from 'axios';
-import { EppoClient } from '@eppo/js-client-sdk-common';
-import { ExperimentConfigurationRequestor } from '@eppo/js-client-sdk-common';
-import { HttpClient } from '@eppo/js-client-sdk-common';
 import { IAssignmentEvent } from '@eppo/js-client-sdk-common';
 import { IAssignmentLogger } from '@eppo/js-client-sdk-common';
-import { IConfigurationStore } from '@eppo/js-client-sdk-common';
-import { IEppoClient as IEppoClient_2 } from '@eppo/js-client-sdk-common';
+import { IEppoClient } from '@eppo/js-client-sdk-common';
 
 // @public
 export function getInstance(): IEppoClient;
@@ -25,13 +20,11 @@ export interface IClientConfig {
     apiKey: string;
     assignmentLogger: IAssignmentLogger;
     baseUrl?: string;
-}
-
-// Warning: (ae-forgotten-export) The symbol "EppoNodeClient" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export interface IEppoClient extends EppoNodeClient {
-    stopPolling(): void;
+    numInitialRequestRetries?: number;
+    numPollRequestRetries?: number;
+    pollAfterFailedInitialization?: boolean;
+    requestTimeoutMs?: number;
+    throwOnFailedInitialization?: boolean;
 }
 
 // @public
