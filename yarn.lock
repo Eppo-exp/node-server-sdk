@@ -460,14 +460,15 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@eppo/js-client-sdk-common@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-2.1.0.tgz#491016d969b4dbca7f0101eda2146493eb6670d5"
-  integrity sha512-oORik7V/+8IitINavwRB6crEDC2k6LjjIqUDn9olMgr3zZsTEHsnPfTzbAkSRhWt0MT9lhjKAmjHubb/eRQ7+A==
+"@eppo/js-client-sdk-common@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-2.2.0.tgz#dab878cebd528e06bcc03bb0cb9fc642d857a66f"
+  integrity sha512-dyQY/+Rp73VdsR2PEy017ANetlHgfVHKToded+x7sq6M8zEa1bTWYCseXk4cKFMn4hMK+4MrIO3YalFn5WDdsw==
   dependencies:
     axios "^1.6.0"
     lru-cache "^10.0.1"
     md5 "^2.3.0"
+    semver "^7.5.4"
 
 "@eslint/eslintrc@^0.4.3":
   version "0.4.3"
