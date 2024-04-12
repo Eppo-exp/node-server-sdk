@@ -1,13 +1,14 @@
 import * as express from 'express';
 
-import { readMockRacResponse } from './testHelpers';
+import { MOCK_UFC_RESPONSE_FILE, readMockUFCResponse } from './testHelpers';
 
 const api = express();
 
 export const TEST_SERVER_PORT = 4123;
+const flagEndpoint = /flag-config\/v1\/config*/;
 
-api.get('/randomized_assignment/v3/config', (_req, res) => {
-  const mockRacResponse = readMockRacResponse();
+api.get(flagEndpoint, (_req, res) => {
+  const mockRacResponse = readMockUFCResponse(MOCK_UFC_RESPONSE_FILE);
   res.json(mockRacResponse);
 });
 

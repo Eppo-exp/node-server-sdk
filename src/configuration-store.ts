@@ -12,8 +12,17 @@ export class InMemoryConfigurationStore implements IConfigurationStore {
     this.cache = new LRUCache({ max: maxEntries });
   }
 
+  isInitialized(): boolean {
+    return !!this.cache;
+  }
+
   get<T>(key: string): T {
     return this.cache.get(key) ?? null;
+  }
+
+  getKeys(): string[] {
+    // Splay because keys() returns a generator.
+    return [...this.cache.keys()];
   }
 
   setEntries<T>(entries: Record<string, T>) {
