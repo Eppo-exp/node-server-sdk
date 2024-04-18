@@ -1,11 +1,13 @@
 import * as fs from 'fs';
 
-import { Flag, VariationType, AttributeType } from '@eppo/js-client-sdk-common';
+import { Flag, VariationType } from '../src/interfaces';
+import { AttributeType } from '../src/types';
 
 export const TEST_DATA_DIR = './test/data/ufc/';
 export const ASSIGNMENT_TEST_DATA_DIR = TEST_DATA_DIR + 'tests/';
 const MOCK_UFC_FILENAME = 'flags-v1';
 export const MOCK_UFC_RESPONSE_FILE = `${MOCK_UFC_FILENAME}.json`;
+export const OBFUSCATED_MOCK_UFC_RESPONSE_FILE = `${MOCK_UFC_FILENAME}-obfuscated.json`;
 
 export enum ValueTestType {
   BoolType = 'boolean',
@@ -55,10 +57,10 @@ export function getTestAssignments(
   }[] = [];
   for (const subject of testCase.subjects) {
     const assignment = assignmentFn(
-      subject.subjectKey,
       testCase.flag,
-      testCase.defaultValue,
+      subject.subjectKey,
       subject.subjectAttributes,
+      testCase.defaultValue,
       obfuscated,
     );
     assignments.push({ subject: subject, assignment: assignment });
@@ -69,7 +71,7 @@ export function getTestAssignments(
 export function validateTestAssignments(
   assignments: {
     subject: SubjectTestCase;
-    assignment: string | boolean | number | object;
+    assignment: string | boolean | number | object | null;
   }[],
   flag: string,
 ) {

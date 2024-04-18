@@ -18,9 +18,6 @@ import {
   validateTestAssignments,
 } from '../test/testHelpers';
 
-import { InMemoryConfigurationStore } from './configuration-store';
-import { MAX_CACHE_ENTRIES } from './constants';
-
 import { getInstance, IAssignmentEvent, IAssignmentLogger, init } from '.';
 
 const { POLL_INTERVAL_MS, POLL_JITTER_PCT } = constants;
@@ -181,7 +178,7 @@ describe('EppoClient E2E test', () => {
       const mockConfigStore = td.object<IConfigurationStore>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(null);
       const client = new EppoClient(mockConfigStore, requestParamsStub);
-      const assignment = client.getStringAssignment('subject-10', flagKey, 'default-value');
+      const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
       expect(assignment).toEqual('default-value');
     });
 
@@ -193,10 +190,10 @@ describe('EppoClient E2E test', () => {
       const mockLogger = td.object<IAssignmentLogger>();
       client.setLogger(mockLogger);
       const assignment = client.getStringAssignment(
-        'subject-10',
         flagKey,
-        'default-value',
+        'subject-10',
         subjectAttributes,
+        'default-value',
       );
       expect(assignment).toEqual('variant-1');
       expect(td.explain(mockLogger.logAssignment).callCount).toEqual(1);
@@ -221,10 +218,10 @@ describe('EppoClient E2E test', () => {
       );
       client.setLogger(mockLogger);
       const assignment = client.getStringAssignment(
-        'subject-10',
         flagKey,
-        'default-value',
+        'subject-10',
         subjectAttributes,
+        'default-value',
       );
       expect(assignment).toEqual('variant-1');
     });
@@ -265,7 +262,7 @@ describe('EppoClient E2E test', () => {
       await initPromise;
 
       const client = getInstance();
-      expect(client.getStringAssignment('subject', flagKey, 'default-value')).toBe('control');
+      expect(client.getStringAssignment(flagKey, 'subject', {}, 'default-value')).toBe('control');
     });
 
     it('gives up initial request and throws error after hitting max retries', async () => {
@@ -291,7 +288,9 @@ describe('EppoClient E2E test', () => {
 
       // Assignments resolve to null
       const client = getInstance();
-      expect(client.getStringAssignment('subject', flagKey, 'default-value')).toBe('default-value');
+      expect(client.getStringAssignment(flagKey, 'subject', {}, 'default-value')).toBe(
+        'default-value',
+      );
 
       // Expect no further configuration requests
       await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
@@ -329,7 +328,9 @@ describe('EppoClient E2E test', () => {
 
       // Initial assignments resolve to null
       const client = getInstance();
-      expect(client.getStringAssignment('subject', flagKey, 'default-value')).toBe('default-value');
+      expect(client.getStringAssignment(flagKey, 'subject', {}, 'default-value')).toBe(
+        'default-value',
+      );
 
       await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
 
@@ -337,7 +338,7 @@ describe('EppoClient E2E test', () => {
       expect(callCount).toBe(3);
 
       // Assignments now working
-      expect(client.getStringAssignment('subject', flagKey, 'default-value')).toBe('control');
+      expect(client.getStringAssignment(flagKey, 'subject', {}, 'default-value')).toBe('control');
     });
   });
 });
