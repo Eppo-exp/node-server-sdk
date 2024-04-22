@@ -174,7 +174,7 @@ describe('EppoClient E2E test', () => {
       );
     });
 
-    it('returns null when ufc config is absent', () => {
+    it('returns the default value when ufc config is absent', () => {
       const mockConfigStore = td.object<IConfigurationStore>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(null);
       const client = new EppoClient(mockConfigStore, requestParamsStub);
@@ -286,7 +286,7 @@ describe('EppoClient E2E test', () => {
 
       expect(callCount).toBe(1);
 
-      // Assignments resolve to null
+      // Assignments resolve to default value.
       const client = getInstance();
       expect(client.getStringAssignment(flagKey, 'subject', {}, 'default-value')).toBe(
         'default-value',
@@ -326,7 +326,7 @@ describe('EppoClient E2E test', () => {
       await initPromise;
       expect(callCount).toBe(2);
 
-      // Initial assignments resolve to null
+      // Initial assignments resolve to default value.
       const client = getInstance();
       expect(client.getStringAssignment(flagKey, 'subject', {}, 'default-value')).toBe(
         'default-value',
