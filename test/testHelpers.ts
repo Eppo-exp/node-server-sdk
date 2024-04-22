@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 
-import { Flag, VariationType } from '../src/interfaces';
-import { AttributeType } from '../src/types';
+import { Flag, VariationType, AttributeType } from '@eppo/js-client-sdk-common';
 
 export const TEST_DATA_DIR = './test/data/ufc/';
 export const ASSIGNMENT_TEST_DATA_DIR = TEST_DATA_DIR + 'tests/';
