@@ -3,7 +3,7 @@ import {
   validation,
   EppoClient,
   IEppoClient,
-  ExperimentConfigurationRequestParameters,
+  FlagConfigurationRequestParameters,
 } from '@eppo/js-client-sdk-common';
 
 import { InMemoryConfigurationStore } from './configuration-store';
@@ -76,7 +76,7 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
   const configurationStore = new InMemoryConfigurationStore(MAX_CACHE_ENTRIES);
 
-  const requestConfiguration: ExperimentConfigurationRequestParameters = {
+  const requestConfiguration: FlagConfigurationRequestParameters = {
     apiKey: config.apiKey,
     sdkName,
     sdkVersion,
