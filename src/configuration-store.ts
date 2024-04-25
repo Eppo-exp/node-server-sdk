@@ -26,6 +26,7 @@ export class InMemoryConfigurationStore implements IConfigurationStore {
   }
 
   setEntries<T>(entries: Record<string, T>) {
+    this.cache.clear();
     Object.entries(entries).forEach(([key, val]) => {
       this.cache.set(key, val);
     });
