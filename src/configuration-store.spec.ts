@@ -16,4 +16,17 @@ describe('InMemoryConfigurationStore', () => {
       expect(store.get(`key-${i}`)).toEqual(`value-${i}`);
     }
   });
+
+  it('evicts entries when new entries are loaded', () => {
+    const maxSize = 1000;
+    const store = new InMemoryConfigurationStore(maxSize);
+
+    store.setEntries({ "hello": "world", "bye": "world"});
+    expect(store.get("hello")).toEqual("world");
+    expect(store.get("bye")).toEqual("world");
+
+    store.setEntries({ "hello": "world"});
+    expect(store.get("hello")).toEqual("world");
+    expect(store.get("bye")).toEqual(null);
+  })
 });
