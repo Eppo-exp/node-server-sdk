@@ -2,7 +2,7 @@
 
 [![Test and lint SDK](https://github.com/Eppo-exp/node-server-sdk/actions/workflows/lint-test-sdk.yml/badge.svg)](https://github.com/Eppo-exp/node-server-sdk/actions/workflows/lint-test-sdk.yml)
 
-[Eppo](https://www.geteppo.com/) is a modular flagging and experimentation analysis tool. Eppo's Node SDK is built to make assignments for single user client applications that run in a web browser. Before proceeding you'll need an Eppo account.
+[Eppo](https://www.geteppo.com/) is a modular flagging and experimentation analysis tool. Eppo's Node SDK is built to make assignments in multi-user server side contexts. Before proceeding you'll need an Eppo account.
 
 ## Features
 
@@ -11,12 +11,11 @@
 - Progressive rollouts
 - A/B/n experiments
 - Mutually exclusive experiments (Layers)
-- Global holdouts
 - Dynamic configuration
 
 ## Installation
 
-```javascript
+```shell
 npm install @eppo/node-server-sdk
 ```
 
@@ -43,10 +42,12 @@ const eppoClient = EppoSdk.getInstance();
 // Hypothetical user.
 const user = getCurrentUser();
 
-const variation = eppoClient.getStringAssignment('new-user-onboarding', user.id, { 
-  country: user.country,
-  subscription_status: user.subscription
-}, 'control');
+const variation = eppoClient.getStringAssignment(
+  'new-user-onboarding', 
+  user.id, 
+  { country: user.country }, 
+  'control'
+);
 ```
 
 ## Assignment functions
@@ -64,7 +65,7 @@ getJSONAssignment(...)
 Each function has the same signature, but returns the type in the function name. For booleans use `getBooleanAssignment`, which has the following signature:
 
 ```javascript
-getBooleanAssignment: (
+getBoolAssignment: (
   flagKey: string,
   subjectKey: string,
   subjectAttributes: Record<string, any>,
@@ -112,4 +113,4 @@ const assignmentLogger: IAssignmentLogger = {
 
 ## Philosophy
 
-Eppo's SDKs are built for simplicity, speed and reliability. Flag configurations are compressed and distributed over a global CDN (Fastly), typically reaching your servers in under 15ms. Server SDKs continue polling Eppo’s API at 30-second intervals. Configurations are then cached locally, ensuring that each assignment is made instantly. Each SDK is as light as possible, with evaluation logic at around [25 simple lines of code](https://github.com/Eppo-exp/js-client-sdk-common/blob/b903bbbca21ca75c0ab49d894951eb2f1fc6c85b/src/evaluator.ts#L34-L59). The simple typed functions listed above are all developers need to know about, abstracting away the complexity of the underlying set of features.
+Eppo's SDKs are built for simplicity, speed and reliability. Flag configurations are compressed and distributed over a global CDN (Fastly), typically reaching your servers in under 15ms. Server SDKs continue polling Eppo’s API at 30-second intervals. Configurations are then cached locally, ensuring that each assignment is made instantly. Evaluation logic within each SDK consists of a few lines of simple numeric and string comparisons. The typed functions listed above are all developers need to understand, abstracting away the complexity of the Eppo's underlying (and expanding) feature set.
