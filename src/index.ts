@@ -4,11 +4,13 @@ import {
   EppoClient,
   IEppoClient,
   FlagConfigurationRequestParameters,
+  MemoryOnlyConfigurationStore,
+  Flag,
 } from '@eppo/js-client-sdk-common';
+import { ObfuscatedFlag } from '@eppo/js-client-sdk-common/dist/interfaces';
 
-import { InMemoryConfigurationStore } from './configuration-store';
-import { MAX_CACHE_ENTRIES } from './constants';
 import { sdkName, sdkVersion } from './sdk-data';
+
 
 /**
  * Configuration used for initializing the Eppo client
@@ -74,7 +76,7 @@ let clientInstance: IEppoClient;
  */
 export async function init(config: IClientConfig): Promise<IEppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
-  const configurationStore = new InMemoryConfigurationStore(MAX_CACHE_ENTRIES);
+  const configurationStore = new MemoryOnlyConfigurationStore<Flag | ObfuscatedFlag>();
 
   const requestConfiguration: FlagConfigurationRequestParameters = {
     apiKey: config.apiKey,
