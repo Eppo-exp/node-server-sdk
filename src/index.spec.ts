@@ -175,7 +175,7 @@ describe('EppoClient E2E test', () => {
     });
 
     it('returns the default value when ufc config is absent', () => {
-      const mockConfigStore = td.object<IConfigurationStore>();
+      const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(null);
       const client = new EppoClient(mockConfigStore, requestParamsStub);
       const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
@@ -183,7 +183,7 @@ describe('EppoClient E2E test', () => {
     });
 
     it('logs variation assignment and experiment key', () => {
-      const mockConfigStore = td.object<IConfigurationStore>();
+      const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(mockUfcFlagConfig);
       const subjectAttributes = { foo: 3 };
       const client = new EppoClient(mockConfigStore, requestParamsStub);
@@ -208,7 +208,7 @@ describe('EppoClient E2E test', () => {
     });
 
     it('handles logging exception', () => {
-      const mockConfigStore = td.object<IConfigurationStore>();
+      const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(mockUfcFlagConfig);
       const subjectAttributes = { foo: 3 };
       const client = new EppoClient(mockConfigStore, requestParamsStub);
