@@ -67,6 +67,8 @@ export interface IClientConfig {
    * Poll for new configurations even if the initial configuration request failed. (default: false)
    */
   pollAfterFailedInitialization?: boolean;
+
+  disablePolling?: boolean;
 }
 
 export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
@@ -100,8 +102,8 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   clientInstance = new EppoClient(configurationStore, requestConfiguration);
   clientInstance.setLogger(config.assignmentLogger);
 
-  if (this.assignmentCache) {
-    clientInstance.useCustomAssignmentCache(this.assignmentCache);
+  if (config.assignmentCache) {
+    clientInstance.useCustomAssignmentCache(config.assignmentCache);
   } else {
     // default to LRU cache with 50_000 entries.
     // we estimate this will use no more than 10 MB of memory
@@ -110,8 +112,10 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     clientInstance.useLRUInMemoryAssignmentCache(50_000);
   }
 
-  // Fetch configurations (which will also start regular polling per requestConfiguration)
-  await clientInstance.fetchFlagConfigurations();
+  if (!config.disablePolling) {
+    // Fetch configurations (which will also start regular polling per requestConfiguration)
+    await clientInstance.fetchFlagConfigurations();
+  }
 
   return clientInstance;
 }
