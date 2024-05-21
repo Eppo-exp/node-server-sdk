@@ -6,11 +6,12 @@ import {
   FlagConfigurationRequestParameters,
   MemoryOnlyConfigurationStore,
   Flag,
+  AssignmentCache,
 } from '@eppo/js-client-sdk-common';
+import { Cacheable } from '@eppo/js-client-sdk-common/dist/assignment-cache';
 import { ObfuscatedFlag } from '@eppo/js-client-sdk-common/dist/interfaces';
 
 import { sdkName, sdkVersion } from './sdk-data';
-
 
 /**
  * Configuration used for initializing the Eppo client
@@ -32,6 +33,11 @@ export interface IClientConfig {
    * Pass a logging implementation to send variation assignments to your data warehouse.
    */
   assignmentLogger: IAssignmentLogger;
+
+  /**
+   * (optional) Provide your own caching solution. If not defined, LRU cache will be used.
+   */
+  assignmentCache?: AssignmentCache<Cacheable>;
 
   /***
    * Timeout in milliseconds for the HTTPS request for the experiment configuration. (Default: 5000)
@@ -94,10 +100,15 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
   clientInstance = new EppoClient(configurationStore, requestConfiguration);
   clientInstance.setLogger(config.assignmentLogger);
 
-  // default to LRU cache with 50_000 entries.
-  // we estimate this will use no more than 10 MB of memory
-  // and should be appropriate for most server-side use cases.
-  clientInstance.useLRUInMemoryAssignmentCache(50_000);
+  if (this.assignmentCache) {
+    clientInstance.useCustomAssignmentCache(this.assignmentCache);
+  } else {
+    // default to LRU cache with 50_000 entries.
+    // we estimate this will use no more than 10 MB of memory
+    // and should be appropriate for most server-side use cases.
+
+    clientInstance.useLRUInMemoryAssignmentCache(50_000);
+  }
 
   // Fetch configurations (which will also start regular polling per requestConfiguration)
   await clientInstance.fetchFlagConfigurations();
