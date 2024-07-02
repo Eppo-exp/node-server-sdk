@@ -6,12 +6,17 @@ import {
   IConfigurationStore,
   Flag,
   VariationType,
+  IBanditEvent,
+  IBanditLogger,
 } from '@eppo/js-client-sdk-common';
+import { ContextAttributes } from '@eppo/js-client-sdk-common/dist/types';
 import * as td from 'testdouble';
 
-import apiServer, { TEST_SERVER_PORT } from '../test/mockApiServer';
+import apiServer, { TEST_BANDIT_API_KEY, TEST_SERVER_PORT } from '../test/mockApiServer';
 import {
   ASSIGNMENT_TEST_DATA_DIR,
+  BANDIT_TEST_DATA_DIR,
+  BanditTestCase,
   getTestAssignments,
   IAssignmentTestCase,
   SubjectTestCase,
@@ -140,7 +145,7 @@ describe('EppoClient E2E test', () => {
       });
     });
 
-    describe('UFC General Test Cases', () => {
+    describe('Shared UFC General Test Cases', () => {
       const testCases = testCasesByFileName<IAssignmentTestCase>(ASSIGNMENT_TEST_DATA_DIR);
 
       it.each(Object.keys(testCases))('test variation assignment splits - %s', async (fileName) => {
@@ -225,6 +230,66 @@ describe('EppoClient E2E test', () => {
         'default-value',
       );
       expect(assignment).toEqual('variant-1');
+    });
+  });
+
+  describe('Shared Bandit Test Cases', () => {
+    beforeAll(async () => {
+      const dummyBanditLogger: IBanditLogger = {
+        logBanditAction(banditEvent: IBanditEvent) {
+          console.log(
+            `Bandit ${banditEvent.bandit} assigned ${banditEvent.subject} the action ${banditEvent.action}`,
+          );
+        },
+      };
+
+      await init({
+        apiKey: TEST_BANDIT_API_KEY, // Flag to dummy test server we want bandit-related files
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: mockLogger,
+        banditLogger: dummyBanditLogger,
+      });
+    });
+
+    const testCases = testCasesByFileName<BanditTestCase>(BANDIT_TEST_DATA_DIR);
+
+    it.each(Object.keys(testCases))('Shared bandit test case - %s', async (fileName: string) => {
+      const { flag: flagKey, defaultValue, subjects } = testCases[fileName];
+      let numAssignmentsChecked = 0;
+      subjects.forEach((subject) => {
+        // test files have actions as an array, so we convert them to a map as expected by the client
+        const actions: Record<string, ContextAttributes> = {};
+        subject.actions.forEach((action) => {
+          actions[action.actionKey] = {
+            numericAttributes: action.numericAttributes,
+            categoricalAttributes: action.categoricalAttributes,
+          };
+        });
+
+        // get the bandit assignment for the test case
+        const banditAssignment = getInstance().getBanditAction(
+          flagKey,
+          subject.subjectKey,
+          subject.subjectAttributes,
+          actions,
+          defaultValue,
+        );
+
+        // Do this check in addition to assertions to provide helpful information on exactly which
+        // evaluation failed to produce an expected result
+        if (
+          banditAssignment.variation !== subject.assignment.variation ||
+          banditAssignment.action !== subject.assignment.action
+        ) {
+          console.error(`Unexpected result for flag ${flagKey} and subject ${subject.subjectKey}`);
+        }
+
+        expect(banditAssignment.variation).toBe(subject.assignment.variation);
+        expect(banditAssignment.action).toBe(subject.assignment.action);
+        numAssignmentsChecked += 1;
+      });
+      // Ensure that this test case correctly checked some test assignments
+      expect(numAssignmentsChecked).toBeGreaterThan(0);
     });
   });
 
