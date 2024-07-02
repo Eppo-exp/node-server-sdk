@@ -151,7 +151,7 @@ describe('EppoClient E2E test', () => {
           }[] = [];
 
           const typeAssignmentFunctions = {
-            [VariationType.BOOLEAN]: client.getBoolAssignment.bind(client),
+            [VariationType.BOOLEAN]: client.getBooleanAssignment.bind(client),
             [VariationType.NUMERIC]: client.getNumericAssignment.bind(client),
             [VariationType.INTEGER]: client.getIntegerAssignment.bind(client),
             [VariationType.STRING]: client.getStringAssignment.bind(client),
@@ -177,7 +177,7 @@ describe('EppoClient E2E test', () => {
     it('returns the default value when ufc config is absent', () => {
       const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(null);
-      const client = new EppoClient(mockConfigStore, requestParamsStub);
+      const client = new EppoClient(mockConfigStore, undefined, undefined, requestParamsStub);
       const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
       expect(assignment).toEqual('default-value');
     });
@@ -186,9 +186,9 @@ describe('EppoClient E2E test', () => {
       const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(mockUfcFlagConfig);
       const subjectAttributes = { foo: 3 };
-      const client = new EppoClient(mockConfigStore, requestParamsStub);
+      const client = new EppoClient(mockConfigStore, undefined, undefined, requestParamsStub);
       const mockLogger = td.object<IAssignmentLogger>();
-      client.setLogger(mockLogger);
+      client.setAssignmentLogger(mockLogger);
       const assignment = client.getStringAssignment(
         flagKey,
         'subject-10',
@@ -211,12 +211,12 @@ describe('EppoClient E2E test', () => {
       const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(mockUfcFlagConfig);
       const subjectAttributes = { foo: 3 };
-      const client = new EppoClient(mockConfigStore, requestParamsStub);
+      const client = new EppoClient(mockConfigStore, undefined, undefined, requestParamsStub);
       const mockLogger = td.object<IAssignmentLogger>();
       td.when(mockLogger.logAssignment(td.matchers.anything())).thenThrow(
         new Error('logging error'),
       );
-      client.setLogger(mockLogger);
+      client.setAssignmentLogger(mockLogger);
       const assignment = client.getStringAssignment(
         flagKey,
         'subject-10',
@@ -236,9 +236,9 @@ describe('EppoClient E2E test', () => {
     };
 
     it('retries initial configuration request before resolving', async () => {
-      td.replace(HttpClient.prototype, 'get');
+      td.replace(HttpClient.prototype, 'getUniversalFlagConfiguration');
       let callCount = 0;
-      td.when(HttpClient.prototype.get(td.matchers.anything())).thenDo(() => {
+      td.when(HttpClient.prototype.getUniversalFlagConfiguration()).thenDo(() => {
         if (++callCount === 1) {
           // Throw an error for the first call
           throw new Error('Intentional Thrown Error For Test');
@@ -266,9 +266,9 @@ describe('EppoClient E2E test', () => {
     });
 
     it('gives up initial request and throws error after hitting max retries', async () => {
-      td.replace(HttpClient.prototype, 'get');
+      td.replace(HttpClient.prototype, 'getUniversalFlagConfiguration');
       let callCount = 0;
-      td.when(HttpClient.prototype.get(td.matchers.anything())).thenDo(async () => {
+      td.when(HttpClient.prototype.getUniversalFlagConfiguration()).thenDo(async () => {
         callCount += 1;
         throw new Error('Intentional Thrown Error For Test');
       });
@@ -298,9 +298,9 @@ describe('EppoClient E2E test', () => {
     });
 
     it('gives up initial request but still polls later if configured to do so', async () => {
-      td.replace(HttpClient.prototype, 'get');
+      td.replace(HttpClient.prototype, 'getUniversalFlagConfiguration');
       let callCount = 0;
-      td.when(HttpClient.prototype.get(td.matchers.anything())).thenDo(() => {
+      td.when(HttpClient.prototype.getUniversalFlagConfiguration()).thenDo(() => {
         if (++callCount <= 2) {
           // Throw an error for the first call
           throw new Error('Intentional Thrown Error For Test');

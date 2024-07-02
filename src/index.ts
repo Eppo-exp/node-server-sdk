@@ -91,8 +91,8 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     throwOnFailedInitialization: config.throwOnFailedInitialization ?? true,
   };
 
-  clientInstance = new EppoClient(configurationStore, requestConfiguration);
-  clientInstance.setLogger(config.assignmentLogger);
+  clientInstance = new EppoClient(configurationStore, undefined, undefined, requestConfiguration);
+  clientInstance.setAssignmentLogger(config.assignmentLogger);
 
   // default to LRU cache with 50_000 entries.
   // we estimate this will use no more than 10 MB of memory
