@@ -1,6 +1,6 @@
 {
   "name": "@eppo/node-server-sdk",
-  "version": "3.0.3-rc.0",
+  "version": "3.1.0",
   "description": "Eppo node server SDK",
   "main": "dist/index.js",
   "files": [
@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
   "dependencies": {
-    "@eppo/js-client-sdk-common": "3.0.6",
+    "@eppo/js-client-sdk-common": "3.4.0",
     "lru-cache": "^10.0.1"
   },
   "devDependencies": {
