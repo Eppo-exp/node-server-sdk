@@ -34,14 +34,22 @@ export function readMockUFCResponse(filename: string): {
   return JSON.parse(fs.readFileSync(TEST_DATA_DIR + filename, 'utf-8'));
 }
 
-export function readAssignmentTestData(): IAssignmentTestCase[] {
-  const testCaseData: IAssignmentTestCase[] = [];
-  const testCaseFiles = fs.readdirSync(ASSIGNMENT_TEST_DATA_DIR);
-  testCaseFiles.forEach((file) => {
-    const testCase = JSON.parse(fs.readFileSync(ASSIGNMENT_TEST_DATA_DIR + file, 'utf8'));
-    testCaseData.push(testCase);
+export function testCasesByFileName<T>(testDirectory: string): Record<string, T> {
+  const testCasesWithFileName: Array<T & { fileName: string }> = fs
+    .readdirSync(testDirectory)
+    .map((fileName) => ({
+      ...JSON.parse(fs.readFileSync(testDirectory + fileName, 'utf8')),
+      fileName,
+    }));
+  if (!testCasesWithFileName.length) {
+    throw new Error('No test cases at ' + testDirectory);
+  }
+  const mappedTestCase: Record<string, T> = {};
+  testCasesWithFileName.forEach((testCaseWithFileName) => {
+    mappedTestCase[testCaseWithFileName.fileName] = testCaseWithFileName;
   });
-  return testCaseData;
+
+  return mappedTestCase;
 }
 
 export function getTestAssignments(

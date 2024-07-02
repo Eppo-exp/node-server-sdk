@@ -11,10 +11,11 @@ import * as td from 'testdouble';
 
 import apiServer, { TEST_SERVER_PORT } from '../test/mockApiServer';
 import {
+  ASSIGNMENT_TEST_DATA_DIR,
   getTestAssignments,
   IAssignmentTestCase,
-  readAssignmentTestData,
   SubjectTestCase,
+  testCasesByFileName,
   validateTestAssignments,
 } from '../test/testHelpers';
 
@@ -140,38 +141,38 @@ describe('EppoClient E2E test', () => {
     });
 
     describe('UFC General Test Cases', () => {
-      it.each(readAssignmentTestData())(
-        'test variation assignment splits',
-        async ({ flag, variationType, defaultValue, subjects }: IAssignmentTestCase) => {
-          const client = getInstance();
+      const testCases = testCasesByFileName<IAssignmentTestCase>(ASSIGNMENT_TEST_DATA_DIR);
 
-          let assignments: {
-            subject: SubjectTestCase;
-            assignment: string | boolean | number | object;
-          }[] = [];
+      it.each(Object.keys(testCases))('test variation assignment splits - %s', async (fileName) => {
+        const { flag, variationType, defaultValue, subjects } = testCases[fileName];
+        const client = getInstance();
 
-          const typeAssignmentFunctions = {
-            [VariationType.BOOLEAN]: client.getBooleanAssignment.bind(client),
-            [VariationType.NUMERIC]: client.getNumericAssignment.bind(client),
-            [VariationType.INTEGER]: client.getIntegerAssignment.bind(client),
-            [VariationType.STRING]: client.getStringAssignment.bind(client),
-            [VariationType.JSON]: client.getJSONAssignment.bind(client),
-          };
+        let assignments: {
+          subject: SubjectTestCase;
+          assignment: string | boolean | number | object;
+        }[] = [];
 
-          const assignmentFn = typeAssignmentFunctions[variationType];
-          if (!assignmentFn) {
-            throw new Error(`Unknown variation type: ${variationType}`);
-          }
+        const typeAssignmentFunctions = {
+          [VariationType.BOOLEAN]: client.getBooleanAssignment.bind(client),
+          [VariationType.NUMERIC]: client.getNumericAssignment.bind(client),
+          [VariationType.INTEGER]: client.getIntegerAssignment.bind(client),
+          [VariationType.STRING]: client.getStringAssignment.bind(client),
+          [VariationType.JSON]: client.getJSONAssignment.bind(client),
+        };
 
-          assignments = getTestAssignments(
-            { flag, variationType, defaultValue, subjects },
-            assignmentFn,
-            false,
-          );
+        const assignmentFn = typeAssignmentFunctions[variationType];
+        if (!assignmentFn) {
+          throw new Error(`Unknown variation type: ${variationType}`);
+        }
 
-          validateTestAssignments(assignments, flag);
-        },
-      );
+        assignments = getTestAssignments(
+          { flag, variationType, defaultValue, subjects },
+          assignmentFn,
+          false,
+        );
+
+        validateTestAssignments(assignments, flag);
+      });
     });
 
     it('returns the default value when ufc config is absent', () => {
