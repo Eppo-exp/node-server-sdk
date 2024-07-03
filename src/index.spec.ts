@@ -9,6 +9,7 @@ import {
   IBanditEvent,
   IBanditLogger,
 } from '@eppo/js-client-sdk-common';
+import { BanditParameters, BanditVariation } from '@eppo/js-client-sdk-common/dist/interfaces';
 import { ContextAttributes } from '@eppo/js-client-sdk-common/dist/types';
 import * as td from 'testdouble';
 
@@ -34,6 +35,11 @@ describe('EppoClient E2E test', () => {
       console.log(`Logged assignment for subject ${assignment.subject}`);
     },
   };
+
+  // These two stores should not be used as this file doesn't test bandits, but we want them to be defined so bandit
+  // functionality is still "on" for the client when we explicitly instantiate the client (vs. using init())
+  const mockBanditVariationStore = td.object<IConfigurationStore<BanditVariation[]>>();
+  const mockBanditModelStore = td.object<IConfigurationStore<BanditParameters>>();
 
   const flagKey = 'mock-experiment';
 
@@ -183,7 +189,12 @@ describe('EppoClient E2E test', () => {
     it('returns the default value when ufc config is absent', () => {
       const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(null);
-      const client = new EppoClient(mockConfigStore, undefined, undefined, requestParamsStub);
+      const client = new EppoClient(
+        mockConfigStore,
+        mockBanditVariationStore,
+        mockBanditModelStore,
+        requestParamsStub,
+      );
       const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
       expect(assignment).toEqual('default-value');
     });
@@ -192,7 +203,12 @@ describe('EppoClient E2E test', () => {
       const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(mockUfcFlagConfig);
       const subjectAttributes = { foo: 3 };
-      const client = new EppoClient(mockConfigStore, undefined, undefined, requestParamsStub);
+      const client = new EppoClient(
+        mockConfigStore,
+        mockBanditVariationStore,
+        mockBanditModelStore,
+        requestParamsStub,
+      );
       const mockLogger = td.object<IAssignmentLogger>();
       client.setAssignmentLogger(mockLogger);
       const assignment = client.getStringAssignment(
@@ -217,7 +233,12 @@ describe('EppoClient E2E test', () => {
       const mockConfigStore = td.object<IConfigurationStore<Flag>>();
       td.when(mockConfigStore.get(flagKey)).thenReturn(mockUfcFlagConfig);
       const subjectAttributes = { foo: 3 };
-      const client = new EppoClient(mockConfigStore, undefined, undefined, requestParamsStub);
+      const client = new EppoClient(
+        mockConfigStore,
+        mockBanditVariationStore,
+        mockBanditModelStore,
+        requestParamsStub,
+      );
       const mockLogger = td.object<IAssignmentLogger>();
       td.when(mockLogger.logAssignment(td.matchers.anything())).thenThrow(
         new Error('logging error'),
