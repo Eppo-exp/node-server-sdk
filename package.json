@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
   "dependencies": {
-    "@eppo/js-client-sdk-common": "/Users/aaron/Workspace/js-client-sdk-common/package",
+    "@eppo/js-client-sdk-common": "3.5.0",
     "lru-cache": "^10.0.1"
   },
   "devDependencies": {

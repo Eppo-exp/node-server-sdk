@@ -6,6 +6,7 @@
 
 import { IAssignmentEvent } from '@eppo/js-client-sdk-common';
 import { IAssignmentLogger } from '@eppo/js-client-sdk-common';
+import { IBanditLogger } from '@eppo/js-client-sdk-common';
 import { IEppoClient } from '@eppo/js-client-sdk-common';
 
 // @public
@@ -19,6 +20,7 @@ export { IAssignmentLogger }
 export interface IClientConfig {
     apiKey: string;
     assignmentLogger: IAssignmentLogger;
+    banditLogger?: IBanditLogger;
     baseUrl?: string;
     numInitialRequestRetries?: number;
     numPollRequestRetries?: number;
