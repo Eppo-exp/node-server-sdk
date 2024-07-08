@@ -97,7 +97,8 @@ export function validateTestAssignments(
       // the expect works well for objects, but this comparison does not
       if (assignment !== subject.assignment) {
         throw new Error(
-          `subject ${subject.subjectKey
+          `subject ${
+            subject.subjectKey
           } was assigned ${assignment?.toString()} when expected ${subject.assignment?.toString()} for flag ${flag}`,
         );
       }
