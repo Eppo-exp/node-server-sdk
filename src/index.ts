@@ -68,7 +68,12 @@ export interface IClientConfig {
   pollAfterFailedInitialization?: boolean;
 }
 
-export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
+export {
+  IAssignmentEvent,
+  IAssignmentLogger,
+  IBanditEvent,
+  IBanditLogger,
+} from '@eppo/js-client-sdk-common';
 
 let clientInstance: IEppoClient;
 
