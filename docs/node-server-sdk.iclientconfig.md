@@ -18,6 +18,7 @@ export interface IClientConfig
 |  --- | --- | --- | --- |
 |  [apiKey](./node-server-sdk.iclientconfig.apikey.md) |  | string | Eppo API key |
 |  [assignmentLogger](./node-server-sdk.iclientconfig.assignmentlogger.md) |  | IAssignmentLogger | Pass a logging implementation to send variation assignments to your data warehouse. |
+|  [banditLogger?](./node-server-sdk.iclientconfig.banditlogger.md) |  | IBanditLogger | _(Optional)_ Logging implementation to send bandit actions to your data warehouse |
 |  [baseUrl?](./node-server-sdk.iclientconfig.baseurl.md) |  | string | _(Optional)_ Base URL of the Eppo API. Clients should use the default setting in most cases. |
 |  [numInitialRequestRetries?](./node-server-sdk.iclientconfig.numinitialrequestretries.md) |  | number | _(Optional)_ Number of additional times the initial configuration request will be attempted if it fails. This is the request servers typically synchronously wait for completion. A small wait will be done between requests. (Default: 1) |
 |  [numPollRequestRetries?](./node-server-sdk.iclientconfig.numpollrequestretries.md) |  | number | _(Optional)_ Number of additional times polling for updated configurations will be attempted before giving up. Polling is done after a successful initial request. Subsequent attempts are done using an exponential backoff. (Default: 7) |

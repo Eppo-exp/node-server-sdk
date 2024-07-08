@@ -1,19 +1,14 @@
 import * as fs from 'fs';
 
-import { Flag, VariationType, AttributeType } from '@eppo/js-client-sdk-common';
+import { VariationType, AttributeType } from '@eppo/js-client-sdk-common';
+import { ContextAttributes } from '@eppo/js-client-sdk-common/dist/types';
 
 export const TEST_DATA_DIR = './test/data/ufc/';
 export const ASSIGNMENT_TEST_DATA_DIR = TEST_DATA_DIR + 'tests/';
-const MOCK_UFC_FILENAME = 'flags-v1';
-export const MOCK_UFC_RESPONSE_FILE = `${MOCK_UFC_FILENAME}.json`;
-export const OBFUSCATED_MOCK_UFC_RESPONSE_FILE = `${MOCK_UFC_FILENAME}-obfuscated.json`;
-
-export enum ValueTestType {
-  BoolType = 'boolean',
-  NumericType = 'numeric',
-  StringType = 'string',
-  JSONType = 'json',
-}
+export const BANDIT_TEST_DATA_DIR = TEST_DATA_DIR + 'bandit-tests/';
+export const MOCK_UFC_RESPONSE_FILE = 'flags-v1.json';
+export const MOCK_FLAGS_WITH_BANDITS_RESPONSE_FILE = `bandit-flags-v1.json`;
+export const MOCK_BANDIT_MODELS_RESPONSE_FILE = `bandit-models-v1.json`;
 
 export interface SubjectTestCase {
   subjectKey: string;
@@ -28,20 +23,43 @@ export interface IAssignmentTestCase {
   subjects: SubjectTestCase[];
 }
 
-export function readMockUFCResponse(filename: string): {
-  flags: Record<string, Flag>;
-} {
+export interface BanditTestCase {
+  flag: string;
+  defaultValue: string;
+  subjects: BanditTestCaseSubject[];
+}
+
+interface BanditTestCaseSubject {
+  subjectKey: string;
+  subjectAttributes: ContextAttributes;
+  actions: BanditTestCaseAction[];
+  assignment: { variation: string; action: string | null };
+}
+
+interface BanditTestCaseAction extends ContextAttributes {
+  actionKey: string;
+}
+
+export function readMockResponse(filename: string) {
   return JSON.parse(fs.readFileSync(TEST_DATA_DIR + filename, 'utf-8'));
 }
 
-export function readAssignmentTestData(): IAssignmentTestCase[] {
-  const testCaseData: IAssignmentTestCase[] = [];
-  const testCaseFiles = fs.readdirSync(ASSIGNMENT_TEST_DATA_DIR);
-  testCaseFiles.forEach((file) => {
-    const testCase = JSON.parse(fs.readFileSync(ASSIGNMENT_TEST_DATA_DIR + file, 'utf8'));
-    testCaseData.push(testCase);
+export function testCasesByFileName<T>(testDirectory: string): Record<string, T> {
+  const testCasesWithFileName: Array<T & { fileName: string }> = fs
+    .readdirSync(testDirectory)
+    .map((fileName) => ({
+      ...JSON.parse(fs.readFileSync(testDirectory + fileName, 'utf8')),
+      fileName,
+    }));
+  if (!testCasesWithFileName.length) {
+    throw new Error('No test cases at ' + testDirectory);
+  }
+  const mappedTestCase: Record<string, T> = {};
+  testCasesWithFileName.forEach((testCaseWithFileName) => {
+    mappedTestCase[testCaseWithFileName.fileName] = testCaseWithFileName;
   });
-  return testCaseData;
+
+  return mappedTestCase;
 }
 
 export function getTestAssignments(
