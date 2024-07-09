@@ -111,6 +111,25 @@ const assignmentLogger: IAssignmentLogger = {
 };
 ```
 
+## Export configuration
+
+To support the use-case of needing to bootstrap your front-end client with an Eppo Client SDK, the Eppo NodeJS SDK provides a function to export flag configurations.
+
+Use the `getFlagConfigurations(): Record<string, Flag>` function to export flag configurations, stringify them (or your preferred serialization method), and send it to the front-end client as a part of your routine initialization.
+
+```javascript
+import express from 'express';
+import * as EppoSdk from "@eppo/node-server-sdk";
+
+const app = express();
+const eppoClient = EppoSdk.getInstance();
+
+app.get('/api/flag-configurations', (req, res) => {
+  const flagConfigurations = eppoClient.getFlagConfigurations();
+  res.json(flagConfigurations);
+});
+```
+
 ## Philosophy
 
 Eppo's SDKs are built for simplicity, speed and reliability. Flag configurations are compressed and distributed over a global CDN (Fastly), typically reaching your servers in under 15ms. Server SDKs continue polling Eppo’s API at 30-second intervals. Configurations are then cached locally, ensuring that each assignment is made instantly. Evaluation logic within each SDK consists of a few lines of simple numeric and string comparisons. The typed functions listed above are all developers need to understand, abstracting away the complexity of the Eppo's underlying (and expanding) feature set.
