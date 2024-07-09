@@ -6,11 +6,11 @@ import {
   FlagConfigurationRequestParameters,
   MemoryOnlyConfigurationStore,
   Flag,
+  IBanditLogger,
 } from '@eppo/js-client-sdk-common';
-import { ObfuscatedFlag } from '@eppo/js-client-sdk-common/dist/interfaces';
+import { BanditParameters, BanditVariation } from '@eppo/js-client-sdk-common/dist/interfaces';
 
 import { sdkName, sdkVersion } from './sdk-data';
-
 
 /**
  * Configuration used for initializing the Eppo client
@@ -32,6 +32,11 @@ export interface IClientConfig {
    * Pass a logging implementation to send variation assignments to your data warehouse.
    */
   assignmentLogger: IAssignmentLogger;
+
+  /**
+   * Logging implementation to send bandit actions to your data warehouse
+   */
+  banditLogger?: IBanditLogger;
 
   /***
    * Timeout in milliseconds for the HTTPS request for the experiment configuration. (Default: 5000)
@@ -63,7 +68,12 @@ export interface IClientConfig {
   pollAfterFailedInitialization?: boolean;
 }
 
-export { IAssignmentEvent, IAssignmentLogger } from '@eppo/js-client-sdk-common';
+export {
+  IAssignmentEvent,
+  IAssignmentLogger,
+  IBanditEvent,
+  IBanditLogger,
+} from '@eppo/js-client-sdk-common';
 
 let clientInstance: IEppoClient;
 
@@ -76,7 +86,6 @@ let clientInstance: IEppoClient;
  */
 export async function init(config: IClientConfig): Promise<IEppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
-  const configurationStore = new MemoryOnlyConfigurationStore<Flag | ObfuscatedFlag>();
 
   const requestConfiguration: FlagConfigurationRequestParameters = {
     apiKey: config.apiKey,
@@ -86,13 +95,25 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
     requestTimeoutMs: config.requestTimeoutMs ?? undefined,
     numInitialRequestRetries: config.numInitialRequestRetries ?? undefined,
     numPollRequestRetries: config.numPollRequestRetries ?? undefined,
-    pollAfterSuccessfulInitialization: true, // For servers we always want to keep polling for the life of the server
+    pollAfterSuccessfulInitialization: true, // For servers, we always want to keep polling for the life of the server
     pollAfterFailedInitialization: config.pollAfterFailedInitialization ?? false,
     throwOnFailedInitialization: config.throwOnFailedInitialization ?? true,
   };
 
-  clientInstance = new EppoClient(configurationStore, requestConfiguration);
-  clientInstance.setLogger(config.assignmentLogger);
+  const flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
+  const banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
+  const banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
+
+  clientInstance = new EppoClient(
+    flagConfigurationStore,
+    banditVariationConfigurationStore,
+    banditModelConfigurationStore,
+    requestConfiguration,
+  );
+  clientInstance.setAssignmentLogger(config.assignmentLogger);
+  if (config.banditLogger) {
+    clientInstance.setBanditLogger(config.banditLogger);
+  }
 
   // default to LRU cache with 50_000 entries.
   // we estimate this will use no more than 10 MB of memory
