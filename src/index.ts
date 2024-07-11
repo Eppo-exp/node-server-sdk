@@ -2,7 +2,6 @@ import {
   IAssignmentLogger,
   validation,
   EppoClient,
-  IEppoClient,
   FlagConfigurationRequestParameters,
   MemoryOnlyConfigurationStore,
   Flag,
@@ -69,13 +68,14 @@ export interface IClientConfig {
 }
 
 export {
+  IAssignmentDetails,
   IAssignmentEvent,
   IAssignmentLogger,
   IBanditEvent,
   IBanditLogger,
 } from '@eppo/js-client-sdk-common';
 
-let clientInstance: IEppoClient;
+let clientInstance: EppoClient;
 
 /**
  * Initializes the Eppo client with configuration parameters.
@@ -84,7 +84,7 @@ let clientInstance: IEppoClient;
  * @param config client configuration
  * @public
  */
-export async function init(config: IClientConfig): Promise<IEppoClient> {
+export async function init(config: IClientConfig): Promise<EppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
 
   const requestConfiguration: FlagConfigurationRequestParameters = {
@@ -131,7 +131,7 @@ export async function init(config: IClientConfig): Promise<IEppoClient> {
  * Use the method after calling init() to initialize the client.
  * @returns a singleton client instance
  */
-export function getInstance(): IEppoClient {
+export function getInstance(): EppoClient {
   if (!clientInstance) {
     throw Error('Expected init() to be called to initialize a client instance');
   }

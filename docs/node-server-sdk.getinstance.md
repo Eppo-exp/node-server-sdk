@@ -9,11 +9,11 @@ Used to access a singleton SDK client instance. Use the method after calling ini
 **Signature:**
 
 ```typescript
-export declare function getInstance(): IEppoClient;
+export declare function getInstance(): EppoClient;
 ```
 **Returns:**
 
-IEppoClient
+EppoClient
 
 a singleton client instance
 

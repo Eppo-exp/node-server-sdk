@@ -4,14 +4,17 @@
 
 ```ts
 
+import { EppoClient } from '@eppo/js-client-sdk-common';
+import { IAssignmentDetails } from '@eppo/js-client-sdk-common';
 import { IAssignmentEvent } from '@eppo/js-client-sdk-common';
 import { IAssignmentLogger } from '@eppo/js-client-sdk-common';
 import { IBanditEvent } from '@eppo/js-client-sdk-common';
 import { IBanditLogger } from '@eppo/js-client-sdk-common';
-import { IEppoClient } from '@eppo/js-client-sdk-common';
 
 // @public
-export function getInstance(): IEppoClient;
+export function getInstance(): EppoClient;
+
+export { IAssignmentDetails }
 
 export { IAssignmentEvent }
 
@@ -35,7 +38,7 @@ export interface IClientConfig {
 }
 
 // @public
-export function init(config: IClientConfig): Promise<IEppoClient>;
+export function init(config: IClientConfig): Promise<EppoClient>;
 
 // (No @packageDocumentation comment for this package)
 
