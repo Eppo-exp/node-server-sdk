@@ -1,6 +1,6 @@
 {
   "name": "@eppo/node-server-sdk",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Eppo node server SDK",
   "main": "dist/index.js",
   "files": [
