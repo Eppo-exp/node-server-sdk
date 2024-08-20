@@ -10,6 +10,10 @@ on:
         description: The branch in sdk-test-data to target for testcase files
         required: false
         default: main
+      sdk_branch:
+        type: string
+        description: The branch of the SDK to test
+        required: false
 
 jobs:
   lint-test-sdk:
@@ -18,7 +22,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: Eppo-exp/node-server-sdk
-          ref: ${{ github.head_ref || github.ref_name || 'main' }}
+          ref: ${{ github.event.inputs.sdk_branch || github.head_ref || github.ref_name || 'main' }}
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
@@ -47,7 +51,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: Eppo-exp/node-server-sdk
-          ref: ${{ github.head_ref || github.ref_name || 'main' }}
+          ref: ${{ github.event.inputs.sdk_branch || github.head_ref || github.ref_name || 'main' }}
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
