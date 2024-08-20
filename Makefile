@@ -39,7 +39,7 @@ test-data:
 
 ## test
 .PHONY: test
-test: test
+test: test test-data
 	yarn test:unit
 
 ## prepare

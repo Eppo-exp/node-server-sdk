@@ -1,13 +1,24 @@
 name: Lint and Test SDK
 on:
   pull_request:
-    path: '**/*'
+    branches: [ "*" ]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      test_data_branch:
+        type: string
+        description: The branch in sdk-test-data to target for testcase files
+        required: false
+        default: main
 
 jobs:
   lint-test-sdk:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: Eppo-exp/node-server-sdk
+          ref: ${{ github.head_ref || github.ref_name || 'main' }}
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
@@ -27,13 +38,16 @@ jobs:
       - name: Check code with eslint
         run: npx eslint '**/*.{ts,tsx}'
         working-directory: ./
-      - name: Run unit tests
-        run: yarn test:unit
+      - name: Run unit and e2e tests
+        run: make test branchName=${{ github.event.inputs.test_data_branch || 'main' }}
         working-directory: ./
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: Eppo-exp/node-server-sdk
+          ref: ${{ github.head_ref || github.ref_name || 'main' }}
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
