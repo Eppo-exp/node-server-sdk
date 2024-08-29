@@ -1,13 +1,33 @@
 name: Lint and Test SDK
+
+env:
+  SDK_BRANCH_NAME: ${{ inputs.sdk_branch  || github.head_ref || github.ref_name || 'main' }}
+  TEST_DATA_BRANCH_NAME: ${{ inputs.test_data_branch || 'main' }}
+
 on:
   pull_request:
-    path: '**/*'
-
+    branches: [ "*" ]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      test_data_branch:
+        type: string
+        description: The branch in sdk-test-data to target for testcase files
+        required: false
+        default: main
+      sdk_branch:
+        type: string
+        description: The branch of the SDK to test
+        required: false
+          
 jobs:
   lint-test-sdk:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: Eppo-exp/node-server-sdk
+          ref: ${{ env.SDK_BRANCH_NAME }}
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
@@ -19,21 +39,22 @@ jobs:
       - name: Install root dependencies
         run: yarn --frozen-lockfile
         working-directory: ./
-      - name: 'Set up GCP SDK for downloading test data'
-        uses: 'google-github-actions/setup-gcloud@v0'
       - name: Install sdk dependencies
         run: yarn --frozen-lockfile
         working-directory: ./
       - name: Check code with eslint
         run: npx eslint '**/*.{ts,tsx}'
         working-directory: ./
-      - name: Run unit tests
-        run: yarn test:unit
+      - name: Run unit and e2e tests
+        run: make test branchName=${{ env.TEST_DATA_BRANCH_NAME }}
         working-directory: ./
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          repository: Eppo-exp/node-server-sdk
+          ref: ${{ env.SDK_BRANCH_NAME }}
       - name: Use Node.js
         uses: actions/setup-node@v1
         with:
