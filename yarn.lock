@@ -460,10 +460,10 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@eppo/js-client-sdk-common@4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-4.0.2.tgz#fb99445ad57d6593d0f9bbc70a2e1327ea962b41"
-  integrity sha512-S9RUxsrHJEl5ePMx9929aiw1uPlv3AxH82iJIJgsuSpLbi3w1EkEo17J/2B4505EI20G9XYLY3fWM0eOUR4WKw==
+"@eppo/js-client-sdk-common@4.3.0":
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-4.3.0.tgz#66c0e5904091ac1a9c2bc3bf4017637b13404ce8"
+  integrity sha512-ur270vCZjUuKuEohF1vH7yh1MBxtDbVcduCJzJmJ6m7kjoyvqNPzG/+lYPEol6Bpr9wV42ciIB+A1cYeNZ7gSA==
   dependencies:
     js-base64 "^3.7.7"
     md5 "^2.3.0"
