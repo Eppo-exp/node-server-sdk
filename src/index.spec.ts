@@ -27,7 +27,7 @@ import {
 
 import { getInstance, IAssignmentEvent, IAssignmentLogger, init } from '.';
 
-const { POLL_INTERVAL_MS, POLL_JITTER_PCT } = constants;
+const { DEFAULT_POLL_INTERVAL_MS, POLL_JITTER_PCT } = constants;
 
 describe('EppoClient E2E test', () => {
   const mockLogger: IAssignmentLogger = {
@@ -315,7 +315,7 @@ describe('EppoClient E2E test', () => {
   });
 
   describe('initialization errors', () => {
-    const maxRetryDelay = POLL_INTERVAL_MS * POLL_JITTER_PCT;
+    const maxRetryDelay = DEFAULT_POLL_INTERVAL_MS * POLL_JITTER_PCT;
     const mockConfigResponse = {
       flags: {
         [flagKey]: mockUfcFlagConfig,
@@ -380,7 +380,7 @@ describe('EppoClient E2E test', () => {
       );
 
       // Expect no further configuration requests
-      await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
+      await jest.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL_MS);
       expect(callCount).toBe(1);
     });
 
@@ -419,7 +419,7 @@ describe('EppoClient E2E test', () => {
         'default-value',
       );
 
-      await jest.advanceTimersByTimeAsync(POLL_INTERVAL_MS);
+      await jest.advanceTimersByTimeAsync(DEFAULT_POLL_INTERVAL_MS);
 
       // Expect a new call from poller
       expect(callCount).toBe(3);

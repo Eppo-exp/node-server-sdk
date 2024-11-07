@@ -65,6 +65,11 @@ export interface IClientConfig {
    * Poll for new configurations even if the initial configuration request failed. (default: false)
    */
   pollAfterFailedInitialization?: boolean;
+
+  /**
+   * Amount of time to wait between API calls to refresh configuration data. Default of 30_000 (30 seconds).
+   */
+  pollingIntervalMs?: number;
 }
 
 export {
@@ -97,6 +102,7 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     numPollRequestRetries: config.numPollRequestRetries ?? undefined,
     pollAfterSuccessfulInitialization: true, // For servers, we always want to keep polling for the life of the server
     pollAfterFailedInitialization: config.pollAfterFailedInitialization ?? false,
+    pollingIntervalMs: config.pollingIntervalMs ?? undefined,
     throwOnFailedInitialization: config.throwOnFailedInitialization ?? true,
   };
 
