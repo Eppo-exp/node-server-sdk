@@ -125,7 +125,9 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
   // we estimate this will use no more than 10 MB of memory
   // and should be appropriate for most server-side use cases.
   clientInstance.useLRUInMemoryAssignmentCache(50_000);
-  clientInstance.useLRUInMemoryBanditAssignmentCache(50_000);
+  // for bandits variant of LRU cache is use, that will
+  // expire on its own after set time. Defaults to 10 minutes
+  clientInstance.useExpiringInMemoryBanditAssignmentCache(50_000);
 
   // Fetch configurations (which will also start regular polling per requestConfiguration)
   await clientInstance.fetchFlagConfigurations();
