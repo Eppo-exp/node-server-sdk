@@ -1,4 +1,4 @@
-import { IAssignmentLogger, IBanditLogger } from "@eppo/js-client-sdk-common";
+import { IAssignmentLogger, IBanditLogger } from '@eppo/js-client-sdk-common';
 
 /**
  * Configuration used for initializing the Eppo client

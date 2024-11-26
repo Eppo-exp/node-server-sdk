@@ -200,5 +200,5 @@ describe('FileBackedNamedEventQueue', () => {
       const splicedEvents = queue.splice(1);
       expect(splicedEvents).toEqual([]);
     });
-  })
+  });
 });
