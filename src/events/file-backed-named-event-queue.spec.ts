@@ -157,4 +157,48 @@ describe('FileBackedNamedEventQueue', () => {
       ]);
     });
   });
+
+  describe('splice', () => {
+    const queueName = 'spliceQueue';
+    let queue: FileBackedNamedEventQueue<string>;
+    const queueDirectory = path.resolve(process.cwd(), `.queues/${queueName}`);
+
+    beforeEach(() => {
+      // Clean up the queue directory
+      if (fs.existsSync(queueDirectory)) {
+        fs.rmdirSync(queueDirectory, { recursive: true });
+      }
+      queue = new FileBackedNamedEventQueue(queueName);
+    });
+
+    afterAll(() => {
+      if (fs.existsSync(queueDirectory)) {
+        fs.rmdirSync(queueDirectory, { recursive: true });
+      }
+    });
+
+    it('should return the correct number of events and remove them from the queue', () => {
+      queue.push('event1');
+      queue.push('event2');
+      queue.push('event3');
+
+      const splicedEvents = queue.splice(2);
+      expect(splicedEvents).toEqual(['event1', 'event2']);
+      expect(queue.length).toBe(1);
+    });
+
+    it('should return all events if the count is greater than the queue length', () => {
+      queue.push('event1');
+      queue.push('event2');
+
+      const splicedEvents = queue.splice(3);
+      expect(splicedEvents).toEqual(['event1', 'event2']);
+      expect(queue.length).toBe(0);
+    });
+
+    it('should return an empty array if the queue is empty', () => {
+      const splicedEvents = queue.splice(1);
+      expect(splicedEvents).toEqual([]);
+    });
+  })
 });

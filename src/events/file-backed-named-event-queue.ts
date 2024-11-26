@@ -3,6 +3,8 @@ import * as path from 'path';
 
 import { applicationLogger, NamedEventQueue } from '@eppo/js-client-sdk-common';
 
+import { takeWhile } from '../util';
+
 export default class FileBackedNamedEventQueue<T> implements NamedEventQueue<T> {
   private readonly queueDirectory: string;
   private readonly metadataFile: string;
@@ -20,14 +22,8 @@ export default class FileBackedNamedEventQueue<T> implements NamedEventQueue<T> 
   }
 
   splice(count: number): T[] {
-    const events: T[] = [];
-    for (let i = 0; i < count; i++) {
-      const event = this.shift();
-      if (event) {
-        events.push(event);
-      }
-    }
-    return events;
+    const arr = Array.from({ length: count }, () => this.shift());
+    return takeWhile(arr, (item) => item !== undefined) as T[];
   }
 
   isEmpty(): boolean {
