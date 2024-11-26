@@ -19,6 +19,8 @@ export {
   IBanditLogger,
 } from '@eppo/js-client-sdk-common';
 
+export { IClientConfig };
+
 let clientInstance: EppoClient;
 
 /**
