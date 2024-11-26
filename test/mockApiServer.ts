@@ -10,7 +10,7 @@ import {
 const api = express();
 
 export const TEST_SERVER_PORT = 4123;
-export const TEST_BANDIT_API_KEY = 'zCsQuoHJxVPp895.ZWg9MTIzNDU2LmUudGVzdGluZy5lcHBvLmNsb3Vk';
+export const TEST_BANDIT_API_KEY = 'foo.ZWg9MTIzNDU2LmUudGVzdGluZy5lcHBvLmNsb3Vk';
 const flagEndpoint = /flag-config\/v1\/config*/;
 const banditEndpoint = /flag-config\/v1\/bandits*/;
 
