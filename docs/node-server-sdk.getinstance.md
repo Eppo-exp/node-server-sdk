@@ -15,5 +15,5 @@ export declare function getInstance(): EppoClient;
 
 EppoClient
 
-a singleton client instance
+a singleton client instance or throws an Error if init() has not been called
 
