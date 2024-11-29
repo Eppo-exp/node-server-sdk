@@ -80,7 +80,7 @@ export function getTestAssignments(
       testCase.defaultValue,
       obfuscated,
     );
-    assignments.push({ subject: subject, assignment: assignment });
+    assignments.push({ subject, assignment });
   }
   return assignments;
 }

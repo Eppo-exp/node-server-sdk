@@ -32,6 +32,8 @@ import SpyInstance = jest.SpyInstance;
 
 const { DEFAULT_POLL_INTERVAL_MS, POLL_JITTER_PCT } = constants;
 
+const apiKey = 'zCsQuoHJxVPp895.ZWg9MTIzNDU2LmUudGVzdGluZy5lcHBvLmNsb3Vk';
+
 describe('EppoClient E2E test', () => {
   const mockLogger: IAssignmentLogger = {
     logAssignment(assignment: IAssignmentEvent) {
@@ -43,7 +45,6 @@ describe('EppoClient E2E test', () => {
   // functionality is still "on" for the client when we explicitly instantiate the client (vs. using init())
   const mockBanditVariationStore = td.object<IConfigurationStore<BanditVariation[]>>();
   const mockBanditModelStore = td.object<IConfigurationStore<BanditParameters>>();
-
   const flagKey = 'mock-experiment';
 
   // Configuration for a single flag within the UFC.
@@ -148,7 +149,7 @@ describe('EppoClient E2E test', () => {
 
     beforeAll(async () => {
       await init({
-        apiKey: 'dummy',
+        apiKey,
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: mockLogger,
       });
@@ -465,7 +466,7 @@ describe('EppoClient E2E test', () => {
 
       // By not awaiting (yet) only the first attempt should be fired off before test execution below resumes
       const initPromise = init({
-        apiKey: 'dummy',
+        apiKey,
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: mockLogger,
       });
@@ -492,7 +493,7 @@ describe('EppoClient E2E test', () => {
       // timeout queue, message queue stuff) so we don't allow retries when rethrowing.
       await expect(
         init({
-          apiKey: 'dummy',
+          apiKey,
           baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
           assignmentLogger: mockLogger,
           numInitialRequestRetries: 0,
@@ -527,7 +528,7 @@ describe('EppoClient E2E test', () => {
 
       // By not awaiting (yet) only the first attempt should be fired off before test execution below resumes
       const initPromise = init({
-        apiKey: 'dummy',
+        apiKey,
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: mockLogger,
         throwOnFailedInitialization: false,
