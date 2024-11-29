@@ -92,7 +92,7 @@ let clientInstance: EppoClient;
 export async function init(config: IClientConfig): Promise<EppoClient> {
   validation.validateNotBlank(config.apiKey, 'API key required');
 
-  const requestConfiguration: FlagConfigurationRequestParameters = {
+  const configurationRequestParameters: FlagConfigurationRequestParameters = {
     apiKey: config.apiKey,
     sdkName,
     sdkVersion,
@@ -110,12 +110,12 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
   const banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
   const banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
 
-  clientInstance = new EppoClient(
+  clientInstance = new EppoClient({
     flagConfigurationStore,
     banditVariationConfigurationStore,
     banditModelConfigurationStore,
-    requestConfiguration,
-  );
+    configurationRequestParameters,
+  });
   clientInstance.setAssignmentLogger(config.assignmentLogger);
   if (config.banditLogger) {
     clientInstance.setBanditLogger(config.banditLogger);
