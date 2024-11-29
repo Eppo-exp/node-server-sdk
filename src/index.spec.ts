@@ -374,6 +374,7 @@ describe('EppoClient E2E test', () => {
       });
       it('Should log bandit assignment if cached entry is expired', async () => {
         jest.useFakeTimers();
+        banditLoggerSpy.mockReset();
 
         const client = getInstance();
         client.useExpiringInMemoryBanditAssignmentCache(2);
@@ -385,6 +386,7 @@ describe('EppoClient E2E test', () => {
       });
 
       it('Should invalidate least used cache entry if cache reaches max size', async () => {
+        banditLoggerSpy.mockReset();
         const client = getInstance();
         client.useExpiringInMemoryBanditAssignmentCache(2);
 
