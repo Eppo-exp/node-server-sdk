@@ -11,7 +11,7 @@ import {
 } from '@eppo/js-client-sdk-common';
 import { BanditParameters, BanditVariation } from '@eppo/js-client-sdk-common/dist/interfaces';
 import { ContextAttributes } from '@eppo/js-client-sdk-common/dist/types';
-import {Attributes} from "@eppo/js-client-sdk-common/src/types";
+import { Attributes } from '@eppo/js-client-sdk-common/src/types';
 import * as td from 'testdouble';
 
 import apiServer, { TEST_BANDIT_API_KEY, TEST_SERVER_PORT } from '../test/mockApiServer';
@@ -317,7 +317,6 @@ describe('EppoClient E2E test', () => {
       expect(numAssignmentsChecked).toBeGreaterThan(0);
     });
 
-
     describe('Bandit assignment cache', () => {
       const flagKey = 'banner_bandit_flag'; // piggyback off a shared test data flag
       const bobKey = 'bob';
@@ -329,22 +328,22 @@ describe('EppoClient E2E test', () => {
       };
 
       const aliceKey = 'alice';
-      const aliceAttributes: Attributes = {age: 25, country: 'USA', gender_identity: 'female' };
+      const aliceAttributes: Attributes = { age: 25, country: 'USA', gender_identity: 'female' };
       const aliceActions: Record<string, Attributes> = {
         nike: { brand_affinity: 1.5, loyalty_tier: 'silver' },
-        adidas: {brand_affinity: -1.0, loyalty_tier: 'bronze' },
-        reebok: {brand_affinity: 0.5, loyalty_tier: 'gold' },
-      }
+        adidas: { brand_affinity: -1.0, loyalty_tier: 'bronze' },
+        reebok: { brand_affinity: 0.5, loyalty_tier: 'gold' },
+      };
       const charlieKey = 'charlie';
-      const charlieAttributes: Attributes = {age: 25, country: 'USA', gender_identity: 'female' };
+      const charlieAttributes: Attributes = { age: 25, country: 'USA', gender_identity: 'female' };
       const charlieActions: Record<string, Attributes> = {
         nike: { brand_affinity: 1.0, loyalty_tier: 'gold' },
-        adidas: {brand_affinity: 1.0, loyalty_tier: 'silver' },
+        adidas: { brand_affinity: 1.0, loyalty_tier: 'silver' },
         puma: {},
-      }
+      };
 
       let banditLoggerSpy: SpyInstance<void, [banditEvent: IBanditEvent]>;
-      const defaultBanditCacheTTL = 600_000
+      const defaultBanditCacheTTL = 600_000;
 
       beforeAll(async () => {
         const dummyBanditLogger: IBanditLogger = {
@@ -369,15 +368,9 @@ describe('EppoClient E2E test', () => {
 
         // Let's say someone is rage refreshing - we want to log assignment only once
         for (const _ of Array(3).keys()) {
-          client.getBanditAction(
-            flagKey,
-            bobKey,
-            bobAttributes,
-            bobActions,
-            'default',
-          );
+          client.getBanditAction(flagKey, bobKey, bobAttributes, bobActions, 'default');
         }
-        expect(banditLoggerSpy).toHaveBeenCalledTimes(1)
+        expect(banditLoggerSpy).toHaveBeenCalledTimes(1);
       });
       it('Should log bandit assignment if cached entry is expired', async () => {
         jest.useFakeTimers();
@@ -385,59 +378,23 @@ describe('EppoClient E2E test', () => {
         const client = getInstance();
         client.useExpiringInMemoryBanditAssignmentCache(2);
 
-        client.getBanditAction(
-          flagKey,
-          bobKey,
-          bobAttributes,
-          bobActions,
-          'default',
-        );
+        client.getBanditAction(flagKey, bobKey, bobAttributes, bobActions, 'default');
         jest.advanceTimersByTime(defaultBanditCacheTTL);
-        client.getBanditAction(
-          flagKey,
-          bobKey,
-          bobAttributes,
-          bobActions,
-          'default',
-        );
-        expect(banditLoggerSpy).toHaveBeenCalledTimes(2)
-      })
+        client.getBanditAction(flagKey, bobKey, bobAttributes, bobActions, 'default');
+        expect(banditLoggerSpy).toHaveBeenCalledTimes(2);
+      });
 
       it('Should invalidate least used cache entry if cache reaches max size', async () => {
         const client = getInstance();
         client.useExpiringInMemoryBanditAssignmentCache(2);
 
-        client.getBanditAction(
-          flagKey,
-          bobKey,
-          bobAttributes,
-          bobActions,
-          'default',
-        );
-        client.getBanditAction(
-          flagKey,
-          aliceKey,
-          aliceAttributes,
-          aliceActions,
-          'default',
-        );
-        client.getBanditAction(
-          flagKey,
-          charlieKey,
-          charlieAttributes,
-          charlieActions,
-          'default'
-        );
+        client.getBanditAction(flagKey, bobKey, bobAttributes, bobActions, 'default');
+        client.getBanditAction(flagKey, aliceKey, aliceAttributes, aliceActions, 'default');
+        client.getBanditAction(flagKey, charlieKey, charlieAttributes, charlieActions, 'default');
         // even though bob was called 2nd time within cache validity time
         // we expect assignment to be logged because max cache size is 2
         // and currently storing alice and charlie
-        client.getBanditAction(
-          flagKey,
-          bobKey,
-          bobAttributes,
-          bobActions,
-          'default',
-        );
+        client.getBanditAction(flagKey, bobKey, bobAttributes, bobActions, 'default');
         expect(banditLoggerSpy).toHaveBeenCalledTimes(4);
       });
     });
