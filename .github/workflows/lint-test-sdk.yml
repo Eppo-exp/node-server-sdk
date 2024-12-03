@@ -28,6 +28,10 @@ jobs:
         node-version: [ '18', '20', '22', '23' ]
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: Eppo-exp/node-server-sdk
+          ref: ${{ env.SDK_BRANCH_NAME }}
+
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
@@ -61,6 +65,10 @@ jobs:
         node-version: [ '18', '20', '22', '23' ]
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: Eppo-exp/node-server-sdk
+          ref: ${{ env.SDK_BRANCH_NAME }}
+
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
