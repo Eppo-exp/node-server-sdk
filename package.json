@@ -29,8 +29,7 @@
   },
   "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
   "dependencies": {
-    "@eppo/js-client-sdk-common": "^4.5.1",
-    "lru-cache": "^10.0.1"
+    "@eppo/js-client-sdk-common": "^4.5.1"
   },
   "devDependencies": {
     "@google-cloud/storage": "^6.9.3",
