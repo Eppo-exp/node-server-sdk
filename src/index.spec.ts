@@ -402,6 +402,32 @@ describe('EppoClient E2E test', () => {
     });
   });
 
+  describe('Best Bandit Action', () => {
+    const flagKey = 'banner_bandit_flag'; // piggyback off a shared test data flag
+    const bobAttributes: Attributes = { age: 25, country: 'USA', gender_identity: 'female' };
+    const bobActions: Record<string, Attributes> = {
+      nike: { brand_affinity: -10.5, loyalty_tier: 'silver' },
+      adidas: { brand_affinity: 1.0, loyalty_tier: 'bronze' },
+      reebok: { brand_affinity: 0.5, loyalty_tier: 'gold' },
+    };
+
+    beforeAll(async () => {
+      await init({
+        apiKey: TEST_BANDIT_API_KEY, // Flag to dummy test server we want bandit-related files
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: mockLogger,
+      });
+    });
+
+    it('Should return the highest ranked bandit', async () => {
+      const client = getInstance();
+
+      const bestAction = client.getBestAction(flagKey, bobAttributes, bobActions, 'default');
+
+      expect(bestAction).toEqual('adidas');
+    });
+  });
+
   describe('initialization errors', () => {
     const maxRetryDelay = DEFAULT_POLL_INTERVAL_MS * POLL_JITTER_PCT;
     const mockConfigResponse = {
