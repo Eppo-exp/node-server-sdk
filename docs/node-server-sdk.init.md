@@ -16,7 +16,7 @@ export declare function init(config: IClientConfig): Promise<EppoClient>;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  config | IClientConfig | client configuration |
+|  config | [IClientConfig](./node-server-sdk.iclientconfig.md) | client configuration |
 
 **Returns:**
 
