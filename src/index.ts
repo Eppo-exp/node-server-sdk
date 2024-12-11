@@ -6,6 +6,7 @@ import {
   newDefaultEventDispatcher,
 } from '@eppo/js-client-sdk-common';
 import { BanditParameters, BanditVariation } from '@eppo/js-client-sdk-common/dist/interfaces';
+import { Event } from '@eppo/js-client-sdk-common/src/events/event-dispatcher';
 
 import FileBackedNamedEventQueue from './events/file-backed-named-event-queue';
 import { IClientConfig } from './i-client-config';
@@ -102,7 +103,7 @@ export function getInstance(): EppoClient {
 }
 
 function newEventDispatcher(sdkKey: string) {
-  const eventQueue = new FileBackedNamedEventQueue('events');
+  const eventQueue = new FileBackedNamedEventQueue<Event>('events');
   const emptyNetworkStatusListener =
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     { isOffline: () => false, onNetworkStatusChange: () => {} };
