@@ -6,7 +6,7 @@ import {
   newDefaultEventDispatcher,
 } from '@eppo/js-client-sdk-common';
 import { BanditParameters, BanditVariation } from '@eppo/js-client-sdk-common/dist/interfaces';
-import { Event } from '@eppo/js-client-sdk-common/src/events/event-dispatcher';
+import Event from '@eppo/js-client-sdk-common/src/events/event';
 
 import FileBackedNamedEventQueue from './events/file-backed-named-event-queue';
 import { IClientConfig } from './i-client-config';

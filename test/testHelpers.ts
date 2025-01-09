@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 
-import { VariationType, AttributeType } from '@eppo/js-client-sdk-common';
-import { ContextAttributes } from '@eppo/js-client-sdk-common/dist/types';
+import { VariationType, AttributeType, ContextAttributes } from '@eppo/js-client-sdk-common';
 
 export const TEST_DATA_DIR = './test/data/ufc/';
 export const ASSIGNMENT_TEST_DATA_DIR = TEST_DATA_DIR + 'tests/';
