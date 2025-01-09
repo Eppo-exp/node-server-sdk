@@ -261,6 +261,44 @@ describe('EppoClient E2E test', () => {
     });
   });
 
+  describe('get precomputed assignments', () => {
+    it('obfuscates assignments', async () => {
+      const client = await init({
+        apiKey,
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: mockLogger,
+      });
+      const subjectAttributes = { id: 'zach' };
+      const expectedAssignment = client.getStringAssignment(
+        'new-user-onboarding',
+        'subject',
+        subjectAttributes,
+        'default-value',
+      );
+      expect(expectedAssignment).toBe('purple');
+      setSaltOverrideForTests(new Uint8Array([7, 53, 17, 78]));
+      const encodedPrecomputedWire = client.getPrecomputedAssignments('subject', subjectAttributes);
+      const { precomputed } = JSON.parse(encodedPrecomputedWire) as IConfigurationWire;
+      if (!precomputed) {
+        fail('Precomputed data not in Configuration response');
+      }
+      const precomputedResponse = JSON.parse(precomputed.response);
+      expect(precomputedResponse).toBeTruthy();
+      expect(precomputedResponse.salt).toEqual('BzURTg==');
+      const precomputedFlags = precomputedResponse?.flags ?? {};
+      expect(Object.keys(precomputedFlags)).toContain('f0da9e751eb86ad80968df152390fa4f'); // 'new-user-onboarding', md5 hashed
+      const decodedFirstFlag = decodePrecomputedFlag(
+        precomputedFlags['f0da9e751eb86ad80968df152390fa4f'],
+      );
+      expect(decodedFirstFlag.flagKey).toEqual('f0da9e751eb86ad80968df152390fa4f');
+      expect(decodedFirstFlag.variationType).toEqual(VariationType.STRING);
+      expect(decodedFirstFlag.variationKey).toEqual('purple');
+      expect(decodedFirstFlag.variationValue).toEqual('purple');
+      expect(decodedFirstFlag.doLog).toEqual(false);
+      expect(decodedFirstFlag.extraLogging).toEqual({});
+    });
+  });
+
   describe('Shared Bandit Test Cases', () => {
     beforeAll(async () => {
       const dummyBanditLogger: IBanditLogger = {
@@ -543,45 +581,6 @@ describe('EppoClient E2E test', () => {
 
       // Assignments now working
       expect(client.getStringAssignment(flagKey, 'subject', {}, 'default-value')).toBe('control');
-    });
-  });
-
-  describe('get precomputed assignments', () => {
-    it('obfuscates assignments', async () => {
-      await init({
-        apiKey,
-        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
-        assignmentLogger: mockLogger,
-      });
-      const client = getInstance();
-      const subjectAttributes = { id: 'zach' };
-      const expectedAssignment = client.getStringAssignment(
-        'new-user-onboarding',
-        'subject',
-        subjectAttributes,
-        'default-value',
-      );
-      expect(expectedAssignment).toBe('purple');
-      setSaltOverrideForTests(new Uint8Array([7, 53, 17, 78]));
-      const encodedPrecomputedWire = client.getPrecomputedAssignments('subject', subjectAttributes);
-      const { precomputed } = JSON.parse(encodedPrecomputedWire) as IConfigurationWire;
-      if (!precomputed) {
-        fail('Precomputed data not in Configuration response');
-      }
-      const precomputedResponse = JSON.parse(precomputed.response);
-      expect(precomputedResponse).toBeTruthy();
-      expect(precomputedResponse.salt).toEqual('BzURTg==');
-      const precomputedFlags = precomputedResponse?.flags ?? {};
-      expect(Object.keys(precomputedFlags)).toContain('f0da9e751eb86ad80968df152390fa4f'); // 'new-user-onboarding', md5 hashed
-      const decodedFirstFlag = decodePrecomputedFlag(
-        precomputedFlags['f0da9e751eb86ad80968df152390fa4f'],
-      );
-      expect(decodedFirstFlag.flagKey).toEqual('f0da9e751eb86ad80968df152390fa4f');
-      expect(decodedFirstFlag.variationType).toEqual(VariationType.STRING);
-      expect(decodedFirstFlag.variationKey).toEqual('purple');
-      expect(decodedFirstFlag.variationValue).toEqual('purple');
-      expect(decodedFirstFlag.doLog).toEqual(false);
-      expect(decodedFirstFlag.extraLogging).toEqual({});
     });
   });
 });
