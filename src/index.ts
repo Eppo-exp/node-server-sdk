@@ -1,4 +1,6 @@
 import {
+  Attributes,
+  ContextAttributes,
   EppoClient,
   Flag,
   FlagConfigurationRequestParameters,
@@ -6,11 +8,13 @@ import {
   newDefaultEventDispatcher,
 } from '@eppo/js-client-sdk-common';
 import { BanditParameters, BanditVariation } from '@eppo/js-client-sdk-common/dist/interfaces';
-import { Event } from '@eppo/js-client-sdk-common/src/events/event-dispatcher';
+import { BanditActions, FlagKey } from '@eppo/js-client-sdk-common/dist/types';
+import Event from '@eppo/js-client-sdk-common/src/events/event';
 
 import FileBackedNamedEventQueue from './events/file-backed-named-event-queue';
 import { IClientConfig } from './i-client-config';
 import { sdkName, sdkVersion } from './sdk-data';
+import { generateSalt } from './util';
 
 export {
   IAssignmentDetails,
@@ -86,6 +90,23 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
 
   // Fetch configurations (which will also start regular polling per requestConfiguration)
   await clientInstance.fetchFlagConfigurations();
+
+  // Monkey patch the function to use a generated salt if none is provided
+  const originalGetPrecomputedConfiguration = clientInstance.getPrecomputedConfiguration;
+  clientInstance.getPrecomputedConfiguration = (
+    subjectKey: string,
+    subjectAttributes: Attributes | ContextAttributes = {},
+    banditActions: Record<FlagKey, BanditActions> = {},
+    salt?: string,
+  ) => {
+    return originalGetPrecomputedConfiguration.call(
+      clientInstance,
+      subjectKey,
+      subjectAttributes,
+      banditActions,
+      salt ?? generateSalt(),
+    );
+  };
 
   return clientInstance;
 }
