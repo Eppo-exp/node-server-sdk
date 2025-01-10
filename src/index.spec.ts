@@ -13,7 +13,7 @@ import {
   Attributes,
   decodePrecomputedFlag,
   BanditParameters,
-  BanditVariation
+  BanditVariation,
 } from '@eppo/js-client-sdk-common';
 import * as base64 from 'js-base64';
 import * as td from 'testdouble';
@@ -278,7 +278,12 @@ describe('EppoClient E2E test', () => {
       );
       expect(expectedAssignment).toBe('purple');
       const salt = base64.fromUint8Array(new Uint8Array([7, 53, 17, 78]));
-      const encodedPrecomputedWire = client.getPrecomputedConfiguration('subject', subjectAttributes, {}, salt);
+      const encodedPrecomputedWire = client.getPrecomputedConfiguration(
+        'subject',
+        subjectAttributes,
+        {},
+        salt,
+      );
       const { precomputed } = JSON.parse(encodedPrecomputedWire) as IConfigurationWire;
       if (!precomputed) {
         fail('Precomputed data not in Configuration response');
@@ -409,6 +414,7 @@ describe('EppoClient E2E test', () => {
         client.useExpiringInMemoryBanditAssignmentCache(2);
 
         // Let's say someone is rage refreshing - we want to log assignment only once
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         for (const _ of Array(3).keys()) {
           client.getBanditAction(flagKey, bobKey, bobAttributes, bobActions, 'default');
         }
