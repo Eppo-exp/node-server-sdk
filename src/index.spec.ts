@@ -11,10 +11,11 @@ import {
   IConfigurationWire,
   ContextAttributes,
   Attributes,
-  setSaltOverrideForTests,
   decodePrecomputedFlag,
+  BanditParameters,
+  BanditVariation
 } from '@eppo/js-client-sdk-common';
-import { BanditParameters, BanditVariation } from '@eppo/js-client-sdk-common/dist/interfaces';
+import * as base64 from 'js-base64';
 import * as td from 'testdouble';
 
 import apiServer, { TEST_BANDIT_API_KEY, TEST_SERVER_PORT } from '../test/mockApiServer';
@@ -276,8 +277,8 @@ describe('EppoClient E2E test', () => {
         'default-value',
       );
       expect(expectedAssignment).toBe('purple');
-      setSaltOverrideForTests(new Uint8Array([7, 53, 17, 78]));
-      const encodedPrecomputedWire = client.getPrecomputedAssignments('subject', subjectAttributes);
+      const salt = base64.fromUint8Array(new Uint8Array([7, 53, 17, 78]));
+      const encodedPrecomputedWire = client.getPrecomputedConfiguration('subject', subjectAttributes, {}, salt);
       const { precomputed } = JSON.parse(encodedPrecomputedWire) as IConfigurationWire;
       if (!precomputed) {
         fail('Precomputed data not in Configuration response');
