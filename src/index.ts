@@ -97,14 +97,14 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     subjectKey: string,
     subjectAttributes: Attributes | ContextAttributes = {},
     banditActions: Record<FlagKey, BanditActions> = {},
-    salt: string = generateSalt(),
+    salt?: string,
   ) => {
     return originalGetPrecomputedConfiguration.call(
       clientInstance,
       subjectKey,
       subjectAttributes,
       banditActions,
-      salt,
+      salt ?? generateSalt(),
     );
   };
 
