@@ -91,7 +91,7 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
   // Fetch configurations (which will also start regular polling per requestConfiguration)
   await clientInstance.fetchFlagConfigurations();
 
-  // Monkey patch the function to use a generated salt
+  // Monkey patch the function to use a generated salt if none is provided
   const originalGetPrecomputedConfiguration = clientInstance.getPrecomputedConfiguration;
   clientInstance.getPrecomputedConfiguration = (
     subjectKey: string,
