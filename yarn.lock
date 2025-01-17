@@ -460,17 +460,17 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@eppo/js-client-sdk-common@4.8.1":
-  version "4.8.1"
-  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-4.8.1.tgz#d273a43e791e50d36aea4dd8813e406139464e10"
-  integrity sha512-z++Z3XxTUAcjYyt63YYN5mkzsBy25LYI1BU3hj3uKl6sn6hHqXJLftQcU/8n/b7VZgL8XTTD2+85xzKbCMKdAA==
+"@eppo/js-client-sdk-common@4.8.3-alpha.5":
+  version "4.8.3-alpha.5"
+  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-4.8.3-alpha.5.tgz#3654bfabf8b61d64a79e86a549143e743f8c7d2b"
+  integrity sha512-ZRsRdiIB7kfT+OafORXsuONdA6hAM59FnRy7QpTLq1SXlc/aQ5zD/wVp452iW8tEE/ciJP7FJ7Qt4wd8wE8kdw==
   dependencies:
     buffer "npm:@eppo/buffer@6.2.0"
     js-base64 "^3.7.7"
     pino "^9.5.0"
     semver "^7.5.4"
     spark-md5 "^3.0.2"
-    uuid "^8.3.2"
+    uuid "^11.0.5"
 
 "@eslint/eslintrc@^0.4.3":
   version "0.4.3"
@@ -4735,7 +4735,12 @@ utils-merge@1.0.1:
   resolved "https://registry.npmjs.org/utils-merge/-/utils-merge-1.0.1.tgz"
   integrity sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=
 
-uuid@^8.0.0, uuid@^8.3.2:
+uuid@^11.0.5:
+  version "11.0.5"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-11.0.5.tgz#07b46bdfa6310c92c3fb3953a8720f170427fc62"
+  integrity sha512-508e6IcKLrhxKdBbcA2b4KQZlLVp2+J5UwQ6F7Drckkc5N9ZJwFa4TgWtsww9UG8fGHbm6gbV19TdM5pQ4GaIA==
+
+uuid@^8.0.0:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
