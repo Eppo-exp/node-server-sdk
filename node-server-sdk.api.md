@@ -4,12 +4,27 @@
 
 ```ts
 
+import { Attributes } from '@eppo/js-client-sdk-common';
+import { AttributeType } from '@eppo/js-client-sdk-common';
+import { BanditActions } from '@eppo/js-client-sdk-common';
+import { BanditSubjectAttributes } from '@eppo/js-client-sdk-common';
+import { ContextAttributes } from '@eppo/js-client-sdk-common';
 import { EppoClient } from '@eppo/js-client-sdk-common';
 import { IAssignmentDetails } from '@eppo/js-client-sdk-common';
 import { IAssignmentEvent } from '@eppo/js-client-sdk-common';
 import { IAssignmentLogger } from '@eppo/js-client-sdk-common';
 import { IBanditEvent } from '@eppo/js-client-sdk-common';
 import { IBanditLogger } from '@eppo/js-client-sdk-common';
+
+export { Attributes }
+
+export { AttributeType }
+
+export { BanditActions }
+
+export { BanditSubjectAttributes }
+
+export { ContextAttributes }
 
 // @public
 export function getInstance(): EppoClient;
