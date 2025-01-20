@@ -472,6 +472,17 @@
     spark-md5 "^3.0.2"
     uuid "^11.0.5"
 
+"@eppo/js-client-sdk-common@https://github.com/Eppo-exp/js-sdk-common#tp/FF-3838":
+  version "4.8.3"
+  resolved "https://github.com/Eppo-exp/js-sdk-common#a11bbeef8cf798ea53ea8b22a78cb1fe3487e70a"
+  dependencies:
+    buffer "npm:@eppo/buffer@6.2.0"
+    js-base64 "^3.7.7"
+    pino "^9.5.0"
+    semver "^7.5.4"
+    spark-md5 "^3.0.2"
+    uuid "^11.0.5"
+
 "@eslint/eslintrc@^0.4.3":
   version "0.4.3"
   resolved "https://registry.npmjs.org/@eslint/eslintrc/-/eslintrc-0.4.3.tgz"
