@@ -1,15 +1,17 @@
 import {
   Attributes,
+  BanditActions,
+  BanditParameters,
+  BanditVariation,
   ContextAttributes,
   EppoClient,
+  Event,
   Flag,
   FlagConfigurationRequestParameters,
+  FlagKey,
   MemoryOnlyConfigurationStore,
   newDefaultEventDispatcher,
 } from '@eppo/js-client-sdk-common';
-import { BanditParameters, BanditVariation } from '@eppo/js-client-sdk-common/dist/interfaces';
-import { BanditActions, FlagKey } from '@eppo/js-client-sdk-common/dist/types';
-import Event from '@eppo/js-client-sdk-common/src/events/event';
 
 import FileBackedNamedEventQueue from './events/file-backed-named-event-queue';
 import { IClientConfig } from './i-client-config';
@@ -17,6 +19,11 @@ import { sdkName, sdkVersion } from './sdk-data';
 import { generateSalt } from './util';
 
 export {
+  Attributes,
+  AttributeType,
+  BanditActions,
+  BanditSubjectAttributes,
+  ContextAttributes,
   IAssignmentDetails,
   IAssignmentEvent,
   IAssignmentLogger,
