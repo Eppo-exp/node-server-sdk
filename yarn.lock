@@ -460,7 +460,7 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@eppo/js-client-sdk-common@^4.8.4":
+"@eppo/js-client-sdk-common@4.8.4":
   version "4.8.4"
   resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-4.8.4.tgz#a1919233fa52399b86ce75b9eebed1c6d2bac16e"
   integrity sha512-cDxOOHjGU0kJLp2zXWGXaH2xcEd/oxsAT4e78jbbhktb+e5vkU3+SCFTvijFykr1h/hQ2a3O1PPP0M8HFfdrZA==
