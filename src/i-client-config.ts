@@ -45,4 +45,26 @@ export interface IClientConfig {
 
   /** Amount of time in milliseconds to wait between API calls to refresh configuration data. Default of 30_000 (30s). */
   pollingIntervalMs?: number;
+
+  /** Configuration settings for the event dispatcher */
+  eventIngestionConfig?: {
+    /** Maximum number of events to send per delivery request. Defaults to 1000 events. */
+    batchSize?: number;
+    /** Number of milliseconds to wait between each batch delivery. Defaults to 10 seconds. */
+    deliveryIntervalMs?: number;
+    /** Whether to disable event ingestion. Defaults to false. */
+    disabled?: boolean;
+    /**
+     * Maximum number of events to queue in memory before starting to drop events.
+     * Note: This is only used if localStorage is not available.
+     * Defaults to 10000 events.
+     */
+    maxQueueSize?: number;
+    /** Maximum number of retry attempts before giving up on a batch delivery. Defaults to 3 retries. */
+    maxRetries?: number;
+    /** Maximum amount of milliseconds to wait before retrying a failed delivery. Defaults to 30 seconds. */
+    maxRetryDelayMs?: number;
+    /** Minimum amount of milliseconds to wait before retrying a failed delivery. Defaults to 5 seconds */
+    retryIntervalMs?: number;
+  };
 }
