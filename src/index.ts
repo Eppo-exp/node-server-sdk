@@ -150,11 +150,11 @@ function newEventDispatcher(
   const {
     batchSize = 1_000,
     deliveryIntervalMs = 10_000,
-    retryIntervalMs = 5_000,
-    maxRetryDelayMs = 30_000,
-    maxRetries = 3,
-    maxQueueSize = 10_000,
     disabled = false,
+    maxQueueSize = 10_000,
+    maxRetries = 3,
+    maxRetryDelayMs = 30_000,
+    retryIntervalMs = 5_000,
   } = config;
   if (disabled) {
     return NO_OP_EVENT_DISPATCHER;
