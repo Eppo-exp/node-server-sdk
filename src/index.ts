@@ -3,13 +3,17 @@ import {
   BanditActions,
   BanditParameters,
   BanditVariation,
+  BoundedEventQueue,
   ContextAttributes,
   EppoClient,
   Event,
+  EventDispatcher,
   Flag,
   FlagConfigurationRequestParameters,
   FlagKey,
   MemoryOnlyConfigurationStore,
+  NamedEventQueue,
+  applicationLogger,
   newDefaultEventDispatcher,
 } from '@eppo/js-client-sdk-common';
 
@@ -17,6 +21,7 @@ import FileBackedNamedEventQueue from './events/file-backed-named-event-queue';
 import { IClientConfig } from './i-client-config';
 import { sdkName, sdkVersion } from './sdk-data';
 import { generateSalt } from './util';
+import { isReadOnlyFs } from './util/index';
 
 export {
   Attributes,
@@ -35,6 +40,13 @@ export { IClientConfig };
 
 let clientInstance: EppoClient;
 
+export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  attachContext: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  dispatch: () => {},
+};
+
 /**
  * Initializes the Eppo client with configuration parameters.
  * This method should be called once on application startup.
@@ -52,6 +64,7 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     pollingIntervalMs,
     throwOnFailedInitialization = true,
     pollAfterFailedInitialization = false,
+    eventIngestionConfig,
   } = config;
   if (!apiKey) {
     throw new Error('API key is required');
@@ -75,7 +88,7 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
   const flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
   const banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
   const banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
-  const eventDispatcher = newEventDispatcher(apiKey);
+  const eventDispatcher = newEventDispatcher(apiKey, eventIngestionConfig);
 
   clientInstance = new EppoClient({
     flagConfigurationStore,
@@ -130,8 +143,35 @@ export function getInstance(): EppoClient {
   return clientInstance;
 }
 
-function newEventDispatcher(sdkKey: string) {
-  const eventQueue = new FileBackedNamedEventQueue<Event>('events');
+function newEventDispatcher(
+  sdkKey: string,
+  eventIngestionConfig: IClientConfig['eventIngestionConfig'] = {
+    disabled: false,
+  },
+): EventDispatcher {
+  if (eventIngestionConfig.disabled) {
+    return NO_OP_EVENT_DISPATCHER;
+  }
+
+  let eventQueue: NamedEventQueue<Event>;
+  try {
+    // Check if the file system is read-only
+    if (isReadOnlyFs(`${process.cwd()}/.queues`)) {
+      applicationLogger.warn(
+        'File system appears to be read-only. Using in-memory event queue instead.',
+      );
+      eventQueue = new BoundedEventQueue<Event>('events');
+    } else {
+      eventQueue = new FileBackedNamedEventQueue<Event>('events');
+    }
+  } catch (error) {
+    // If there's any error during the check, fall back to BoundedEventQueue
+    applicationLogger.warn(
+      `Error checking file system: ${error}. Using in-memory event queue instead.`,
+    );
+    eventQueue = new BoundedEventQueue<Event>('events');
+  }
+
   const emptyNetworkStatusListener =
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     { isOffline: () => false, onNetworkStatusChange: () => {} };

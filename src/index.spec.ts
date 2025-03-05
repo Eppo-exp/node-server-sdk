@@ -14,6 +14,7 @@ import {
   decodePrecomputedFlag,
   BanditParameters,
   BanditVariation,
+  applicationLogger,
 } from '@eppo/js-client-sdk-common';
 import * as base64 from 'js-base64';
 import * as td from 'testdouble';
@@ -30,7 +31,9 @@ import {
   validateTestAssignments,
 } from '../test/testHelpers';
 
-import { getInstance, IAssignmentEvent, IAssignmentLogger, init } from '.';
+import * as util from './util/index';
+
+import { getInstance, IAssignmentEvent, IAssignmentLogger, init, NO_OP_EVENT_DISPATCHER } from '.';
 
 import SpyInstance = jest.SpyInstance;
 
@@ -367,7 +370,11 @@ describe('EppoClient E2E test', () => {
     describe('Bandit assignment cache', () => {
       const flagKey = 'banner_bandit_flag'; // piggyback off a shared test data flag
       const bobKey = 'bob';
-      const bobAttributes: Attributes = { age: 25, country: 'USA', gender_identity: 'female' };
+      const bobAttributes: Attributes = {
+        age: 25,
+        country: 'USA',
+        gender_identity: 'female',
+      };
       const bobActions: Record<string, Attributes> = {
         nike: { brand_affinity: 1.5, loyalty_tier: 'silver' },
         adidas: { brand_affinity: -1.0, loyalty_tier: 'bronze' },
@@ -375,14 +382,22 @@ describe('EppoClient E2E test', () => {
       };
 
       const aliceKey = 'alice';
-      const aliceAttributes: Attributes = { age: 25, country: 'USA', gender_identity: 'female' };
+      const aliceAttributes: Attributes = {
+        age: 25,
+        country: 'USA',
+        gender_identity: 'female',
+      };
       const aliceActions: Record<string, Attributes> = {
         nike: { brand_affinity: 1.5, loyalty_tier: 'silver' },
         adidas: { brand_affinity: -1.0, loyalty_tier: 'bronze' },
         reebok: { brand_affinity: 0.5, loyalty_tier: 'gold' },
       };
       const charlieKey = 'charlie';
-      const charlieAttributes: Attributes = { age: 25, country: 'USA', gender_identity: 'female' };
+      const charlieAttributes: Attributes = {
+        age: 25,
+        country: 'USA',
+        gender_identity: 'female',
+      };
       const charlieActions: Record<string, Attributes> = {
         nike: { brand_affinity: 1.0, loyalty_tier: 'gold' },
         adidas: { brand_affinity: 1.0, loyalty_tier: 'silver' },
@@ -452,7 +467,11 @@ describe('EppoClient E2E test', () => {
 
   describe('Best Bandit Action', () => {
     const flagKey = 'banner_bandit_flag'; // piggyback off a shared test data flag
-    const bobAttributes: Attributes = { age: 25, country: 'USA', gender_identity: 'female' };
+    const bobAttributes: Attributes = {
+      age: 25,
+      country: 'USA',
+      gender_identity: 'female',
+    };
     const bobActions: Record<string, Attributes> = {
       nike: { brand_affinity: -10.5, loyalty_tier: 'silver' },
       adidas: { brand_affinity: 1.0, loyalty_tier: 'bronze' },
@@ -469,7 +488,6 @@ describe('EppoClient E2E test', () => {
 
     it('Should return the highest ranked bandit', async () => {
       const client = getInstance();
-
       const bestAction = client.getBestAction(flagKey, bobAttributes, bobActions, 'default');
 
       expect(bestAction).toEqual('adidas');
@@ -588,6 +606,110 @@ describe('EppoClient E2E test', () => {
 
       // Assignments now working
       expect(client.getStringAssignment(flagKey, 'subject', {}, 'default-value')).toBe('control');
+    });
+  });
+
+  describe('eventIngestionConfig', () => {
+    it('should not be used if eventIngestionConfig.disabled is true', async () => {
+      const client = await init({
+        apiKey,
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: mockLogger,
+        eventIngestionConfig: {
+          disabled: true,
+        },
+      });
+      expect(client['eventDispatcher']).toEqual(NO_OP_EVENT_DISPATCHER);
+    });
+
+    it('should be used if eventIngestionConfig.disabled is false', async () => {
+      const client = await init({
+        apiKey,
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: mockLogger,
+        eventIngestionConfig: {
+          disabled: false,
+        },
+      });
+      expect(client['eventDispatcher']).not.toEqual(NO_OP_EVENT_DISPATCHER);
+    });
+
+    describe('read-only file system handling', () => {
+      // Save original implementation
+      let isReadOnlyFsSpy: SpyInstance;
+
+      beforeEach(() => {
+        // Reset the module before each test
+        jest.resetModules();
+        // Create a spy on isReadOnlyFs that we can mock
+        isReadOnlyFsSpy = jest.spyOn(util, 'isReadOnlyFs');
+      });
+
+      afterEach(() => {
+        isReadOnlyFsSpy.mockRestore();
+      });
+
+      it('should use BoundedEventQueue when file system is read-only', async () => {
+        // Mock isReadOnlyFs to return true (read-only file system)
+        isReadOnlyFsSpy.mockReturnValue(true);
+        const client = await init({
+          apiKey,
+          baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+          assignmentLogger: mockLogger,
+          eventIngestionConfig: {
+            disabled: false,
+          },
+        });
+
+        // Check that the event queue is a BoundedEventQueue
+        // We can't directly check the type, but we can check that it's not a FileBackedNamedEventQueue
+        // by checking if the queue has a 'queueDirectory' property
+        const eventDispatcher = client['eventDispatcher'];
+        const eventQueue = eventDispatcher['batchProcessor']['eventQueue'];
+        expect(eventQueue).toBeDefined();
+        expect(eventQueue['queueDirectory']).toBeUndefined();
+      });
+
+      it('should use FileBackedNamedEventQueue when file system is writable', async () => {
+        // Mock isReadOnlyFs to return false (writable file system)
+        isReadOnlyFsSpy.mockReturnValue(false);
+        const client = await init({
+          apiKey,
+          baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+          assignmentLogger: mockLogger,
+          eventIngestionConfig: {
+            disabled: false,
+          },
+        });
+
+        // Check that the event queue is a FileBackedNamedEventQueue
+        // by checking if the queue has a 'queueDirectory' property
+        const eventDispatcher = client['eventDispatcher'];
+        const eventQueue = eventDispatcher['batchProcessor']['eventQueue'];
+        expect(eventQueue).toBeDefined();
+        expect(eventQueue['queueDirectory']).toBeDefined();
+      });
+
+      it('should use BoundedEventQueue when isReadOnlyFs throws an error', async () => {
+        // Mock isReadOnlyFs to throw an error
+        isReadOnlyFsSpy.mockImplementation(() => {
+          throw new Error('Test error');
+        });
+        const client = await init({
+          apiKey,
+          baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+          assignmentLogger: mockLogger,
+          eventIngestionConfig: {
+            disabled: false,
+          },
+        });
+
+        // Check that the event queue is a BoundedEventQueue
+        const eventDispatcher = client['eventDispatcher'];
+        const eventQueue = eventDispatcher['batchProcessor']['eventQueue'];
+        expect(eventQueue).toBeDefined();
+        expect(eventQueue['queueDirectory']).toBeUndefined();
+      });
     });
   });
 });
