@@ -145,14 +145,20 @@ export function getInstance(): EppoClient {
 
 function newEventDispatcher(
   sdkKey: string,
-  eventIngestionConfig: IClientConfig['eventIngestionConfig'] = {
-    disabled: false,
-  },
+  config: IClientConfig['eventIngestionConfig'] = {},
 ): EventDispatcher {
-  if (eventIngestionConfig.disabled) {
+  const {
+    batchSize = 1_000,
+    deliveryIntervalMs = 10_000,
+    retryIntervalMs = 5_000,
+    maxRetryDelayMs = 30_000,
+    maxRetries = 3,
+    maxQueueSize = 10_000,
+    disabled = false,
+  } = config;
+  if (disabled) {
     return NO_OP_EVENT_DISPATCHER;
   }
-
   let eventQueue: NamedEventQueue<Event>;
   try {
     // Check if the file system is read-only
@@ -160,7 +166,7 @@ function newEventDispatcher(
       applicationLogger.warn(
         'File system appears to be read-only. Using in-memory event queue instead.',
       );
-      eventQueue = new BoundedEventQueue<Event>('events');
+      eventQueue = new BoundedEventQueue<Event>('events', [], maxQueueSize);
     } else {
       eventQueue = new FileBackedNamedEventQueue<Event>('events');
     }
@@ -169,11 +175,16 @@ function newEventDispatcher(
     applicationLogger.warn(
       `Error checking file system: ${error}. Using in-memory event queue instead.`,
     );
-    eventQueue = new BoundedEventQueue<Event>('events');
+    eventQueue = new BoundedEventQueue<Event>('events', [], maxQueueSize);
   }
 
   const emptyNetworkStatusListener =
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     { isOffline: () => false, onNetworkStatusChange: () => {} };
-  return newDefaultEventDispatcher(eventQueue, emptyNetworkStatusListener, sdkKey);
+  return newDefaultEventDispatcher(eventQueue, emptyNetworkStatusListener, sdkKey, batchSize, {
+    deliveryIntervalMs,
+    retryIntervalMs,
+    maxRetryDelayMs,
+    maxRetries,
+  });
 }
