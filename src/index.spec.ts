@@ -14,7 +14,6 @@ import {
   decodePrecomputedFlag,
   BanditParameters,
   BanditVariation,
-  applicationLogger,
 } from '@eppo/js-client-sdk-common';
 import * as base64 from 'js-base64';
 import * as td from 'testdouble';
