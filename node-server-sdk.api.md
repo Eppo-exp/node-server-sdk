@@ -10,6 +10,7 @@ import { BanditActions } from '@eppo/js-client-sdk-common';
 import { BanditSubjectAttributes } from '@eppo/js-client-sdk-common';
 import { ContextAttributes } from '@eppo/js-client-sdk-common';
 import { EppoClient } from '@eppo/js-client-sdk-common';
+import { EventDispatcher } from '@eppo/js-client-sdk-common';
 import { IAssignmentDetails } from '@eppo/js-client-sdk-common';
 import { IAssignmentEvent } from '@eppo/js-client-sdk-common';
 import { IAssignmentLogger } from '@eppo/js-client-sdk-common';
@@ -45,6 +46,15 @@ export interface IClientConfig {
     assignmentLogger: IAssignmentLogger;
     banditLogger?: IBanditLogger;
     baseUrl?: string;
+    eventIngestionConfig?: {
+        batchSize?: number;
+        deliveryIntervalMs?: number;
+        disabled?: boolean;
+        maxQueueSize?: number;
+        maxRetries?: number;
+        maxRetryDelayMs?: number;
+        retryIntervalMs?: number;
+    };
     numInitialRequestRetries?: number;
     numPollRequestRetries?: number;
     pollAfterFailedInitialization?: boolean;
@@ -55,6 +65,9 @@ export interface IClientConfig {
 
 // @public
 export function init(config: IClientConfig): Promise<EppoClient>;
+
+// @public (undocumented)
+export const NO_OP_EVENT_DISPATCHER: EventDispatcher;
 
 // (No @packageDocumentation comment for this package)
 

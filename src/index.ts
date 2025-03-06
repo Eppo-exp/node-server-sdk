@@ -34,6 +34,7 @@ export {
   IAssignmentLogger,
   IBanditEvent,
   IBanditLogger,
+  EppoAssignmentLogger,
 } from '@eppo/js-client-sdk-common';
 
 export { IClientConfig };
