@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
   "dependencies": {
-    "@eppo/js-client-sdk-common": "4.13.0"
+    "@eppo/js-client-sdk-common": "4.13.1"
   },
   "devDependencies": {
     "@google-cloud/storage": "^6.9.3",
