@@ -9,6 +9,7 @@ import { AttributeType } from '@eppo/js-client-sdk-common';
 import { BanditActions } from '@eppo/js-client-sdk-common';
 import { BanditSubjectAttributes } from '@eppo/js-client-sdk-common';
 import { ContextAttributes } from '@eppo/js-client-sdk-common';
+import { EppoAssignmentLogger } from '@eppo/js-client-sdk-common';
 import { EppoClient } from '@eppo/js-client-sdk-common';
 import { EventDispatcher } from '@eppo/js-client-sdk-common';
 import { IAssignmentDetails } from '@eppo/js-client-sdk-common';
@@ -26,6 +27,8 @@ export { BanditActions }
 export { BanditSubjectAttributes }
 
 export { ContextAttributes }
+
+export { EppoAssignmentLogger }
 
 // @public
 export function getInstance(): EppoClient;
