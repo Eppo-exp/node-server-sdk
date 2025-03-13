@@ -17,3 +17,9 @@
 |  --- | --- |
 |  [IClientConfig](./node-server-sdk.iclientconfig.md) | Configuration used for initializing the Eppo client |
 
+## Variables
+
+|  Variable | Description |
+|  --- | --- |
+|  [NO\_OP\_EVENT\_DISPATCHER](./node-server-sdk.no_op_event_dispatcher.md) |  |
+
