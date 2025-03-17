@@ -49,10 +49,10 @@ export interface IClientConfig {
     assignmentLogger: IAssignmentLogger;
     banditLogger?: IBanditLogger;
     baseUrl?: string;
-    eventIngestionConfig?: {
+    eventTracking?: {
         batchSize?: number;
         deliveryIntervalMs?: number;
-        disabled?: boolean;
+        enabled?: boolean;
         maxQueueSize?: number;
         maxRetries?: number;
         maxRetryDelayMs?: number;

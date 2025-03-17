@@ -65,7 +65,7 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     pollingIntervalMs,
     throwOnFailedInitialization = true,
     pollAfterFailedInitialization = false,
-    eventIngestionConfig,
+    eventTracking,
   } = config;
   if (!apiKey) {
     throw new Error('API key is required');
@@ -89,7 +89,7 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
   const flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
   const banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
   const banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
-  const eventDispatcher = newEventDispatcher(apiKey, eventIngestionConfig);
+  const eventDispatcher = newEventDispatcher(apiKey, eventTracking);
 
   clientInstance = new EppoClient({
     flagConfigurationStore,
@@ -146,18 +146,18 @@ export function getInstance(): EppoClient {
 
 function newEventDispatcher(
   sdkKey: string,
-  config: IClientConfig['eventIngestionConfig'] = {},
+  config: IClientConfig['eventTracking'] = {},
 ): EventDispatcher {
   const {
     batchSize = 1_000,
     deliveryIntervalMs = 10_000,
-    disabled = false,
+    enabled = false,
     maxQueueSize = 10_000,
     maxRetries = 3,
     maxRetryDelayMs = 30_000,
     retryIntervalMs = 5_000,
   } = config;
-  if (disabled) {
+  if (!enabled) {
     return NO_OP_EVENT_DISPATCHER;
   }
   let eventQueue: NamedEventQueue<Event>;

@@ -608,26 +608,23 @@ describe('EppoClient E2E test', () => {
     });
   });
 
-  describe('eventIngestionConfig', () => {
-    it('should not be used if eventIngestionConfig.disabled is true', async () => {
+  describe('eventTracking', () => {
+    it('should be disabled by default', async () => {
       const client = await init({
         apiKey,
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: mockLogger,
-        eventIngestionConfig: {
-          disabled: true,
-        },
       });
       expect(client['eventDispatcher']).toEqual(NO_OP_EVENT_DISPATCHER);
     });
 
-    it('should be used if eventIngestionConfig.disabled is false', async () => {
+    it('should be enabled if eventTracking.enabled is true', async () => {
       const client = await init({
         apiKey,
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: mockLogger,
-        eventIngestionConfig: {
-          disabled: false,
+        eventTracking: {
+          enabled: true
         },
       });
       expect(client['eventDispatcher']).not.toEqual(NO_OP_EVENT_DISPATCHER);
@@ -655,8 +652,8 @@ describe('EppoClient E2E test', () => {
           apiKey,
           baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
           assignmentLogger: mockLogger,
-          eventIngestionConfig: {
-            disabled: false,
+          eventTracking: {
+            enabled: true,
           },
         });
 
@@ -676,8 +673,8 @@ describe('EppoClient E2E test', () => {
           apiKey,
           baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
           assignmentLogger: mockLogger,
-          eventIngestionConfig: {
-            disabled: false,
+          eventTracking: {
+            enabled: true,
           },
         });
 
@@ -698,8 +695,8 @@ describe('EppoClient E2E test', () => {
           apiKey,
           baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
           assignmentLogger: mockLogger,
-          eventIngestionConfig: {
-            disabled: false,
+          eventTracking: {
+            enabled: true,
           },
         });
 
