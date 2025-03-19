@@ -1,6 +1,6 @@
 {
   "name": "@eppo/node-server-sdk",
-  "version": "3.10.0",
+  "version": "3.10.1",
   "description": "Eppo node server SDK",
   "main": "dist/index.js",
   "files": [
@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
   "dependencies": {
-    "@eppo/js-client-sdk-common": "4.14.1"
+    "@eppo/js-client-sdk-common": "4.14.3"
   },
   "devDependencies": {
     "@google-cloud/storage": "^6.9.3",
