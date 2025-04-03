@@ -624,7 +624,7 @@ describe('EppoClient E2E test', () => {
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: mockLogger,
         eventTracking: {
-          enabled: true
+          enabled: true,
         },
       });
       expect(client['eventDispatcher']).not.toEqual(NO_OP_EVENT_DISPATCHER);
