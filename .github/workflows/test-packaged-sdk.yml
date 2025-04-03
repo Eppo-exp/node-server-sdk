@@ -13,7 +13,6 @@ jobs:
       matrix:
         platform: ['linux']
     steps:
-      - uses: actions/checkout@v4
       - uses: Eppo-exp/sdk-test-data/.github/actions/test-server-package@main
         with:
           platform: ${{ matrix.platform }}
