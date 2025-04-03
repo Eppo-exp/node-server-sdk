@@ -37,6 +37,21 @@ jobs:
       - run: yarn install
       - run: yarn test
 
+      - run: |
+          echo "Testing SDK Package at refs/tags/${{ steps.version.outputs.full }}"
+
+      - name: Test Server Package
+        uses: Eppo-exp/sdk-test-data/.github/actions/test-server-package@main
+        with:
+          platform: linux
+          sdk_name: 'node-server-sdk'
+          sdk_ref: refs/tags/${{ steps.version.outputs.full }} # Use the tag since the version is not yet published
+          sdk_relay_dir: 'node-sdk-relay'
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+          sdk_testing_project_id: ${{ vars.SDK_TESTING_PROJECT_ID }}
+          sdk_testing_region: ${{ vars.SDK_TESTING_REGION }}
+
+
       - name: Publish Latest
         uses: JS-DevTools/npm-publish@v3
         if: ${{ !github.event.release.prerelease && !steps.version.outputs.prerelease }}
