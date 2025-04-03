@@ -1,0 +1,26 @@
+name: Test Packaged SDK
+
+on:
+  release:
+    types: [published]
+  push:
+    branches:
+      - tp/*
+
+jobs:
+  test-node-sdk:
+    runs-on: ${{ matrix.platform == 'linux' && 'ubuntu-latest' || matrix.platform == 'macos' && 'macos-13' || matrix.platform == 'windows' && 'windows-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ['linux']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Eppo-exp/sdk-test-data/.github/actions/test-server-package@main
+        with:
+          platform: ${{ matrix.platform }}
+          sdk_name: 'node-server-sdk'
+          sdk_relay_dir: 'node-sdk-relay'
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+          sdk_testing_project_id: ${{ vars.SDK_TESTING_PROJECT_ID }}
+          sdk_testing_region: ${{ vars.SDK_TESTING_REGION }}
