@@ -4,7 +4,40 @@ on:
     types: [published]
 
 jobs:
+  test-packaged-node-sdk:
+    runs-on: ${{ matrix.platform == 'linux' && 'ubuntu-latest' || matrix.platform == 'macos' && 'macos-13' || matrix.platform == 'windows' && 'windows-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ['linux']
+        node-version: [ '18', '20', '22', '23' ]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Parse version from tag
+        id: version
+        uses: release-kit/semver@v2
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - run: |
+          echo "Testing SDK Package at version ${{ steps.version.outputs.full }}"
+
+      - uses: Eppo-exp/sdk-test-data/.github/actions/test-server-package@main
+        with:
+          platform: ${{ matrix.platform }}
+          sdk_name: 'node-server-sdk'
+          sdk_version: ${{ steps.version.outputs.full }}
+          sdk_relay_dir: 'node-sdk-relay'
+          shard_label: 'node-${{ matrix.node-version }}'
+          service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+          sdk_testing_project_id: ${{ vars.SDK_TESTING_PROJECT_ID }}
+          sdk_testing_region: ${{ vars.SDK_TESTING_REGION }}
+
   publish:
+    needs: test-packaged-node-sdk
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
