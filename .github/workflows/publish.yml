@@ -34,7 +34,7 @@ jobs:
           sdk_testing_project_id: ${{ vars.SDK_TESTING_PROJECT_ID }}
           sdk_testing_region: ${{ vars.SDK_TESTING_REGION }}
           shard_label: 'node-${{ matrix.node-version }}'
-          sdk_ref: refs/tags/${{ steps.version.outputs.full }}
+          sdk_version: ${{ steps.version.outputs.full }}
 
   publish:
     needs: test-packaged-node-sdk
