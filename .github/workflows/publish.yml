@@ -25,7 +25,7 @@ jobs:
       - run: |
           echo "Testing SDK Package at refs/tags/${{ steps.version.outputs.full }}"
 
-      - uses: Eppo-exp/sdk-test-data/.github/actions/test-server-package@tp/action-checkout
+      - uses: Eppo-exp/sdk-test-data/.github/actions/test-server-package@main
         with:
           platform: ${{ matrix.platform }}
           sdk_name: 'node-server-sdk'
@@ -33,6 +33,7 @@ jobs:
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
           sdk_testing_project_id: ${{ vars.SDK_TESTING_PROJECT_ID }}
           sdk_testing_region: ${{ vars.SDK_TESTING_REGION }}
+          shard_label: 'node-${{ matrix.node-version }}'
 
   publish:
     needs: test-packaged-node-sdk
