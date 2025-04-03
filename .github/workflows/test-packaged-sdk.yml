@@ -1,11 +1,9 @@
 name: Test Packaged SDK
 
 on:
-  release:
-    types: [published]
   push:
     branches:
-      - tp/*
+      - workflow-test/*
 
 jobs:
   test-node-sdk:
