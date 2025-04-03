@@ -23,13 +23,14 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - run: |
-          echo "Testing SDK Package at version ${{ steps.version.outputs.full }}"
+          echo "Testing SDK Package with version tag ${{ steps.version.outputs.full }}"
+          echo "Loading SDK at ref ${{ github.ref_name }}"
 
       - uses: Eppo-exp/sdk-test-data/.github/actions/test-server-package@main
         with:
           platform: ${{ matrix.platform }}
           sdk_name: 'node-server-sdk'
-          sdk_ref: 'refs/tags/${{ steps.version.outputs.full }}' # use tag because version isn't published yet
+          sdk_ref: ${{ github.ref_name }}
           sdk_relay_dir: 'node-sdk-relay'
           shard_label: 'node-${{ matrix.node-version }}'
           service_account_key: ${{ secrets.SERVICE_ACCOUNT_KEY }}
