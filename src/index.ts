@@ -79,8 +79,8 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     requestTimeoutMs,
     numInitialRequestRetries,
     numPollRequestRetries,
-    // For server-side, we always want to keep polling for the life of the process
-    pollAfterSuccessfulInitialization: true,
+    // For server-side, we default to keep polling for the life of the process
+    pollAfterSuccessfulInitialization: config.pollAfterSuccessfulInitialization ?? true,
     pollAfterFailedInitialization,
     pollingIntervalMs,
     throwOnFailedInitialization,
