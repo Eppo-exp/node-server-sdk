@@ -708,4 +708,31 @@ describe('EppoClient E2E test', () => {
       });
     });
   });
+
+  describe('pollAfterSuccessfulInitialization', () => {
+    it('should default to true when not specified', async () => {
+      const client = await init({
+        apiKey,
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: mockLogger,
+      });
+      
+      // Access the internal configurationRequestParameters to verify the default
+      const configurationRequestParameters = client['configurationRequestParameters'];
+      expect(configurationRequestParameters.pollAfterSuccessfulInitialization).toBe(true);
+    });
+
+    it('should use the provided value when specified', async () => {
+      const client = await init({
+        apiKey,
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: mockLogger,
+        pollAfterSuccessfulInitialization: false,
+      });
+      
+      // Access the internal configurationRequestParameters to verify the custom value
+      const configurationRequestParameters = client['configurationRequestParameters'];
+      expect(configurationRequestParameters.pollAfterSuccessfulInitialization).toBe(false);
+    });
+  });
 });
