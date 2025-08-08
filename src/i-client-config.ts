@@ -43,6 +43,12 @@ export interface IClientConfig {
   /** Poll for new configurations even if the initial configuration request failed. (default: false) */
   pollAfterFailedInitialization?: boolean;
 
+  /**
+   * Poll for new configurations (every `pollingIntervalMs`) after successfully requesting the initial configuration. (default: true)
+   * For server-side applications, this defaults to true to ensure configurations stay up-to-date for the life of the process.
+   */
+  pollAfterSuccessfulInitialization?: boolean;
+
   /** Amount of time in milliseconds to wait between API calls to refresh configuration data. Default of 30_000 (30s). */
   pollingIntervalMs?: number;
 
