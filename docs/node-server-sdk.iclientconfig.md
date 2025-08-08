@@ -14,17 +14,254 @@ export interface IClientConfig
 
 ## Properties
 
-|  Property | Modifiers | Type | Description |
-|  --- | --- | --- | --- |
-|  [apiKey](./node-server-sdk.iclientconfig.apikey.md) |  | string | Eppo SDK key |
-|  [assignmentLogger](./node-server-sdk.iclientconfig.assignmentlogger.md) |  | IAssignmentLogger | Provide a logging implementation to send variation assignments to your data warehouse. |
-|  [banditLogger?](./node-server-sdk.iclientconfig.banditlogger.md) |  | IBanditLogger | _(Optional)_ Logging implementation to send bandit actions to your data warehouse |
-|  [baseUrl?](./node-server-sdk.iclientconfig.baseurl.md) |  | string | _(Optional)_ Base URL of the Eppo API. Clients should use the default setting in most cases. |
-|  [eventTracking?](./node-server-sdk.iclientconfig.eventtracking.md) |  | { batchSize?: number; deliveryIntervalMs?: number; enabled?: boolean; maxQueueSize?: number; maxRetries?: number; maxRetryDelayMs?: number; retryIntervalMs?: number; } | _(Optional)_ Configuration settings for the event dispatcher |
-|  [numInitialRequestRetries?](./node-server-sdk.iclientconfig.numinitialrequestretries.md) |  | number | _(Optional)_ Number of additional times the initial configuration request will be attempted if it fails. This is the request servers typically synchronously wait for completion. A small wait will be done between requests. (Default: 1) |
-|  [numPollRequestRetries?](./node-server-sdk.iclientconfig.numpollrequestretries.md) |  | number | _(Optional)_ Number of additional times polling for updated configurations will be attempted before giving up. Polling is done after a successful initial request. Subsequent attempts are done using an exponential backoff. (Default: 7) |
-|  [pollAfterFailedInitialization?](./node-server-sdk.iclientconfig.pollafterfailedinitialization.md) |  | boolean | _(Optional)_ Poll for new configurations even if the initial configuration request failed. (default: false) |
-|  [pollingIntervalMs?](./node-server-sdk.iclientconfig.pollingintervalms.md) |  | number | _(Optional)_ Amount of time in milliseconds to wait between API calls to refresh configuration data. Default of 30\_000 (30s). |
-|  [requestTimeoutMs?](./node-server-sdk.iclientconfig.requesttimeoutms.md) |  | number | _(Optional)_ Timeout in milliseconds for the HTTPS request for the experiment configuration. (Default: 5000) |
-|  [throwOnFailedInitialization?](./node-server-sdk.iclientconfig.throwonfailedinitialization.md) |  | boolean | _(Optional)_ Throw error if unable to fetch an initial configuration during initialization. (default: true) |
+<table><thead><tr><th>
+
+Property
+
+
+</th><th>
+
+Modifiers
+
+
+</th><th>
+
+Type
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[apiKey](./node-server-sdk.iclientconfig.apikey.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+Eppo SDK key
+
+
+</td></tr>
+<tr><td>
+
+[assignmentLogger](./node-server-sdk.iclientconfig.assignmentlogger.md)
+
+
+</td><td>
+
+
+</td><td>
+
+IAssignmentLogger
+
+
+</td><td>
+
+Provide a logging implementation to send variation assignments to your data warehouse.
+
+
+</td></tr>
+<tr><td>
+
+[banditLogger?](./node-server-sdk.iclientconfig.banditlogger.md)
+
+
+</td><td>
+
+
+</td><td>
+
+IBanditLogger
+
+
+</td><td>
+
+_(Optional)_ Logging implementation to send bandit actions to your data warehouse
+
+
+</td></tr>
+<tr><td>
+
+[baseUrl?](./node-server-sdk.iclientconfig.baseurl.md)
+
+
+</td><td>
+
+
+</td><td>
+
+string
+
+
+</td><td>
+
+_(Optional)_ Base URL of the Eppo API. Clients should use the default setting in most cases.
+
+
+</td></tr>
+<tr><td>
+
+[eventTracking?](./node-server-sdk.iclientconfig.eventtracking.md)
+
+
+</td><td>
+
+
+</td><td>
+
+{ batchSize?: number; deliveryIntervalMs?: number; enabled?: boolean; maxQueueSize?: number; maxRetries?: number; maxRetryDelayMs?: number; retryIntervalMs?: number; }
+
+
+</td><td>
+
+_(Optional)_ Configuration settings for the event dispatcher
+
+
+</td></tr>
+<tr><td>
+
+[numInitialRequestRetries?](./node-server-sdk.iclientconfig.numinitialrequestretries.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+_(Optional)_ Number of additional times the initial configuration request will be attempted if it fails. This is the request servers typically synchronously wait for completion. A small wait will be done between requests. (Default: 1)
+
+
+</td></tr>
+<tr><td>
+
+[numPollRequestRetries?](./node-server-sdk.iclientconfig.numpollrequestretries.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+_(Optional)_ Number of additional times polling for updated configurations will be attempted before giving up. Polling is done after a successful initial request. Subsequent attempts are done using an exponential backoff. (Default: 7)
+
+
+</td></tr>
+<tr><td>
+
+[pollAfterFailedInitialization?](./node-server-sdk.iclientconfig.pollafterfailedinitialization.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Poll for new configurations even if the initial configuration request failed. (default: false)
+
+
+</td></tr>
+<tr><td>
+
+[pollAfterSuccessfulInitialization?](./node-server-sdk.iclientconfig.pollaftersuccessfulinitialization.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Poll for new configurations (every `pollingIntervalMs`<!-- -->) after successfully requesting the initial configuration. (default: true) For server-side applications, this defaults to true to ensure configurations stay up-to-date for the life of the process.
+
+
+</td></tr>
+<tr><td>
+
+[pollingIntervalMs?](./node-server-sdk.iclientconfig.pollingintervalms.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+_(Optional)_ Amount of time in milliseconds to wait between API calls to refresh configuration data. Default of 30\_000 (30s).
+
+
+</td></tr>
+<tr><td>
+
+[requestTimeoutMs?](./node-server-sdk.iclientconfig.requesttimeoutms.md)
+
+
+</td><td>
+
+
+</td><td>
+
+number
+
+
+</td><td>
+
+_(Optional)_ Timeout in milliseconds for the HTTPS request for the experiment configuration. (Default: 5000)
+
+
+</td></tr>
+<tr><td>
+
+[throwOnFailedInitialization?](./node-server-sdk.iclientconfig.throwonfailedinitialization.md)
+
+
+</td><td>
+
+
+</td><td>
+
+boolean
+
+
+</td><td>
+
+_(Optional)_ Throw error if unable to fetch an initial configuration during initialization. (default: true)
+
+
+</td></tr>
+</tbody></table>
 

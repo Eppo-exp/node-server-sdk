@@ -61,6 +61,7 @@ export interface IClientConfig {
     numInitialRequestRetries?: number;
     numPollRequestRetries?: number;
     pollAfterFailedInitialization?: boolean;
+    pollAfterSuccessfulInitialization?: boolean;
     pollingIntervalMs?: number;
     requestTimeoutMs?: number;
     throwOnFailedInitialization?: boolean;

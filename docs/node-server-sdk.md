@@ -6,20 +6,88 @@
 
 ## Functions
 
-|  Function | Description |
-|  --- | --- |
-|  [getInstance()](./node-server-sdk.getinstance.md) | Used to access a singleton SDK client instance. Use the method after calling init() to initialize the client. |
-|  [init(config)](./node-server-sdk.init.md) | Initializes the Eppo client with configuration parameters. This method should be called once on application startup. After invocation of this method, the SDK will poll Eppo API at regular intervals to retrieve assignment configurations. |
+<table><thead><tr><th>
+
+Function
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[getInstance()](./node-server-sdk.getinstance.md)
+
+
+</td><td>
+
+Used to access a singleton SDK client instance. Use the method after calling init() to initialize the client.
+
+
+</td></tr>
+<tr><td>
+
+[init(config)](./node-server-sdk.init.md)
+
+
+</td><td>
+
+Initializes the Eppo client with configuration parameters. This method should be called once on application startup. After invocation of this method, the SDK will poll Eppo API at regular intervals to retrieve assignment configurations.
+
+
+</td></tr>
+</tbody></table>
 
 ## Interfaces
 
-|  Interface | Description |
-|  --- | --- |
-|  [IClientConfig](./node-server-sdk.iclientconfig.md) | Configuration used for initializing the Eppo client |
+<table><thead><tr><th>
+
+Interface
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[IClientConfig](./node-server-sdk.iclientconfig.md)
+
+
+</td><td>
+
+Configuration used for initializing the Eppo client
+
+
+</td></tr>
+</tbody></table>
 
 ## Variables
 
-|  Variable | Description |
-|  --- | --- |
-|  [NO\_OP\_EVENT\_DISPATCHER](./node-server-sdk.no_op_event_dispatcher.md) |  |
+<table><thead><tr><th>
+
+Variable
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[NO\_OP\_EVENT\_DISPATCHER](./node-server-sdk.no_op_event_dispatcher.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 

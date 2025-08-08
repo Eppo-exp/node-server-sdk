@@ -6,7 +6,25 @@
 
 ## Packages
 
-|  Package | Description |
-|  --- | --- |
-|  [@eppo/node-server-sdk](./node-server-sdk.md) |  |
+<table><thead><tr><th>
+
+Package
+
+
+</th><th>
+
+Description
+
+
+</th></tr></thead>
+<tbody><tr><td>
+
+[@eppo/node-server-sdk](./node-server-sdk.md)
+
+
+</td><td>
+
+
+</td></tr>
+</tbody></table>
 
