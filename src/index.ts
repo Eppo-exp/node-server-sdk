@@ -19,6 +19,7 @@ import {
 
 import FileBackedNamedEventQueue from './events/file-backed-named-event-queue';
 import { IClientConfig } from './i-client-config';
+import { EppoOpenFeatureProvider } from './openfeature-provider';
 import { sdkName, sdkVersion } from './sdk-data';
 import { generateSalt } from './util';
 import { isReadOnlyFs } from './util/index';
@@ -38,6 +39,7 @@ export {
 } from '@eppo/js-client-sdk-common';
 
 export { IClientConfig };
+export { EppoOpenFeatureProvider };
 
 let clientInstance: EppoClient;
 
@@ -142,6 +144,19 @@ export function getInstance(): EppoClient {
     throw Error('Expected init() to be called to initialize a client instance');
   }
   return clientInstance;
+}
+
+/**
+ * Creates an OpenFeature Provider instance from the current Eppo client
+ * @returns OpenFeature Provider instance or throws an Error if init() has not been called
+ */
+export function getOpenFeatureProvider(): EppoOpenFeatureProvider {
+  if (!clientInstance) {
+    throw Error(
+      'Expected init() to be called to initialize a client instance before creating OpenFeature provider',
+    );
+  }
+  return new EppoOpenFeatureProvider(clientInstance);
 }
 
 function newEventDispatcher(
