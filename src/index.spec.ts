@@ -716,7 +716,7 @@ describe('EppoClient E2E test', () => {
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: mockLogger,
       });
-      
+
       // Access the internal configurationRequestParameters to verify the default
       const configurationRequestParameters = client['configurationRequestParameters'];
       expect(configurationRequestParameters.pollAfterSuccessfulInitialization).toBe(true);
@@ -729,7 +729,7 @@ describe('EppoClient E2E test', () => {
         assignmentLogger: mockLogger,
         pollAfterSuccessfulInitialization: false,
       });
-      
+
       // Access the internal configurationRequestParameters to verify the custom value
       const configurationRequestParameters = client['configurationRequestParameters'];
       expect(configurationRequestParameters.pollAfterSuccessfulInitialization).toBe(false);
