@@ -40,6 +40,7 @@ import {
   IAssignmentLogger,
   init,
   NO_OP_EVENT_DISPATCHER,
+  offlineInit,
 } from '.';
 
 import SpyInstance = jest.SpyInstance;
@@ -914,6 +915,289 @@ describe('EppoClient E2E test', () => {
       const coldStartBandit = parsed.bandits['cold_start_bandit'];
       expect(coldStartBandit.modelVersion).toBe('cold start');
       expect(Object.keys(coldStartBandit.modelData.coefficients).length).toBe(0);
+    });
+  });
+});
+
+describe('offlineInit', () => {
+  const flagKey = 'mock-experiment';
+
+  // Configuration for a single flag within the UFC.
+  const mockUfcFlagConfig: Flag = {
+    key: flagKey,
+    enabled: true,
+    variationType: VariationType.STRING,
+    variations: {
+      control: {
+        key: 'control',
+        value: 'control',
+      },
+      'variant-1': {
+        key: 'variant-1',
+        value: 'variant-1',
+      },
+      'variant-2': {
+        key: 'variant-2',
+        value: 'variant-2',
+      },
+    },
+    allocations: [
+      {
+        key: 'traffic-split',
+        rules: [],
+        splits: [
+          {
+            variationKey: 'control',
+            shards: [
+              {
+                salt: 'some-salt',
+                ranges: [{ start: 0, end: 3400 }],
+              },
+            ],
+          },
+          {
+            variationKey: 'variant-1',
+            shards: [
+              {
+                salt: 'some-salt',
+                ranges: [{ start: 3400, end: 6700 }],
+              },
+            ],
+          },
+          {
+            variationKey: 'variant-2',
+            shards: [
+              {
+                salt: 'some-salt',
+                ranges: [{ start: 6700, end: 10000 }],
+              },
+            ],
+          },
+        ],
+        doLog: true,
+      },
+    ],
+    totalShards: 10000,
+  };
+
+  // Helper to create a full configuration JSON string
+  const createFlagsConfigJson = (
+    flags: Record<string, Flag>,
+    options: { createdAt?: string; format?: string } = {},
+  ): string => {
+    return JSON.stringify({
+      createdAt: options.createdAt ?? '2024-04-17T19:40:53.716Z',
+      format: options.format ?? 'SERVER',
+      environment: { name: 'Test' },
+      flags,
+    });
+  };
+
+  describe('basic initialization', () => {
+    it('initializes with flag configurations and returns correct assignments', () => {
+      const client = offlineInit({
+        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
+      });
+
+      // subject-10 should get variant-1 based on the hash
+      const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
+      expect(assignment).toEqual('variant-1');
+    });
+
+    it('returns default value when flag is not found', () => {
+      const client = offlineInit({
+        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
+      });
+
+      const assignment = client.getStringAssignment(
+        'non-existent-flag',
+        'subject-10',
+        {},
+        'default-value',
+      );
+      expect(assignment).toEqual('default-value');
+    });
+
+    it('initializes with empty configuration', () => {
+      const client = offlineInit({
+        flagsConfiguration: createFlagsConfigJson({}),
+      });
+
+      const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
+      expect(assignment).toEqual('default-value');
+    });
+
+    it('makes client available via getInstance()', () => {
+      offlineInit({
+        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
+      });
+
+      const client = getInstance();
+      const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
+      expect(assignment).toEqual('variant-1');
+    });
+  });
+
+  describe('assignment logging', () => {
+    it('logs assignments when assignment logger is provided', () => {
+      const mockLogger = td.object<IAssignmentLogger>();
+
+      const client = offlineInit({
+        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
+        assignmentLogger: mockLogger,
+      });
+
+      client.getStringAssignment(flagKey, 'subject-10', { foo: 'bar' }, 'default-value');
+
+      expect(td.explain(mockLogger.logAssignment).callCount).toEqual(1);
+      const loggedAssignment = td.explain(mockLogger.logAssignment).calls[0].args[0];
+      expect(loggedAssignment.subject).toEqual('subject-10');
+      expect(loggedAssignment.featureFlag).toEqual(flagKey);
+      expect(loggedAssignment.allocation).toEqual('traffic-split');
+    });
+
+    it('does not throw when assignment logger throws', () => {
+      const mockLogger = td.object<IAssignmentLogger>();
+      td.when(mockLogger.logAssignment(td.matchers.anything())).thenThrow(
+        new Error('logging error'),
+      );
+
+      const client = offlineInit({
+        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
+        assignmentLogger: mockLogger,
+      });
+
+      // Should not throw, even though logger throws
+      const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
+      expect(assignment).toEqual('variant-1');
+    });
+  });
+
+  describe('configuration metadata', () => {
+    it('extracts createdAt from configuration as configPublishedAt', () => {
+      const createdAt = '2024-01-15T10:00:00.000Z';
+
+      const client = offlineInit({
+        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }, { createdAt }),
+      });
+
+      const result = client.getStringAssignmentDetails(flagKey, 'subject-10', {}, 'default-value');
+      expect(result.evaluationDetails.configPublishedAt).toBe(createdAt);
+    });
+  });
+
+  describe('error handling', () => {
+    it('throws error by default when JSON parsing fails', () => {
+      expect(() => {
+        offlineInit({
+          flagsConfiguration: 'invalid json',
+        });
+      }).toThrow();
+    });
+
+    it('does not throw when throwOnFailedInitialization is false', () => {
+      expect(() => {
+        offlineInit({
+          flagsConfiguration: 'invalid json',
+          throwOnFailedInitialization: false,
+        });
+      }).not.toThrow();
+    });
+
+    it('does not throw with valid empty flags configuration', () => {
+      expect(() => {
+        offlineInit({
+          flagsConfiguration: createFlagsConfigJson({}),
+        });
+      }).not.toThrow();
+    });
+  });
+
+  describe('no network requests', () => {
+    it('does not have configurationRequestParameters (no polling)', () => {
+      const client = offlineInit({
+        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
+      });
+
+      // Access the internal configurationRequestParameters - should be undefined for offline mode
+      const configurationRequestParameters = client['configurationRequestParameters'];
+      expect(configurationRequestParameters).toBeUndefined();
+    });
+  });
+
+  describe('bandit support', () => {
+    it('initializes with bandit references from configuration', () => {
+      const banditFlagKey = 'bandit-flag';
+      const banditKey = 'test-bandit';
+
+      const banditFlagConfig: Flag = {
+        key: banditFlagKey,
+        enabled: true,
+        variationType: VariationType.STRING,
+        variations: {
+          bandit: {
+            key: 'bandit',
+            value: 'bandit',
+          },
+          control: {
+            key: 'control',
+            value: 'control',
+          },
+        },
+        allocations: [
+          {
+            key: 'bandit-allocation',
+            rules: [],
+            splits: [
+              {
+                variationKey: 'bandit',
+                shards: [
+                  {
+                    salt: 'salt',
+                    ranges: [{ start: 0, end: 10000 }],
+                  },
+                ],
+              },
+            ],
+            doLog: true,
+          },
+        ],
+        totalShards: 10000,
+      };
+
+      // Create a configuration with bandit references
+      const flagsConfigJson = JSON.stringify({
+        createdAt: '2024-04-17T19:40:53.716Z',
+        format: 'SERVER',
+        environment: { name: 'Test' },
+        flags: { [banditFlagKey]: banditFlagConfig },
+        banditReferences: {
+          [banditKey]: {
+            modelVersion: 'v1',
+            flagVariations: [
+              {
+                key: 'bandit',
+                flagKey: banditFlagKey,
+                variationKey: 'bandit',
+                variationValue: 'bandit',
+              },
+            ],
+          },
+        },
+      });
+
+      const client = offlineInit({
+        flagsConfiguration: flagsConfigJson,
+      });
+
+      // Verify the client is initialized and can make assignments
+      const assignment = client.getStringAssignment(
+        banditFlagKey,
+        'subject-1',
+        {},
+        'default-value',
+      );
+      expect(assignment).toEqual('bandit');
     });
   });
 });
