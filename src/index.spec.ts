@@ -746,8 +746,16 @@ describe('EppoClient E2E test', () => {
   });
 
   describe('getFlagsConfiguration', () => {
+    let client: EppoClient | null = null;
+
+    afterAll(() => {
+      if (client) {
+        client.stopPolling();
+      }
+    });
+
     it('returns configuration JSON with flags and format after init', async () => {
-      const client = await init({
+      client = await init({
         apiKey: 'dummy',
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: { logAssignment: jest.fn() },
@@ -765,8 +773,6 @@ describe('EppoClient E2E test', () => {
       if (parsed.environment) {
         expect(parsed.environment.name).toBeDefined();
       }
-
-      client.stopPolling();
     });
   });
 });
