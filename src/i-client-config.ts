@@ -52,7 +52,10 @@ export interface IClientConfig {
   /** Amount of time in milliseconds to wait between API calls to refresh configuration data. Default of 30_000 (30s). */
   pollingIntervalMs?: number;
 
-  /** Configuration settings for the event dispatcher */
+  /**
+   * Configuration settings for the event dispatcher.
+   * @deprecated Eppo has discontinued eventing support. Event tracking will be handled by Datadog SDKs.
+   */
   eventTracking?: {
     /** Maximum number of events to send per delivery request. Defaults to 1000 events. */
     batchSize?: number;
@@ -73,4 +76,56 @@ export interface IClientConfig {
     /** Minimum amount of milliseconds to wait before retrying a failed delivery. Defaults to 5 seconds */
     retryIntervalMs?: number;
   };
+}
+
+/**
+ * Configuration used for offline initialization of the Eppo client.
+ * Offline initialization allows the SDK to be used without making any network requests.
+ * @public
+ */
+export interface IOfflineClientConfig {
+  /**
+   * The full flags configuration JSON string as returned by the Eppo API.
+   * This should be the complete response from the /flag-config/v1/config endpoint.
+   *
+   * Expected format:
+   * ```json
+   * {
+   *   "createdAt": "2024-04-17T19:40:53.716Z",
+   *   "format": "SERVER",
+   *   "environment": { "name": "production" },
+   *   "flags": { ... }
+   * }
+   * ```
+   */
+  flagsConfiguration: string;
+
+  /**
+   * Optional bandit models configuration JSON string as returned by the Eppo API.
+   * This should be the complete response from the bandit parameters endpoint.
+   *
+   * Expected format:
+   * ```json
+   * {
+   *   "updatedAt": "2024-04-17T19:40:53.716Z",
+   *   "bandits": { ... }
+   * }
+   * ```
+   */
+  banditsConfiguration?: string;
+
+  /**
+   * Optional assignment logger for sending variation assignments to your data warehouse.
+   * Required for experiment analysis.
+   */
+  assignmentLogger?: IAssignmentLogger;
+
+  /** Optional bandit logger for sending bandit actions to your data warehouse */
+  banditLogger?: IBanditLogger;
+
+  /**
+   * Whether to throw an error if initialization fails. (default: true)
+   * If false, the client will be initialized with an empty configuration.
+   */
+  throwOnFailedInitialization?: boolean;
 }
