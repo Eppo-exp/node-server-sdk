@@ -1298,3 +1298,143 @@ describe('offlineInit', () => {
     });
   });
 });
+
+describe('Shared UFC Test Cases via Offline Round-Trip', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let sdkModule: any;
+
+  beforeAll(async () => {
+    // Step 1: Initialize normally via API
+    await init({
+      apiKey: 'dummy',
+      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+      assignmentLogger: { logAssignment: jest.fn() },
+    });
+
+    // Step 2: Export the configuration
+    const flagsConfig = getFlagsConfiguration();
+    if (!flagsConfig) {
+      throw new Error('Failed to export flags configuration');
+    }
+
+    // Step 3: Reset module state to ensure we're only using offline-initialized client
+    jest.resetModules();
+
+    // Step 4: Re-import module and initialize with offlineInit using exported config
+    sdkModule = require('.');
+    sdkModule.offlineInit({ flagsConfiguration: flagsConfig });
+  });
+
+  const testCases = testCasesByFileName<IAssignmentTestCase>(ASSIGNMENT_TEST_DATA_DIR);
+
+  it.each(Object.keys(testCases))(
+    'offline round-trip: variation assignment splits - %s',
+    (fileName) => {
+      const { flag, variationType, defaultValue, subjects } = testCases[fileName];
+      const client = sdkModule.getInstance();
+
+      const typeAssignmentFunctions = {
+        [VariationType.BOOLEAN]: client.getBooleanAssignment.bind(client),
+        [VariationType.NUMERIC]: client.getNumericAssignment.bind(client),
+        [VariationType.INTEGER]: client.getIntegerAssignment.bind(client),
+        [VariationType.STRING]: client.getStringAssignment.bind(client),
+        [VariationType.JSON]: client.getJSONAssignment.bind(client),
+      };
+
+      const assignmentFn = typeAssignmentFunctions[variationType];
+      if (!assignmentFn) {
+        throw new Error(`Unknown variation type: ${variationType}`);
+      }
+
+      const assignments = getTestAssignments(
+        { flag, variationType, defaultValue, subjects },
+        assignmentFn,
+        false,
+      );
+
+      validateTestAssignments(assignments, flag);
+    },
+  );
+});
+
+describe('Shared Bandit Test Cases via Offline Round-Trip', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let sdkModule: any;
+
+  beforeAll(async () => {
+    // Step 1: Initialize normally via API with bandit-specific API key
+    await init({
+      apiKey: TEST_BANDIT_API_KEY,
+      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+      assignmentLogger: { logAssignment: jest.fn() },
+      banditLogger: { logBanditAction: jest.fn() },
+    });
+
+    // Step 2: Export both configurations
+    const flagsConfig = getFlagsConfiguration();
+    if (!flagsConfig) {
+      throw new Error('Failed to export flags configuration');
+    }
+    const banditsConfig = getBanditsConfiguration();
+
+    // Step 3: Reset module state to ensure we're only using offline-initialized client
+    jest.resetModules();
+
+    // Step 4: Re-import module and initialize with offlineInit using exported configs
+    sdkModule = require('.');
+    sdkModule.offlineInit({
+      flagsConfiguration: flagsConfig,
+      banditsConfiguration: banditsConfig ?? undefined,
+    });
+  });
+
+  const testCases = testCasesByFileName<BanditTestCase>(BANDIT_TEST_DATA_DIR);
+
+  it.each(Object.keys(testCases))(
+    'offline round-trip: bandit test case - %s',
+    (fileName: string) => {
+      const { flag: flagKey, defaultValue, subjects } = testCases[fileName];
+      let numAssignmentsChecked = 0;
+
+      subjects.forEach((subject) => {
+        // test files have actions as an array, so we convert them to a map as expected by the client
+        const actions: Record<string, ContextAttributes> = {};
+        subject.actions.forEach((action) => {
+          actions[action.actionKey] = {
+            numericAttributes: action.numericAttributes,
+            categoricalAttributes: action.categoricalAttributes,
+          };
+        });
+
+        // get the bandit assignment for the test case
+        const banditAssignment = sdkModule
+          .getInstance()
+          .getBanditAction(
+            flagKey,
+            subject.subjectKey,
+            subject.subjectAttributes,
+            actions,
+            defaultValue,
+          );
+
+        // Do this check in addition to assertions to provide helpful information on exactly which
+        // evaluation failed to produce an expected result
+        if (
+          banditAssignment.variation !== subject.assignment.variation ||
+          banditAssignment.action !== subject.assignment.action
+        ) {
+          console.error(
+            `Offline round-trip: Unexpected result for flag ${flagKey} and subject ${subject.subjectKey}`,
+          );
+        }
+
+        expect(banditAssignment.variation).toBe(subject.assignment.variation);
+        expect(banditAssignment.action).toBe(subject.assignment.action);
+        numAssignmentsChecked += 1;
+      });
+
+      // Ensure that this test case correctly checked some test assignments
+      expect(numAssignmentsChecked).toBeGreaterThan(0);
+    },
+  );
+});
