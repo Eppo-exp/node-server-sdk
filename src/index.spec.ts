@@ -754,7 +754,7 @@ describe('EppoClient E2E test', () => {
       }
     });
 
-    it('returns configuration JSON with flags and format after init', async () => {
+    it('returns configuration JSON matching flags-v1.json structure', async () => {
       client = await init({
         apiKey: 'dummy',
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
@@ -765,14 +765,73 @@ describe('EppoClient E2E test', () => {
       expect(exportedConfig).not.toBeNull();
 
       const parsed = JSON.parse(exportedConfig ?? '');
-      expect(parsed.flags).toBeDefined();
+
+      // Verify top-level metadata
       expect(parsed.format).toBe('SERVER');
-      // The mock server returns flags, so we should have some
-      expect(Object.keys(parsed.flags).length).toBeGreaterThan(0);
-      // Environment may or may not be set depending on mock data
-      if (parsed.environment) {
-        expect(parsed.environment.name).toBeDefined();
-      }
+      expect(parsed.createdAt).toBe('2024-04-17T19:40:53.716Z');
+      expect(parsed.environment).toEqual({ name: 'Test' });
+
+      // Verify exact number of flags from flags-v1.json
+      expect(Object.keys(parsed.flags).length).toBe(22);
+
+      // Verify a complex flag with rules and conditions: new-user-onboarding
+      const flag = parsed.flags['new-user-onboarding'];
+      expect(flag).toBeDefined();
+      expect(flag.key).toBe('new-user-onboarding');
+      expect(flag.enabled).toBe(true);
+      expect(flag.variationType).toBe('STRING');
+      expect(flag.totalShards).toBe(10000);
+
+      // Verify variations
+      expect(Object.keys(flag.variations).length).toBe(6);
+      expect(flag.variations.control).toEqual({ key: 'control', value: 'control' });
+      expect(flag.variations.red).toEqual({ key: 'red', value: 'red' });
+      expect(flag.variations.blue).toEqual({ key: 'blue', value: 'blue' });
+      expect(flag.variations.green).toEqual({ key: 'green', value: 'green' });
+      expect(flag.variations.yellow).toEqual({ key: 'yellow', value: 'yellow' });
+      expect(flag.variations.purple).toEqual({ key: 'purple', value: 'purple' });
+
+      // Verify allocations structure
+      expect(flag.allocations.length).toBe(4);
+
+      // First allocation: "id rule" with MATCHES condition
+      const idRuleAlloc = flag.allocations[0];
+      expect(idRuleAlloc.key).toBe('id rule');
+      expect(idRuleAlloc.doLog).toBe(false);
+      expect(idRuleAlloc.rules.length).toBe(1);
+      expect(idRuleAlloc.rules[0].conditions.length).toBe(1);
+      expect(idRuleAlloc.rules[0].conditions[0]).toEqual({
+        attribute: 'id',
+        operator: 'MATCHES',
+        value: 'zach',
+      });
+      expect(idRuleAlloc.splits[0].variationKey).toBe('purple');
+
+      // Second allocation: "internal users" with MATCHES condition
+      const internalUsersAlloc = flag.allocations[1];
+      expect(internalUsersAlloc.key).toBe('internal users');
+      expect(internalUsersAlloc.rules[0].conditions[0]).toEqual({
+        attribute: 'email',
+        operator: 'MATCHES',
+        value: '@mycompany.com',
+      });
+
+      // Third allocation: "experiment" with NOT_ONE_OF condition and shards
+      const experimentAlloc = flag.allocations[2];
+      expect(experimentAlloc.key).toBe('experiment');
+      expect(experimentAlloc.doLog).toBe(true);
+      expect(experimentAlloc.rules[0].conditions[0].operator).toBe('NOT_ONE_OF');
+      expect(experimentAlloc.rules[0].conditions[0].value).toEqual(['US', 'Canada', 'Mexico']);
+      expect(experimentAlloc.splits.length).toBe(3); // control, red, yellow
+
+      // Fourth allocation: "rollout" with ONE_OF condition and extraLogging
+      const rolloutAlloc = flag.allocations[3];
+      expect(rolloutAlloc.key).toBe('rollout');
+      expect(rolloutAlloc.rules[0].conditions[0].operator).toBe('ONE_OF');
+      expect(rolloutAlloc.splits[0].extraLogging).toEqual({
+        allocationvalue_type: 'rollout',
+        owner: 'hippo',
+      });
     });
   });
 });
