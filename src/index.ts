@@ -41,9 +41,9 @@ export {
 export { IClientConfig, IOfflineClientConfig };
 
 let clientInstance: EppoClient;
-let flagConfigurationStoreInstance: MemoryOnlyConfigurationStore<Flag>;
-let banditVariationConfigurationStoreInstance: MemoryOnlyConfigurationStore<BanditVariation[]>;
-let banditModelConfigurationStoreInstance: MemoryOnlyConfigurationStore<BanditParameters>;
+let flagConfigurationStore: MemoryOnlyConfigurationStore<Flag>;
+let banditVariationConfigurationStore: MemoryOnlyConfigurationStore<BanditVariation[]>;
+let banditModelConfigurationStore: MemoryOnlyConfigurationStore<BanditParameters>;
 
 /**
  * Default assignment cache size for server-side use cases.
@@ -99,15 +99,15 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     throwOnFailedInitialization,
   };
 
-  flagConfigurationStoreInstance = new MemoryOnlyConfigurationStore<Flag>();
-  banditVariationConfigurationStoreInstance = new MemoryOnlyConfigurationStore<BanditVariation[]>();
-  banditModelConfigurationStoreInstance = new MemoryOnlyConfigurationStore<BanditParameters>();
+  flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
+  banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
+  banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
   const eventDispatcher = newEventDispatcher(apiKey, eventTracking);
 
   clientInstance = new EppoClient({
-    flagConfigurationStore: flagConfigurationStoreInstance,
-    banditVariationConfigurationStore: banditVariationConfigurationStoreInstance,
-    banditModelConfigurationStore: banditModelConfigurationStoreInstance,
+    flagConfigurationStore,
+    banditVariationConfigurationStore,
+    banditModelConfigurationStore,
     configurationRequestParameters,
     eventDispatcher,
   });
@@ -162,14 +162,14 @@ export function getInstance(): EppoClient {
  * @public
  */
 export function getFlagsConfiguration(): string | null {
-  if (!flagConfigurationStoreInstance) {
+  if (!flagConfigurationStore) {
     return null;
   }
 
-  const flags = flagConfigurationStoreInstance.entries();
-  const format = flagConfigurationStoreInstance.getFormat();
-  const createdAt = flagConfigurationStoreInstance.getConfigPublishedAt();
-  const environment = flagConfigurationStoreInstance.getEnvironment();
+  const flags = flagConfigurationStore.entries();
+  const format = flagConfigurationStore.getFormat();
+  const createdAt = flagConfigurationStore.getConfigPublishedAt();
+  const environment = flagConfigurationStore.getEnvironment();
 
   const configuration: {
     createdAt?: string;
@@ -214,12 +214,12 @@ function reconstructBanditReferences(): Record<
   string,
   { modelVersion: string; flagVariations: BanditVariation[] }
 > | null {
-  if (!banditVariationConfigurationStoreInstance || !banditModelConfigurationStoreInstance) {
+  if (!banditVariationConfigurationStore || !banditModelConfigurationStore) {
     return null;
   }
 
-  const variationsByFlagKey = banditVariationConfigurationStoreInstance.entries();
-  const banditParameters = banditModelConfigurationStoreInstance.entries();
+  const variationsByFlagKey = banditVariationConfigurationStore.entries();
+  const banditParameters = banditModelConfigurationStore.entries();
 
   // Flatten all variations and group by bandit key
   const variationsByBanditKey: Record<string, BanditVariation[]> = {};
@@ -264,11 +264,11 @@ function reconstructBanditReferences(): Record<
  * @public
  */
 export function getBanditsConfiguration(): string | null {
-  if (!banditModelConfigurationStoreInstance) {
+  if (!banditModelConfigurationStore) {
     return null;
   }
 
-  const bandits = banditModelConfigurationStoreInstance.entries();
+  const bandits = banditModelConfigurationStore.entries();
 
   // Return null if there are no bandits
   if (Object.keys(bandits).length === 0) {
@@ -318,20 +318,18 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
     };
 
     // Create memory-only configuration stores
-    flagConfigurationStoreInstance = new MemoryOnlyConfigurationStore<Flag>();
-    banditVariationConfigurationStoreInstance = new MemoryOnlyConfigurationStore<
-      BanditVariation[]
-    >();
-    banditModelConfigurationStoreInstance = new MemoryOnlyConfigurationStore<BanditParameters>();
+    flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
+    banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
+    banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
 
     // Set format from the configuration (default to SERVER)
     const format = (flagsConfigResponse.format as FormatEnum) ?? FormatEnum.SERVER;
-    flagConfigurationStoreInstance.setFormat(format);
+    flagConfigurationStore.setFormat(format);
 
     // Load flag configurations into store
     // Note: setEntries is async but MemoryOnlyConfigurationStore performs synchronous operations internally,
     // so there's no race condition. We add .catch() for defensive error handling, matching JS client SDK pattern.
-    flagConfigurationStoreInstance
+    flagConfigurationStore
       .setEntries(flagsConfigResponse.flags ?? {})
       .catch((err) =>
         applicationLogger.warn(`Error setting flags for memory-only configuration store: ${err}`),
@@ -339,12 +337,12 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
 
     // Set configuration timestamp if available
     if (flagsConfigResponse.createdAt) {
-      flagConfigurationStoreInstance.setConfigPublishedAt(flagsConfigResponse.createdAt);
+      flagConfigurationStore.setConfigPublishedAt(flagsConfigResponse.createdAt);
     }
 
     // Set environment if available
     if (flagsConfigResponse.environment) {
-      flagConfigurationStoreInstance.setEnvironment(flagsConfigResponse.environment);
+      flagConfigurationStore.setEnvironment(flagsConfigResponse.environment);
     }
 
     // Process bandit references from the flags configuration
@@ -360,7 +358,7 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
           banditVariationsByFlagKey[flagKey].push(flagVariation);
         }
       }
-      banditVariationConfigurationStoreInstance
+      banditVariationConfigurationStore
         .setEntries(banditVariationsByFlagKey)
         .catch((err) =>
           applicationLogger.warn(
@@ -375,7 +373,7 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
         updatedAt?: string;
         bandits: Record<string, BanditParameters>;
       };
-      banditModelConfigurationStoreInstance
+      banditModelConfigurationStore
         .setEntries(banditsConfigResponse.bandits ?? {})
         .catch((err) =>
           applicationLogger.warn(
@@ -386,9 +384,9 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
 
     // Create client without request parameters (offline mode - no polling)
     clientInstance = new EppoClient({
-      flagConfigurationStore: flagConfigurationStoreInstance,
-      banditVariationConfigurationStore: banditVariationConfigurationStoreInstance,
-      banditModelConfigurationStore: banditModelConfigurationStoreInstance,
+      flagConfigurationStore,
+      banditVariationConfigurationStore,
+      banditModelConfigurationStore,
       // No configurationRequestParameters = offline mode, no network requests
     });
 

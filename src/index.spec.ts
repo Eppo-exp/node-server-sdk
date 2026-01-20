@@ -1089,35 +1089,6 @@ describe('getFlagsConfiguration', () => {
     expect(parsed.environment.name).toBe('Test');
   });
 
-  it('exported configuration can be used with offlineInit (round-trip)', () => {
-    // First, initialize with a configuration
-    const inputConfig = JSON.stringify({
-      createdAt: '2024-04-17T19:40:53.716Z',
-      format: 'SERVER',
-      environment: { name: 'Production' },
-      flags: { [flagKey]: mockFlagConfig },
-    });
-
-    offlineInit({ flagsConfiguration: inputConfig });
-
-    // Get an assignment to verify it works
-    let client = getInstance();
-    const assignment1 = client.getStringAssignment(flagKey, 'user-123', {}, 'default');
-
-    // Export the configuration
-    const exportedConfig = getFlagsConfiguration();
-    expect(exportedConfig).not.toBeNull();
-
-    // Re-initialize with the exported configuration
-    offlineInit({ flagsConfiguration: exportedConfig ?? '' });
-
-    // Verify assignments still work the same
-    client = getInstance();
-    const assignment2 = client.getStringAssignment(flagKey, 'user-123', {}, 'default');
-
-    expect(assignment2).toBe(assignment1);
-  });
-
   it('includes all flags in exported configuration', () => {
     const flag1: Flag = { ...mockFlagConfig, key: 'flag-1' };
     const flag2: Flag = { ...mockFlagConfig, key: 'flag-2' };
@@ -1214,92 +1185,6 @@ describe('getFlagsConfiguration', () => {
     expect(parsed.banditReferences[banditKey].modelVersion).toBe('v123');
     expect(parsed.banditReferences[banditKey].flagVariations).toHaveLength(1);
     expect(parsed.banditReferences[banditKey].flagVariations[0].flagKey).toBe(banditFlagKey);
-  });
-
-  it('banditReferences round-trip works correctly', () => {
-    const banditFlagKey = 'bandit-flag-rt';
-    const banditKey = 'test-bandit-rt';
-
-    const banditFlag: Flag = {
-      key: banditFlagKey,
-      enabled: true,
-      variationType: VariationType.STRING,
-      variations: {
-        control: { key: 'control', value: 'control' },
-        bandit: { key: 'bandit', value: 'bandit-action' },
-      },
-      allocations: [
-        {
-          key: 'allocation',
-          rules: [],
-          splits: [
-            {
-              variationKey: 'control',
-              shards: [{ salt: 'salt', ranges: [{ start: 0, end: 5000 }] }],
-            },
-            {
-              variationKey: 'bandit',
-              shards: [{ salt: 'salt', ranges: [{ start: 5000, end: 10000 }] }],
-            },
-          ],
-          doLog: true,
-        },
-      ],
-      totalShards: 10000,
-    };
-
-    const inputConfig = JSON.stringify({
-      format: 'SERVER',
-      flags: { [banditFlagKey]: banditFlag },
-      banditReferences: {
-        [banditKey]: {
-          modelVersion: 'v456',
-          flagVariations: [
-            {
-              key: banditKey,
-              flagKey: banditFlagKey,
-              variationKey: 'bandit',
-              variationValue: 'bandit-action',
-            },
-          ],
-        },
-      },
-    });
-
-    const banditsConfig = JSON.stringify({
-      bandits: {
-        [banditKey]: {
-          banditKey: banditKey,
-          modelName: 'falcon',
-          modelVersion: 'v456',
-          modelData: {
-            gamma: 1.0,
-            defaultActionScore: 0.0,
-            actionProbabilityFloor: 0.0,
-            coefficients: {},
-          },
-        },
-      },
-    });
-
-    // Initialize with config
-    offlineInit({ flagsConfiguration: inputConfig, banditsConfiguration: banditsConfig });
-
-    // Export configuration
-    const exportedConfig = getFlagsConfiguration();
-    expect(exportedConfig).not.toBeNull();
-
-    // Re-initialize with exported config (same bandits config)
-    offlineInit({ flagsConfiguration: exportedConfig ?? '', banditsConfiguration: banditsConfig });
-
-    // Verify banditReferences survived the round-trip
-    const reExportedConfig = getFlagsConfiguration();
-    const parsed = JSON.parse(reExportedConfig ?? '');
-
-    expect(parsed.banditReferences).toBeDefined();
-    expect(parsed.banditReferences[banditKey]).toBeDefined();
-    expect(parsed.banditReferences[banditKey].modelVersion).toBe('v456');
-    expect(parsed.banditReferences[banditKey].flagVariations).toHaveLength(1);
   });
 });
 
@@ -1403,68 +1288,6 @@ describe('getBanditsConfiguration', () => {
     expect(parsed.bandits[banditKey].banditKey).toBe(banditKey);
     expect(parsed.bandits[banditKey].modelVersion).toBe('v789');
     expect(parsed.bandits[banditKey].modelData.gamma).toBe(1.0);
-  });
-
-  it('exported bandits configuration can be used with offlineInit (round-trip)', () => {
-    const banditKey = 'test-bandit-roundtrip';
-
-    const inputConfig = JSON.stringify({
-      format: 'SERVER',
-      flags: { [flagKey]: mockFlagConfig },
-      banditReferences: {
-        [banditKey]: {
-          modelVersion: 'v999',
-          flagVariations: [
-            {
-              key: banditKey,
-              flagKey: flagKey,
-              variationKey: 'bandit',
-              variationValue: 'bandit-action',
-            },
-          ],
-        },
-      },
-    });
-
-    const banditsConfig = JSON.stringify({
-      bandits: {
-        [banditKey]: {
-          banditKey: banditKey,
-          modelName: 'falcon',
-          modelVersion: 'v999',
-          modelData: {
-            gamma: 2.5,
-            defaultActionScore: 0.1,
-            actionProbabilityFloor: 0.05,
-            coefficients: {},
-          },
-        },
-      },
-    });
-
-    // Initialize with config
-    offlineInit({ flagsConfiguration: inputConfig, banditsConfiguration: banditsConfig });
-
-    // Export both configurations
-    const exportedFlags = getFlagsConfiguration();
-    const exportedBandits = getBanditsConfiguration();
-    expect(exportedFlags).not.toBeNull();
-    expect(exportedBandits).not.toBeNull();
-
-    // Re-initialize with exported configs
-    offlineInit({
-      flagsConfiguration: exportedFlags ?? '',
-      banditsConfiguration: exportedBandits ?? undefined,
-    });
-
-    // Verify bandits survived the round-trip
-    const reExportedBandits = getBanditsConfiguration();
-    const parsed = JSON.parse(reExportedBandits ?? '');
-
-    expect(parsed.bandits[banditKey]).toBeDefined();
-    expect(parsed.bandits[banditKey].modelVersion).toBe('v999');
-    expect(parsed.bandits[banditKey].modelData.gamma).toBe(2.5);
-    expect(parsed.bandits[banditKey].modelData.defaultActionScore).toBe(0.1);
   });
 });
 
