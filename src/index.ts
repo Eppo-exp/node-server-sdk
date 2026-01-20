@@ -246,6 +246,35 @@ function reconstructBanditReferences(): Record<string, BanditReference> {
   return banditReferences;
 }
 
+/**
+ * Returns the current bandits configuration as a JSON string.
+ * This can be used together with getFlagsConfiguration() to bootstrap
+ * another SDK instance using offlineInit().
+ *
+ * @returns JSON string containing the bandits configuration, or null if not initialized or no bandits
+ * @public
+ */
+export function getBanditsConfiguration(): string | null {
+  if (!banditModelConfigurationStore) {
+    return null;
+  }
+
+  const bandits = banditModelConfigurationStore.entries();
+
+  // Return null if there are no bandits
+  if (Object.keys(bandits).length === 0) {
+    return null;
+  }
+
+  const configuration: {
+    bandits: Record<string, BanditParameters>;
+  } = {
+    bandits,
+  };
+
+  return JSON.stringify(configuration);
+}
+
 function newEventDispatcher(
   sdkKey: string,
   config: IClientConfig['eventTracking'] = {},

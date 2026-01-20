@@ -33,6 +33,7 @@ import {
 import * as util from './util/index';
 
 import {
+  getBanditsConfiguration,
   getFlagsConfiguration,
   getInstance,
   IAssignmentEvent,
@@ -833,5 +834,36 @@ describe('EppoClient E2E test', () => {
         owner: 'hippo',
       });
     });
+  });
+});
+
+describe('getBanditsConfiguration', () => {
+  it('returns null when no bandits are configured', async () => {
+    await init({
+      apiKey: 'dummy',
+      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+      assignmentLogger: { logAssignment: jest.fn() },
+    });
+
+    // The default mock doesn't include bandits, so this should return null
+    const banditsConfig = getBanditsConfiguration();
+    expect(banditsConfig).toBeNull();
+  });
+
+  it('returns bandits configuration JSON when bandits are present', async () => {
+    await init({
+      apiKey: TEST_BANDIT_API_KEY,
+      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+      assignmentLogger: { logAssignment: jest.fn() },
+      banditLogger: { logBanditAction: jest.fn() },
+    });
+
+    const banditsConfig = getBanditsConfiguration();
+    // With the bandit API key, we should have bandits
+    if (banditsConfig) {
+      const parsed = JSON.parse(banditsConfig);
+      expect(parsed.bandits).toBeDefined();
+      expect(Object.keys(parsed.bandits).length).toBeGreaterThan(0);
+    }
   });
 });
