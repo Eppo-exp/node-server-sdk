@@ -508,6 +508,10 @@ describe('EppoClient E2E test', () => {
       },
     };
 
+    afterEach(() => {
+      td.reset();
+    });
+
     it('retries initial configuration request before resolving', async () => {
       td.replace(HttpClient.prototype, 'getUniversalFlagConfiguration');
       let callCount = 0;
@@ -642,8 +646,6 @@ describe('EppoClient E2E test', () => {
       let isReadOnlyFsSpy: SpyInstance;
 
       beforeEach(() => {
-        // Reset the module before each test
-        jest.resetModules();
         // Create a spy on isReadOnlyFs that we can mock
         isReadOnlyFsSpy = jest.spyOn(util, 'isReadOnlyFs');
       });
@@ -742,54 +744,29 @@ describe('EppoClient E2E test', () => {
       expect(configurationRequestParameters.pollAfterSuccessfulInitialization).toBe(false);
     });
   });
-});
 
-describe('getFlagsConfiguration', () => {
-  it('returns configuration JSON after init', async () => {
-    await init({
-      apiKey: 'dummy',
-      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
-      assignmentLogger: { logAssignment: jest.fn() },
+  describe('getFlagsConfiguration', () => {
+    it('returns configuration JSON with flags and format after init', async () => {
+      const client = await init({
+        apiKey: 'dummy',
+        baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+        assignmentLogger: { logAssignment: jest.fn() },
+      });
+
+      const exportedConfig = getFlagsConfiguration();
+      expect(exportedConfig).not.toBeNull();
+
+      const parsed = JSON.parse(exportedConfig ?? '');
+      expect(parsed.flags).toBeDefined();
+      expect(parsed.format).toBe('SERVER');
+      // The mock server returns flags, so we should have some
+      expect(Object.keys(parsed.flags).length).toBeGreaterThan(0);
+      // Environment may or may not be set depending on mock data
+      if (parsed.environment) {
+        expect(parsed.environment.name).toBeDefined();
+      }
+
+      client.stopPolling();
     });
-
-    const exportedConfig = getFlagsConfiguration();
-    expect(exportedConfig).not.toBeNull();
-
-    const parsed = JSON.parse(exportedConfig ?? '');
-    expect(parsed.flags).toBeDefined();
-    expect(parsed.format).toBe('SERVER');
-  });
-
-  it('includes flags from the API response', async () => {
-    await init({
-      apiKey: 'dummy',
-      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
-      assignmentLogger: { logAssignment: jest.fn() },
-    });
-
-    const exportedConfig = getFlagsConfiguration();
-    expect(exportedConfig).not.toBeNull();
-
-    const parsed = JSON.parse(exportedConfig ?? '');
-    // The mock server returns flags, so we should have some
-    expect(Object.keys(parsed.flags).length).toBeGreaterThan(0);
-  });
-
-  it('includes environment when available', async () => {
-    await init({
-      apiKey: 'dummy',
-      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
-      assignmentLogger: { logAssignment: jest.fn() },
-    });
-
-    const exportedConfig = getFlagsConfiguration();
-    expect(exportedConfig).not.toBeNull();
-
-    const parsed = JSON.parse(exportedConfig ?? '');
-    // Environment may or may not be set depending on mock data
-    // Just verify the structure is correct
-    if (parsed.environment) {
-      expect(parsed.environment.name).toBeDefined();
-    }
   });
 });
