@@ -40,6 +40,11 @@ export {
 export { IClientConfig };
 
 let clientInstance: EppoClient;
+
+// We keep references to the configuration stores at module level because EppoClient
+// does not expose public getters for store metadata (format, createdAt, environment)
+// or bandit configurations. These references are needed by getFlagsConfiguration()
+// and getBanditsConfiguration() to reconstruct exportable configuration JSON.
 let flagConfigurationStore: MemoryOnlyConfigurationStore<Flag>;
 let banditVariationConfigurationStore: MemoryOnlyConfigurationStore<BanditVariation[]>;
 let banditModelConfigurationStore: MemoryOnlyConfigurationStore<BanditParameters>;
@@ -148,7 +153,7 @@ export function getInstance(): EppoClient {
 }
 
 /**
- * Returns the current flags configuration as a JSON string.
+ * Reconstructs the current flags configuration as a JSON string.
  * This can be used to bootstrap another SDK instance using offlineInit().
  *
  * @returns JSON string containing the flags configuration, or null if not initialized
