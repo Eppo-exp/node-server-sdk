@@ -1126,34 +1126,36 @@ describe('offlineInit', () => {
   });
 
   describe('bandit support', () => {
-    it('initializes with bandit references from configuration', () => {
-      const banditFlagKey = 'bandit-flag';
-      const banditKey = 'test-bandit';
+    it('initializes with bandit references and supports getBanditAction', () => {
+      // Use realistic names inspired by bandit-flags-v1.json and bandit-models-v1.json
+      const banditFlagKey = 'banner_bandit_flag';
+      const banditKey = 'banner_bandit';
 
+      // Flag configuration matching banner_bandit_flag structure
       const banditFlagConfig: Flag = {
         key: banditFlagKey,
         enabled: true,
         variationType: VariationType.STRING,
         variations: {
-          bandit: {
-            key: 'bandit',
-            value: 'bandit',
-          },
           control: {
             key: 'control',
             value: 'control',
           },
+          [banditKey]: {
+            key: banditKey,
+            value: banditKey,
+          },
         },
         allocations: [
           {
-            key: 'bandit-allocation',
+            key: 'training',
             rules: [],
             splits: [
               {
-                variationKey: 'bandit',
+                variationKey: banditKey,
                 shards: [
                   {
-                    salt: 'salt',
+                    salt: 'traffic-split',
                     ranges: [{ start: 0, end: 10000 }],
                   },
                 ],
@@ -1165,7 +1167,7 @@ describe('offlineInit', () => {
         totalShards: 10000,
       };
 
-      // Create a configuration with bandit references
+      // Flags configuration with bandit references (matching bandit-flags-v1.json structure)
       const flagsConfigJson = JSON.stringify({
         createdAt: '2024-04-17T19:40:53.716Z',
         format: 'SERVER',
@@ -1173,31 +1175,119 @@ describe('offlineInit', () => {
         flags: { [banditFlagKey]: banditFlagConfig },
         banditReferences: {
           [banditKey]: {
-            modelVersion: 'v1',
+            modelVersion: '123',
             flagVariations: [
               {
-                key: 'bandit',
+                key: banditKey,
                 flagKey: banditFlagKey,
-                variationKey: 'bandit',
-                variationValue: 'bandit',
+                allocationKey: 'training',
+                variationKey: banditKey,
+                variationValue: banditKey,
               },
             ],
           },
         },
       });
 
-      const client = offlineInit({
-        flagsConfiguration: flagsConfigJson,
+      // Bandit model configuration (matching bandit-models-v1.json structure for banner_bandit)
+      const banditsConfigJson = JSON.stringify({
+        bandits: {
+          [banditKey]: {
+            banditKey,
+            modelName: 'falcon',
+            modelVersion: '123',
+            updatedAt: '2023-09-13T04:52:06.462Z',
+            modelData: {
+              gamma: 1.0,
+              defaultActionScore: 0.0,
+              actionProbabilityFloor: 0.0,
+              coefficients: {
+                nike: {
+                  actionKey: 'nike',
+                  intercept: 1.0,
+                  actionNumericCoefficients: [
+                    {
+                      attributeKey: 'brand_affinity',
+                      coefficient: 1.0,
+                      missingValueCoefficient: -0.1,
+                    },
+                  ],
+                  actionCategoricalCoefficients: [
+                    {
+                      attributeKey: 'loyalty_tier',
+                      valueCoefficients: { gold: 4.5, silver: 3.2, bronze: 1.9 },
+                      missingValueCoefficient: 0.0,
+                    },
+                  ],
+                  subjectNumericCoefficients: [
+                    { attributeKey: 'account_age', coefficient: 0.3, missingValueCoefficient: 0.0 },
+                  ],
+                  subjectCategoricalCoefficients: [
+                    {
+                      attributeKey: 'gender_identity',
+                      valueCoefficients: { female: 0.5, male: -0.5 },
+                      missingValueCoefficient: 2.3,
+                    },
+                  ],
+                },
+                adidas: {
+                  actionKey: 'adidas',
+                  intercept: 1.1,
+                  actionNumericCoefficients: [
+                    {
+                      attributeKey: 'brand_affinity',
+                      coefficient: 2.0,
+                      missingValueCoefficient: 1.2,
+                    },
+                  ],
+                  actionCategoricalCoefficients: [],
+                  subjectNumericCoefficients: [],
+                  subjectCategoricalCoefficients: [
+                    {
+                      attributeKey: 'gender_identity',
+                      valueCoefficients: { female: -1.0, male: 1.0 },
+                      missingValueCoefficient: 0.0,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
       });
 
-      // Verify the client is initialized and can make assignments
-      const assignment = client.getStringAssignment(
+      const client = offlineInit({
+        flagsConfiguration: flagsConfigJson,
+        banditsConfiguration: banditsConfigJson,
+      });
+
+      // Verify the client is initialized and can make flag assignments
+      const assignment = client.getStringAssignment(banditFlagKey, 'alice', {}, 'default-value');
+      expect(assignment).toEqual(banditKey);
+
+      // Verify bandit action selection using "alice" from test-case-banner-bandit.json
+      // alice with her attributes and actions should get nike
+      const banditResult = client.getBanditAction(
         banditFlagKey,
-        'subject-1',
-        {},
+        'alice',
+        {
+          numericAttributes: { age: 25 },
+          categoricalAttributes: { country: 'USA', gender_identity: 'female' },
+        },
+        {
+          nike: {
+            numericAttributes: { brand_affinity: 1.5 },
+            categoricalAttributes: { loyalty_tier: 'silver' },
+          },
+          adidas: {
+            numericAttributes: { brand_affinity: -1.0 },
+            categoricalAttributes: { loyalty_tier: 'bronze' },
+          },
+        },
         'default-value',
       );
-      expect(assignment).toEqual('bandit');
+      expect(banditResult.variation).toEqual(banditKey);
+      expect(banditResult.action).toEqual('nike');
     });
   });
 });
