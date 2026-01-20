@@ -849,7 +849,7 @@ describe('EppoClient E2E test', () => {
       expect(banditsConfig).toBeNull();
     });
 
-    it('returns bandits configuration JSON when bandits are present', async () => {
+    it('returns bandits configuration JSON matching bandit-models-v1.json structure', async () => {
       await init({
         apiKey: TEST_BANDIT_API_KEY,
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
@@ -858,12 +858,58 @@ describe('EppoClient E2E test', () => {
       });
 
       const banditsConfig = getBanditsConfiguration();
-      // With the bandit API key, we should have bandits
-      if (banditsConfig) {
-        const parsed = JSON.parse(banditsConfig);
-        expect(parsed.bandits).toBeDefined();
-        expect(Object.keys(parsed.bandits).length).toBeGreaterThan(0);
-      }
+      expect(banditsConfig).not.toBeNull();
+
+      const parsed = JSON.parse(banditsConfig ?? '');
+
+      // Verify exact number of bandits from bandit-models-v1.json
+      expect(Object.keys(parsed.bandits).length).toBe(3);
+      expect(Object.keys(parsed.bandits).sort()).toEqual([
+        'banner_bandit',
+        'car_bandit',
+        'cold_start_bandit',
+      ]);
+
+      // Verify banner_bandit structure in detail
+      const bannerBandit = parsed.bandits['banner_bandit'];
+      expect(bannerBandit.banditKey).toBe('banner_bandit');
+      expect(bannerBandit.modelName).toBe('falcon');
+      expect(bannerBandit.modelVersion).toBe('123');
+      expect(bannerBandit.updatedAt).toBe('2023-09-13T04:52:06.462Z');
+
+      // Verify modelData
+      expect(bannerBandit.modelData.gamma).toBe(1.0);
+      expect(bannerBandit.modelData.defaultActionScore).toBe(0.0);
+      expect(bannerBandit.modelData.actionProbabilityFloor).toBe(0.0);
+
+      // Verify coefficients - should have nike and adidas
+      expect(Object.keys(bannerBandit.modelData.coefficients).sort()).toEqual(['adidas', 'nike']);
+
+      // Verify nike coefficient structure
+      const nikeCoeff = bannerBandit.modelData.coefficients['nike'];
+      expect(nikeCoeff.actionKey).toBe('nike');
+      expect(nikeCoeff.intercept).toBe(1.0);
+      expect(nikeCoeff.actionNumericCoefficients.length).toBe(1);
+      expect(nikeCoeff.actionNumericCoefficients[0]).toEqual({
+        attributeKey: 'brand_affinity',
+        coefficient: 1.0,
+        missingValueCoefficient: -0.1,
+      });
+      expect(nikeCoeff.actionCategoricalCoefficients.length).toBe(2);
+      expect(nikeCoeff.subjectNumericCoefficients.length).toBe(1);
+      expect(nikeCoeff.subjectCategoricalCoefficients.length).toBe(1);
+
+      // Verify car_bandit has different settings
+      const carBandit = parsed.bandits['car_bandit'];
+      expect(carBandit.modelVersion).toBe('456');
+      expect(carBandit.modelData.defaultActionScore).toBe(5.0);
+      expect(carBandit.modelData.actionProbabilityFloor).toBe(0.2);
+      expect(Object.keys(carBandit.modelData.coefficients)).toEqual(['toyota']);
+
+      // Verify cold_start_bandit has empty coefficients
+      const coldStartBandit = parsed.bandits['cold_start_bandit'];
+      expect(coldStartBandit.modelVersion).toBe('cold start');
+      expect(Object.keys(coldStartBandit.modelData.coefficients).length).toBe(0);
     });
   });
 });
