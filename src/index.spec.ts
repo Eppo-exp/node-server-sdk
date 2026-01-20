@@ -32,7 +32,14 @@ import {
 
 import * as util from './util/index';
 
-import { getInstance, IAssignmentEvent, IAssignmentLogger, init, NO_OP_EVENT_DISPATCHER } from '.';
+import {
+  getFlagsConfiguration,
+  getInstance,
+  IAssignmentEvent,
+  IAssignmentLogger,
+  init,
+  NO_OP_EVENT_DISPATCHER,
+} from '.';
 
 import SpyInstance = jest.SpyInstance;
 
@@ -734,5 +741,55 @@ describe('EppoClient E2E test', () => {
       const configurationRequestParameters = client['configurationRequestParameters'];
       expect(configurationRequestParameters.pollAfterSuccessfulInitialization).toBe(false);
     });
+  });
+});
+
+describe('getFlagsConfiguration', () => {
+  it('returns configuration JSON after init', async () => {
+    await init({
+      apiKey: 'dummy',
+      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+      assignmentLogger: { logAssignment: jest.fn() },
+    });
+
+    const exportedConfig = getFlagsConfiguration();
+    expect(exportedConfig).not.toBeNull();
+
+    const parsed = JSON.parse(exportedConfig ?? '');
+    expect(parsed.flags).toBeDefined();
+    expect(parsed.format).toBe('SERVER');
+  });
+
+  it('includes flags from the API response', async () => {
+    await init({
+      apiKey: 'dummy',
+      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+      assignmentLogger: { logAssignment: jest.fn() },
+    });
+
+    const exportedConfig = getFlagsConfiguration();
+    expect(exportedConfig).not.toBeNull();
+
+    const parsed = JSON.parse(exportedConfig ?? '');
+    // The mock server returns flags, so we should have some
+    expect(Object.keys(parsed.flags).length).toBeGreaterThan(0);
+  });
+
+  it('includes environment when available', async () => {
+    await init({
+      apiKey: 'dummy',
+      baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
+      assignmentLogger: { logAssignment: jest.fn() },
+    });
+
+    const exportedConfig = getFlagsConfiguration();
+    expect(exportedConfig).not.toBeNull();
+
+    const parsed = JSON.parse(exportedConfig ?? '');
+    // Environment may or may not be set depending on mock data
+    // Just verify the structure is correct
+    if (parsed.environment) {
+      expect(parsed.environment.name).toBeDefined();
+    }
   });
 });

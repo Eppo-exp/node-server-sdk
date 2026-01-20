@@ -40,6 +40,9 @@ export {
 export { IClientConfig };
 
 let clientInstance: EppoClient;
+let flagConfigurationStore: MemoryOnlyConfigurationStore<Flag>;
+let banditVariationConfigurationStore: MemoryOnlyConfigurationStore<BanditVariation[]>;
+let banditModelConfigurationStore: MemoryOnlyConfigurationStore<BanditParameters>;
 
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -86,9 +89,9 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     throwOnFailedInitialization,
   };
 
-  const flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
-  const banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
-  const banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
+  flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
+  banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
+  banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
   const eventDispatcher = newEventDispatcher(apiKey, eventTracking);
 
   clientInstance = new EppoClient({
@@ -142,6 +145,107 @@ export function getInstance(): EppoClient {
     throw Error('Expected init() to be called to initialize a client instance');
   }
   return clientInstance;
+}
+
+/**
+ * Returns the current flags configuration as a JSON string.
+ * This can be used to bootstrap another SDK instance using offlineInit().
+ *
+ * @returns JSON string containing the flags configuration, or null if not initialized
+ * @public
+ */
+export function getFlagsConfiguration(): string | null {
+  if (!flagConfigurationStore) {
+    return null;
+  }
+
+  const flags = flagConfigurationStore.entries();
+  const format = flagConfigurationStore.getFormat();
+  const createdAt = flagConfigurationStore.getConfigPublishedAt();
+  const environment = flagConfigurationStore.getEnvironment();
+
+  const configuration: {
+    createdAt?: string;
+    format?: string;
+    environment?: { name: string };
+    flags: Record<string, Flag>;
+    banditReferences?: Record<
+      string,
+      {
+        modelVersion: string;
+        flagVariations: BanditVariation[];
+      }
+    >;
+  } = {
+    flags,
+  };
+
+  if (createdAt) {
+    configuration.createdAt = createdAt;
+  }
+  if (format) {
+    configuration.format = format;
+  }
+  if (environment) {
+    configuration.environment = environment;
+  }
+
+  const banditReferences = reconstructBanditReferences();
+  if (banditReferences) {
+    configuration.banditReferences = banditReferences;
+  }
+
+  return JSON.stringify(configuration);
+}
+
+/**
+ * Reconstructs banditReferences from stored variations and parameters.
+ * The variations are stored indexed by flag key, so we need to re-pivot them
+ * back to being indexed by bandit key for export.
+ */
+function reconstructBanditReferences(): Record<
+  string,
+  { modelVersion: string; flagVariations: BanditVariation[] }
+> | null {
+  if (!banditVariationConfigurationStore || !banditModelConfigurationStore) {
+    return null;
+  }
+
+  const variationsByFlagKey = banditVariationConfigurationStore.entries();
+  const banditParameters = banditModelConfigurationStore.entries();
+
+  // Flatten all variations and group by bandit key
+  const variationsByBanditKey: Record<string, BanditVariation[]> = {};
+  for (const variations of Object.values(variationsByFlagKey)) {
+    for (const variation of variations) {
+      const banditKey = variation.key;
+      if (!variationsByBanditKey[banditKey]) {
+        variationsByBanditKey[banditKey] = [];
+      }
+      variationsByBanditKey[banditKey].push(variation);
+    }
+  }
+
+  // Build banditReferences with model versions
+  const banditReferences: Record<
+    string,
+    { modelVersion: string; flagVariations: BanditVariation[] }
+  > = {};
+  for (const [banditKey, variations] of Object.entries(variationsByBanditKey)) {
+    const params = banditParameters[banditKey];
+    if (params) {
+      banditReferences[banditKey] = {
+        modelVersion: params.modelVersion,
+        flagVariations: variations,
+      };
+    }
+  }
+
+  if (Object.keys(banditReferences).length === 0) {
+    return null;
+  }
+
+  return banditReferences;
 }
 
 function newEventDispatcher(
