@@ -1027,7 +1027,7 @@ describe('offlineInit', () => {
       expect(assignment).toEqual('default-value');
     });
 
-    it('makes client available via getInstance()', () => {
+    it('can request assignment', () => {
       offlineInit({
         flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
       });
@@ -1035,6 +1035,16 @@ describe('offlineInit', () => {
       const client = getInstance();
       const assignment = client.getStringAssignment(flagKey, 'subject-10', {}, 'default-value');
       expect(assignment).toEqual('variant-1');
+    });
+
+    it('does not have configurationRequestParameters (no polling)', () => {
+      const client = offlineInit({
+        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
+      });
+
+      // Access the internal configurationRequestParameters - should be undefined for offline mode
+      const configurationRequestParameters = client['configurationRequestParameters'];
+      expect(configurationRequestParameters).toBeUndefined();
     });
   });
 
@@ -1105,23 +1115,12 @@ describe('offlineInit', () => {
     });
 
     it('does not throw with valid empty flags configuration', () => {
-      expect(() => {
-        offlineInit({
-          flagsConfiguration: createFlagsConfigJson({}),
-        });
-      }).not.toThrow();
-    });
-  });
-
-  describe('no network requests', () => {
-    it('does not have configurationRequestParameters (no polling)', () => {
       const client = offlineInit({
-        flagsConfiguration: createFlagsConfigJson({ [flagKey]: mockUfcFlagConfig }),
+        flagsConfiguration: createFlagsConfigJson({}),
       });
 
-      // Access the internal configurationRequestParameters - should be undefined for offline mode
-      const configurationRequestParameters = client['configurationRequestParameters'];
-      expect(configurationRequestParameters).toBeUndefined();
+      const assignment = client.getStringAssignment(flagKey, 'subject-1', {}, 'default-value');
+      expect(assignment).toEqual('default-value');
     });
   });
 
