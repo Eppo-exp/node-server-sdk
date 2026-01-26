@@ -5,12 +5,14 @@ import {
   BanditVariation,
   BoundedEventQueue,
   ContextAttributes,
+  Environment,
   EppoClient,
   Event,
   EventDispatcher,
   Flag,
   FlagConfigurationRequestParameters,
   FlagKey,
+  FormatEnum,
   MemoryOnlyConfigurationStore,
   NamedEventQueue,
   applicationLogger,
@@ -48,6 +50,28 @@ let clientInstance: EppoClient;
 let flagConfigurationStore: MemoryOnlyConfigurationStore<Flag>;
 let banditVariationConfigurationStore: MemoryOnlyConfigurationStore<BanditVariation[]>;
 let banditModelConfigurationStore: MemoryOnlyConfigurationStore<BanditParameters>;
+
+/**
+ * Represents a bandit reference linking a bandit to its flag variations.
+ * Matches the BanditReference interface from the common package.
+ */
+interface BanditReference {
+  modelVersion: string;
+  flagVariations: BanditVariation[];
+}
+
+/**
+ * Represents the universal flag configuration response format.
+ * This matches the IUniversalFlagConfigResponse interface from the common package's http-client.
+ * All fields are required - validation ensures they exist before use.
+ */
+interface FlagsConfigurationResponse {
+  createdAt: string;
+  format: FormatEnum;
+  environment: Environment;
+  flags: Record<string, Flag>;
+  banditReferences: Record<string, BanditReference>;
+}
 
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -164,41 +188,15 @@ export function getFlagsConfiguration(): string | null {
     return null;
   }
 
-  const flags = flagConfigurationStore.entries();
-  const format = flagConfigurationStore.getFormat();
-  const createdAt = flagConfigurationStore.getConfigPublishedAt();
-  const environment = flagConfigurationStore.getEnvironment();
-
-  const configuration: {
-    createdAt?: string;
-    format?: string;
-    environment?: { name: string };
-    flags: Record<string, Flag>;
-    banditReferences?: Record<
-      string,
-      {
-        modelVersion: string;
-        flagVariations: BanditVariation[];
-      }
-    >;
-  } = {
-    flags,
+  // Build configuration matching FlagsConfigurationResponse structure.
+  // All fields are required - they are guaranteed to exist after successful initialization.
+  const configuration: FlagsConfigurationResponse = {
+    createdAt: flagConfigurationStore.getConfigPublishedAt() ?? '',
+    format: flagConfigurationStore.getFormat() ?? FormatEnum.SERVER,
+    environment: flagConfigurationStore.getEnvironment() ?? { name: '' },
+    flags: flagConfigurationStore.entries(),
+    banditReferences: reconstructBanditReferences(),
   };
-
-  if (createdAt) {
-    configuration.createdAt = createdAt;
-  }
-  if (format) {
-    configuration.format = format;
-  }
-  if (environment) {
-    configuration.environment = environment;
-  }
-
-  const banditReferences = reconstructBanditReferences();
-  if (banditReferences) {
-    configuration.banditReferences = banditReferences;
-  }
 
   return JSON.stringify(configuration);
 }
@@ -208,12 +206,9 @@ export function getFlagsConfiguration(): string | null {
  * The variations are stored indexed by flag key, so we need to re-pivot them
  * back to being indexed by bandit key for export.
  */
-function reconstructBanditReferences(): Record<
-  string,
-  { modelVersion: string; flagVariations: BanditVariation[] }
-> | null {
+function reconstructBanditReferences(): Record<string, BanditReference> {
   if (!banditVariationConfigurationStore || !banditModelConfigurationStore) {
-    return null;
+    return {};
   }
 
   const variationsByFlagKey = banditVariationConfigurationStore.entries();
@@ -232,10 +227,7 @@ function reconstructBanditReferences(): Record<
   }
 
   // Build banditReferences with model versions
-  const banditReferences: Record<
-    string,
-    { modelVersion: string; flagVariations: BanditVariation[] }
-  > = {};
+  const banditReferences: Record<string, BanditReference> = {};
   for (const [banditKey, variations] of Object.entries(variationsByBanditKey)) {
     const params = banditParameters[banditKey];
     if (params) {
@@ -244,10 +236,6 @@ function reconstructBanditReferences(): Record<
         flagVariations: variations,
       };
     }
-  }
-
-  if (Object.keys(banditReferences).length === 0) {
-    return null;
   }
 
   return banditReferences;
