@@ -97,62 +97,6 @@ interface BanditsConfigurationResponse {
 const DEFAULT_ASSIGNMENT_CACHE_SIZE = 50_000;
 
 /**
- * Validates that the parsed flags configuration has all required fields.
- * Returns an array of validation error messages, or empty array if valid.
- */
-function validateFlagsConfiguration(config: unknown): string[] {
-  const errors: string[] = [];
-
-  if (!config || typeof config !== 'object') {
-    errors.push('Configuration must be an object');
-    return errors;
-  }
-
-  const cfg = config as Record<string, unknown>;
-
-  if (typeof cfg.createdAt !== 'string') {
-    errors.push('Missing or invalid "createdAt" field');
-  }
-  if (typeof cfg.format !== 'string') {
-    errors.push('Missing or invalid "format" field');
-  }
-  if (!cfg.environment || typeof cfg.environment !== 'object') {
-    errors.push('Missing or invalid "environment" field');
-  } else if (typeof (cfg.environment as Record<string, unknown>).name !== 'string') {
-    errors.push('Missing or invalid "environment.name" field');
-  }
-  if (!cfg.flags || typeof cfg.flags !== 'object') {
-    errors.push('Missing or invalid "flags" field');
-  }
-  if (!cfg.banditReferences || typeof cfg.banditReferences !== 'object') {
-    errors.push('Missing or invalid "banditReferences" field');
-  }
-
-  return errors;
-}
-
-/**
- * Validates that the parsed bandits configuration has all required fields.
- * Returns an array of validation error messages, or empty array if valid.
- */
-function validateBanditsConfiguration(config: unknown): string[] {
-  const errors: string[] = [];
-
-  if (!config || typeof config !== 'object') {
-    errors.push('Configuration must be an object');
-    return errors;
-  }
-
-  const cfg = config as Record<string, unknown>;
-
-  if (!cfg.bandits || typeof cfg.bandits !== 'object') {
-    errors.push('Missing or invalid "bandits" field');
-  }
-
-  return errors;
-}
-
-/**
  * @deprecated Eppo has discontinued eventing support. Event tracking will be handled by Datadog SDKs.
  */
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
@@ -387,7 +331,11 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
       flagConfigurationStore
         .setEntries(flagsConfigResponse.flags)
         .catch((err) =>
-          applicationLogger.warn(`Error setting flags for memory-only configuration store: ${err}`),
+          applicationLogger.warn(
+            `Error setting flags for memory-only configuration store: ${
+              err instanceof Error ? err.message : err
+            }`,
+          ),
         );
 
       // Set configuration timestamp
@@ -412,7 +360,9 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
         .setEntries(banditVariationsByFlagKey)
         .catch((err) =>
           applicationLogger.warn(
-            `Error setting bandit variations for memory-only configuration store: ${err}`,
+            `Error setting bandit variations for memory-only configuration store: ${
+              err instanceof Error ? err.message : err
+            }`,
           ),
         );
     }
@@ -437,7 +387,9 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
           .setEntries(banditsConfigResponse.bandits)
           .catch((err) =>
             applicationLogger.warn(
-              `Error setting bandit models for memory-only configuration store: ${err}`,
+              `Error setting bandit models for memory-only configuration store: ${
+                err instanceof Error ? err.message : err
+              }`,
             ),
           );
       }
@@ -474,6 +426,62 @@ export function offlineInit(config: IOfflineClientConfig): EppoClient {
     // It will return default values for all assignments
     return clientInstance;
   }
+}
+
+/**
+ * Validates that the parsed flags configuration has all required fields.
+ * Returns an array of validation error messages, or empty array if valid.
+ */
+function validateFlagsConfiguration(config: unknown): string[] {
+  const errors: string[] = [];
+
+  if (!config || typeof config !== 'object') {
+    errors.push('Configuration must be an object');
+    return errors;
+  }
+
+  const cfg = config as Record<string, unknown>;
+
+  if (typeof cfg.createdAt !== 'string') {
+    errors.push('Missing or invalid "createdAt" field');
+  }
+  if (typeof cfg.format !== 'string') {
+    errors.push('Missing or invalid "format" field');
+  }
+  if (!cfg.environment || typeof cfg.environment !== 'object') {
+    errors.push('Missing or invalid "environment" field');
+  } else if (typeof (cfg.environment as Record<string, unknown>).name !== 'string') {
+    errors.push('Missing or invalid "environment.name" field');
+  }
+  if (!cfg.flags || typeof cfg.flags !== 'object') {
+    errors.push('Missing or invalid "flags" field');
+  }
+  if (!cfg.banditReferences || typeof cfg.banditReferences !== 'object') {
+    errors.push('Missing or invalid "banditReferences" field');
+  }
+
+  return errors;
+}
+
+/**
+ * Validates that the parsed bandits configuration has all required fields.
+ * Returns an array of validation error messages, or empty array if valid.
+ */
+function validateBanditsConfiguration(config: unknown): string[] {
+  const errors: string[] = [];
+
+  if (!config || typeof config !== 'object') {
+    errors.push('Configuration must be an object');
+    return errors;
+  }
+
+  const cfg = config as Record<string, unknown>;
+
+  if (!cfg.bandits || typeof cfg.bandits !== 'object') {
+    errors.push('Missing or invalid "bandits" field');
+  }
+
+  return errors;
 }
 
 /**
