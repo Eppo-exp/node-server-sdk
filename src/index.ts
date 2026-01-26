@@ -53,7 +53,10 @@ let banditModelConfigurationStore: MemoryOnlyConfigurationStore<BanditParameters
 
 /**
  * Represents a bandit reference linking a bandit to its flag variations.
- * Matches the BanditReference interface from the common package.
+ *
+ * TODO: Remove this local definition once BanditReference is exported from @eppo/js-client-sdk-common.
+ * This duplicates the BanditReference interface from the common package's http-client module,
+ * which is not currently exported from the package's public API.
  */
 interface BanditReference {
   modelVersion: string;
@@ -62,8 +65,10 @@ interface BanditReference {
 
 /**
  * Represents the universal flag configuration response format.
- * This matches the IUniversalFlagConfigResponse interface from the common package's http-client.
- * All fields are required - validation ensures they exist before use.
+ *
+ * TODO: Remove this local definition once IUniversalFlagConfigResponse is exported from @eppo/js-client-sdk-common.
+ * This duplicates the IUniversalFlagConfigResponse interface from the common package's http-client module,
+ * which is not currently exported from the package's public API.
  */
 interface FlagsConfigurationResponse {
   createdAt: string;
@@ -191,9 +196,9 @@ export function getFlagsConfiguration(): string | null {
   // Build configuration matching FlagsConfigurationResponse structure.
   // All fields are required - they are guaranteed to exist after successful initialization.
   const configuration: FlagsConfigurationResponse = {
-    createdAt: flagConfigurationStore.getConfigPublishedAt() ?? '',
+    createdAt: flagConfigurationStore.getConfigPublishedAt() ?? new Date().toISOString(),
     format: flagConfigurationStore.getFormat() ?? FormatEnum.SERVER,
-    environment: flagConfigurationStore.getEnvironment() ?? { name: '' },
+    environment: flagConfigurationStore.getEnvironment() ?? { name: 'UNKNOWN' },
     flags: flagConfigurationStore.entries(),
     banditReferences: reconstructBanditReferences(),
   };
