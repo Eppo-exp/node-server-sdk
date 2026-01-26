@@ -983,13 +983,21 @@ describe('offlineInit', () => {
   // Helper to create a full configuration JSON string
   const createFlagsConfigJson = (
     flags: Record<string, Flag>,
-    options: { createdAt?: string; format?: string } = {},
+    options: {
+      createdAt?: string;
+      format?: string;
+      banditReferences?: Record<
+        string,
+        { modelVersion: string; flagVariations: BanditVariation[] }
+      >;
+    } = {},
   ): string => {
     return JSON.stringify({
       createdAt: options.createdAt ?? '2024-04-17T19:40:53.716Z',
       format: options.format ?? 'SERVER',
       environment: { name: 'Test' },
       flags,
+      banditReferences: options.banditReferences ?? {},
     });
   };
 
