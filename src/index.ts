@@ -78,6 +78,16 @@ interface FlagsConfigurationResponse {
   banditReferences: Record<string, BanditReference>;
 }
 
+/**
+ * Represents the bandits configuration response format.
+ * This matches the IBanditParametersResponse interface from the common package's http-client,
+ * except updatedAt is optional since we don't store it separately.
+ */
+interface BanditsConfigurationResponse {
+  updatedAt?: string;
+  bandits: Record<string, BanditParameters>;
+}
+
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   attachContext: () => {},
@@ -266,9 +276,9 @@ export function getBanditsConfiguration(): string | null {
     return null;
   }
 
-  const configuration: {
-    bandits: Record<string, BanditParameters>;
-  } = {
+  // Build configuration matching BanditsConfigurationResponse structure.
+  // Note: updatedAt is not available from the store, so it's omitted.
+  const configuration: BanditsConfigurationResponse = {
     bandits,
   };
 
