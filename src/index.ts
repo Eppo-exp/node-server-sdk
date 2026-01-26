@@ -80,11 +80,13 @@ interface FlagsConfigurationResponse {
 
 /**
  * Represents the bandits configuration response format.
- * This matches the IBanditParametersResponse interface from the common package's http-client,
- * except updatedAt is optional since we don't store it separately.
+ *
+ * TODO: Remove this local definition once IBanditParametersResponse is exported from @eppo/js-client-sdk-common.
+ * This duplicates the IBanditParametersResponse interface from the common package's http-client module,
+ * which is not currently exported from the package's public API.
  */
 interface BanditsConfigurationResponse {
-  updatedAt?: string;
+  updatedAt: string;
   bandits: Record<string, BanditParameters>;
 }
 
@@ -261,25 +263,14 @@ function reconstructBanditReferences(): Record<string, BanditReference> {
  * This can be used together with getFlagsConfiguration() to bootstrap
  * another SDK instance using offlineInit().
  *
- * @returns JSON string containing the bandits configuration, or null if not initialized or no bandits
+ * @returns JSON string containing the bandits configuration
  * @public
  */
-export function getBanditsConfiguration(): string | null {
-  if (!banditModelConfigurationStore) {
-    return null;
-  }
-
-  const bandits = banditModelConfigurationStore.entries();
-
-  // Return null if there are no bandits
-  if (Object.keys(bandits).length === 0) {
-    return null;
-  }
-
+export function getBanditsConfiguration(): string {
   // Build configuration matching BanditsConfigurationResponse structure.
-  // Note: updatedAt is not available from the store, so it's omitted.
   const configuration: BanditsConfigurationResponse = {
-    bandits,
+    updatedAt: new Date().toISOString(), // TODO: ideally we can track this and use it when regenerating bandits configuration
+    bandits: banditModelConfigurationStore ? banditModelConfigurationStore.entries() : {},
   };
 
   return JSON.stringify(configuration);

@@ -837,16 +837,20 @@ describe('EppoClient E2E test', () => {
   });
 
   describe('getBanditsConfiguration', () => {
-    it('returns null when no bandits are configured', async () => {
+    it('returns empty bandits configuration when no bandits are configured', async () => {
       await init({
         apiKey: 'dummy',
         baseUrl: `http://127.0.0.1:${TEST_SERVER_PORT}`,
         assignmentLogger: { logAssignment: jest.fn() },
       });
 
-      // The default mock doesn't include bandits, so this should return null
+      // The default mock doesn't include bandits, so this should return an empty bandits map
       const banditsConfig = getBanditsConfiguration();
-      expect(banditsConfig).toBeNull();
+      expect(banditsConfig).not.toBeNull();
+      expect(banditsConfig).toBeDefined();
+      const parsed = JSON.parse(banditsConfig as string);
+      expect(parsed.bandits).toEqual({});
+      expect(parsed.updatedAt).toBeDefined();
     });
 
     it('returns bandits configuration JSON matching bandit-models-v1.json structure', async () => {
