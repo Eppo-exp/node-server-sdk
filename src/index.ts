@@ -5,12 +5,14 @@ import {
   BanditVariation,
   BoundedEventQueue,
   ContextAttributes,
+  Environment,
   EppoClient,
   Event,
   EventDispatcher,
   Flag,
   FlagConfigurationRequestParameters,
   FlagKey,
+  FormatEnum,
   MemoryOnlyConfigurationStore,
   NamedEventQueue,
   applicationLogger,
@@ -40,6 +42,41 @@ export {
 export { IClientConfig };
 
 let clientInstance: EppoClient;
+
+// We keep references to the configuration stores at module level because EppoClient
+// does not expose public getters for store metadata (format, createdAt, environment)
+// or bandit configurations. These references are needed by getFlagsConfiguration()
+// and getBanditsConfiguration() to reconstruct exportable configuration JSON.
+let flagConfigurationStore: MemoryOnlyConfigurationStore<Flag>;
+let banditVariationConfigurationStore: MemoryOnlyConfigurationStore<BanditVariation[]>;
+let banditModelConfigurationStore: MemoryOnlyConfigurationStore<BanditParameters>;
+
+/**
+ * Represents a bandit reference linking a bandit to its flag variations.
+ *
+ * TODO: Remove this local definition once BanditReference is exported from @eppo/js-client-sdk-common.
+ * This duplicates the BanditReference interface from the common package's http-client module,
+ * which is not currently exported from the package's public API.
+ */
+interface BanditReference {
+  modelVersion: string;
+  flagVariations: BanditVariation[];
+}
+
+/**
+ * Represents the universal flag configuration response format.
+ *
+ * TODO: Remove this local definition once IUniversalFlagConfigResponse is exported from @eppo/js-client-sdk-common.
+ * This duplicates the IUniversalFlagConfigResponse interface from the common package's http-client module,
+ * which is not currently exported from the package's public API.
+ */
+interface FlagsConfigurationResponse {
+  createdAt: string;
+  format: FormatEnum;
+  environment: Environment;
+  flags: Record<string, Flag>;
+  banditReferences: Record<string, BanditReference>;
+}
 
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -86,9 +123,9 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     throwOnFailedInitialization,
   };
 
-  const flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
-  const banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
-  const banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
+  flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
+  banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
+  banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
   const eventDispatcher = newEventDispatcher(apiKey, eventTracking);
 
   clientInstance = new EppoClient({
@@ -142,6 +179,71 @@ export function getInstance(): EppoClient {
     throw Error('Expected init() to be called to initialize a client instance');
   }
   return clientInstance;
+}
+
+/**
+ * Reconstructs the current flags configuration as a JSON string.
+ * This can be used to bootstrap another SDK instance using offlineInit().
+ *
+ * @returns JSON string containing the flags configuration, or null if not initialized
+ * @public
+ */
+export function getFlagsConfiguration(): string | null {
+  if (!flagConfigurationStore) {
+    return null;
+  }
+
+  // Build configuration matching FlagsConfigurationResponse structure.
+  // All fields are required - they are guaranteed to exist after successful initialization.
+  const configuration: FlagsConfigurationResponse = {
+    createdAt: flagConfigurationStore.getConfigPublishedAt() ?? new Date().toISOString(),
+    format: flagConfigurationStore.getFormat() ?? FormatEnum.SERVER,
+    environment: flagConfigurationStore.getEnvironment() ?? { name: 'UNKNOWN' },
+    flags: flagConfigurationStore.entries(),
+    banditReferences: reconstructBanditReferences(),
+  };
+
+  return JSON.stringify(configuration);
+}
+
+/**
+ * Reconstructs banditReferences from stored variations and parameters.
+ * The variations are stored indexed by flag key, so we need to re-pivot them
+ * back to being indexed by bandit key for export.
+ */
+function reconstructBanditReferences(): Record<string, BanditReference> {
+  if (!banditVariationConfigurationStore || !banditModelConfigurationStore) {
+    return {};
+  }
+
+  const variationsByFlagKey = banditVariationConfigurationStore.entries();
+  const banditParameters = banditModelConfigurationStore.entries();
+
+  // Flatten all variations and group by bandit key
+  const variationsByBanditKey: Record<string, BanditVariation[]> = {};
+  for (const variations of Object.values(variationsByFlagKey)) {
+    for (const variation of variations) {
+      const banditKey = variation.key;
+      if (!variationsByBanditKey[banditKey]) {
+        variationsByBanditKey[banditKey] = [];
+      }
+      variationsByBanditKey[banditKey].push(variation);
+    }
+  }
+
+  // Build banditReferences with model versions
+  const banditReferences: Record<string, BanditReference> = {};
+  for (const [banditKey, variations] of Object.entries(variationsByBanditKey)) {
+    const params = banditParameters[banditKey];
+    if (params) {
+      banditReferences[banditKey] = {
+        modelVersion: params.modelVersion,
+        flagVariations: variations,
+      };
+    }
+  }
+
+  return banditReferences;
 }
 
 function newEventDispatcher(
