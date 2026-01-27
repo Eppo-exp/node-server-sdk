@@ -31,6 +31,12 @@ export { ContextAttributes }
 export { EppoAssignmentLogger }
 
 // @public
+export function getBanditsConfiguration(): string;
+
+// @public
+export function getFlagsConfiguration(): string | null;
+
+// @public
 export function getInstance(): EppoClient;
 
 export { IAssignmentDetails }
@@ -49,6 +55,7 @@ export interface IClientConfig {
     assignmentLogger: IAssignmentLogger;
     banditLogger?: IBanditLogger;
     baseUrl?: string;
+    // @deprecated
     eventTracking?: {
         batchSize?: number;
         deliveryIntervalMs?: number;
@@ -70,8 +77,20 @@ export interface IClientConfig {
 // @public
 export function init(config: IClientConfig): Promise<EppoClient>;
 
-// @public (undocumented)
+// @public
+export interface IOfflineClientConfig {
+    assignmentLogger?: IAssignmentLogger;
+    banditLogger?: IBanditLogger;
+    banditsConfiguration?: string;
+    flagsConfiguration: string;
+    throwOnFailedInitialization?: boolean;
+}
+
+// @public @deprecated (undocumented)
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher;
+
+// @public
+export function offlineInit(config: IOfflineClientConfig): EppoClient;
 
 // (No @packageDocumentation comment for this package)
 

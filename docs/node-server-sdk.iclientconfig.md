@@ -126,7 +126,7 @@ _(Optional)_ Base URL of the Eppo API. Clients should use the default setting in
 
 </td><td>
 
-_(Optional)_ Configuration settings for the event dispatcher
+_(Optional)_ Configuration settings for the event dispatcher.
 
 
 </td></tr>

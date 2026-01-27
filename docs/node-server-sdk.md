@@ -19,6 +19,28 @@ Description
 </th></tr></thead>
 <tbody><tr><td>
 
+[getBanditsConfiguration()](./node-server-sdk.getbanditsconfiguration.md)
+
+
+</td><td>
+
+Returns the current bandits configuration as a JSON string. This can be used together with getFlagsConfiguration() to bootstrap another SDK instance using offlineInit().
+
+
+</td></tr>
+<tr><td>
+
+[getFlagsConfiguration()](./node-server-sdk.getflagsconfiguration.md)
+
+
+</td><td>
+
+Reconstructs the current flags configuration as a JSON string. This can be used to bootstrap another SDK instance using offlineInit().
+
+
+</td></tr>
+<tr><td>
+
 [getInstance()](./node-server-sdk.getinstance.md)
 
 
@@ -36,6 +58,17 @@ Used to access a singleton SDK client instance. Use the method after calling ini
 </td><td>
 
 Initializes the Eppo client with configuration parameters. This method should be called once on application startup. After invocation of this method, the SDK will poll Eppo API at regular intervals to retrieve assignment configurations.
+
+
+</td></tr>
+<tr><td>
+
+[offlineInit(config)](./node-server-sdk.offlineinit.md)
+
+
+</td><td>
+
+Initializes the Eppo client in offline mode with a provided configuration. This method is synchronous and does not make any network requests. Use this when you want to initialize the SDK with a previously fetched configuration.
 
 
 </td></tr>
@@ -62,6 +95,17 @@ Description
 </td><td>
 
 Configuration used for initializing the Eppo client
+
+
+</td></tr>
+<tr><td>
+
+[IOfflineClientConfig](./node-server-sdk.iofflineclientconfig.md)
+
+
+</td><td>
+
+Configuration used for offline initialization of the Eppo client. Offline initialization allows the SDK to be used without making any network requests.
 
 
 </td></tr>

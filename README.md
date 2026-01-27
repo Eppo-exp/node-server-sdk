@@ -8,10 +8,17 @@
 
 - Feature gates
 - Kill switches
+- Dynamic configuration
 - Progressive rollouts
 - A/B/n experiments
+- Holdouts
 - Mutually exclusive experiments (Layers)
-- Dynamic configuration
+- Switchback experiments
+- Contextual Multi-armed bandits
+
+## Requirements
+
+- Node.js version 20.x or later
 
 ## Installation
 
