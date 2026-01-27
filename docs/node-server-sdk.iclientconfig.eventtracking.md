@@ -4,7 +4,12 @@
 
 ## IClientConfig.eventTracking property
 
-Configuration settings for the event dispatcher
+> Warning: This API is now obsolete.
+> 
+> Eppo has discontinued eventing support. Event tracking will be handled by Datadog SDKs.
+> 
+
+Configuration settings for the event dispatcher.
 
 **Signature:**
 

@@ -4,6 +4,11 @@
 
 ## NO\_OP\_EVENT\_DISPATCHER variable
 
+> Warning: This API is now obsolete.
+> 
+> Eppo has discontinued eventing support. Event tracking will be handled by Datadog SDKs.
+> 
+
 **Signature:**
 
 ```typescript
