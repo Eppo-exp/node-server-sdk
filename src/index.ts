@@ -78,6 +78,18 @@ interface FlagsConfigurationResponse {
   banditReferences: Record<string, BanditReference>;
 }
 
+/**
+ * Represents the bandits configuration response format.
+ *
+ * TODO: Remove this local definition once IBanditParametersResponse is exported from @eppo/js-client-sdk-common.
+ * This duplicates the IBanditParametersResponse interface from the common package's http-client module,
+ * which is not currently exported from the package's public API.
+ */
+interface BanditsConfigurationResponse {
+  updatedAt: string;
+  bandits: Record<string, BanditParameters>;
+}
+
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   attachContext: () => {},
@@ -244,6 +256,24 @@ function reconstructBanditReferences(): Record<string, BanditReference> {
   }
 
   return banditReferences;
+}
+
+/**
+ * Returns the current bandits configuration as a JSON string.
+ * This can be used together with getFlagsConfiguration() to bootstrap
+ * another SDK instance using offlineInit().
+ *
+ * @returns JSON string containing the bandits configuration
+ * @public
+ */
+export function getBanditsConfiguration(): string {
+  // Build configuration matching BanditsConfigurationResponse structure.
+  const configuration: BanditsConfigurationResponse = {
+    updatedAt: new Date().toISOString(), // TODO: ideally we can track this and use it when regenerating bandits configuration
+    bandits: banditModelConfigurationStore ? banditModelConfigurationStore.entries() : {},
+  };
+
+  return JSON.stringify(configuration);
 }
 
 function newEventDispatcher(

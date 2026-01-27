@@ -6,7 +6,7 @@ env:
 
 on:
   pull_request:
-    branches: [ "*" ]
+    branches: [ "**" ]
   workflow_dispatch:
   workflow_call:
     inputs:
