@@ -20,7 +20,7 @@ import {
 } from '@eppo/js-client-sdk-common';
 
 import FileBackedNamedEventQueue from './events/file-backed-named-event-queue';
-import { IClientConfig } from './i-client-config';
+import { IClientConfig, IOfflineClientConfig } from './i-client-config';
 import { sdkName, sdkVersion } from './sdk-data';
 import { generateSalt } from './util';
 import { isReadOnlyFs } from './util/index';
@@ -39,7 +39,7 @@ export {
   EppoAssignmentLogger,
 } from '@eppo/js-client-sdk-common';
 
-export { IClientConfig };
+export { IClientConfig, IOfflineClientConfig };
 
 let clientInstance: EppoClient;
 
@@ -90,6 +90,15 @@ interface BanditsConfigurationResponse {
   bandits: Record<string, BanditParameters>;
 }
 
+/**
+ * Default assignment cache size for server-side use cases.
+ * We estimate this will use no more than 10 MB of memory.
+ */
+const DEFAULT_ASSIGNMENT_CACHE_SIZE = 50_000;
+
+/**
+ * @deprecated Eppo has discontinued eventing support. Event tracking will be handled by Datadog SDKs.
+ */
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   attachContext: () => {},
@@ -152,11 +161,8 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
     clientInstance.setBanditLogger(config.banditLogger);
   }
 
-  // default to LRU cache with 50_000 entries.
-  // we estimate this will use no more than 10 MB of memory
-  // and should be appropriate for most server-side use cases.
-  clientInstance.useLRUInMemoryAssignmentCache(50_000);
-  clientInstance.useExpiringInMemoryBanditAssignmentCache(50_000);
+  clientInstance.useLRUInMemoryAssignmentCache(DEFAULT_ASSIGNMENT_CACHE_SIZE);
+  clientInstance.useExpiringInMemoryBanditAssignmentCache(DEFAULT_ASSIGNMENT_CACHE_SIZE);
 
   // Fetch configurations (which will also start regular polling per requestConfiguration)
   await clientInstance.fetchFlagConfigurations();
@@ -276,6 +282,211 @@ export function getBanditsConfiguration(): string {
   return JSON.stringify(configuration);
 }
 
+/**
+ * Initializes the Eppo client in offline mode with a provided configuration.
+ * This method is synchronous and does not make any network requests.
+ * Use this when you want to initialize the SDK with a previously fetched configuration.
+ * @param config offline client configuration containing flag configurations as JSON strings
+ * @returns the initialized client instance
+ * @public
+ */
+export function offlineInit(config: IOfflineClientConfig): EppoClient {
+  const {
+    flagsConfiguration,
+    banditsConfiguration,
+    assignmentLogger,
+    banditLogger,
+    throwOnFailedInitialization = true,
+  } = config;
+
+  // Create memory-only configuration stores
+  flagConfigurationStore = new MemoryOnlyConfigurationStore<Flag>();
+  banditVariationConfigurationStore = new MemoryOnlyConfigurationStore<BanditVariation[]>();
+  banditModelConfigurationStore = new MemoryOnlyConfigurationStore<BanditParameters>();
+
+  try {
+    // Parse and validate the flags configuration JSON
+    const parsedFlagsConfig = JSON.parse(flagsConfiguration);
+    const flagsValidationErrors = validateFlagsConfiguration(parsedFlagsConfig);
+
+    if (flagsValidationErrors.length > 0) {
+      const errorMessage = `Invalid flags configuration: ${flagsValidationErrors.join(', ')}`;
+      if (throwOnFailedInitialization) {
+        throw new Error(errorMessage);
+      }
+      applicationLogger.warn(
+        `${errorMessage}. Using empty configuration - all assignments will return default values.`,
+      );
+      // Skip loading flags config, stores remain empty
+    } else {
+      // Cast to typed response after validation
+      const flagsConfigResponse = parsedFlagsConfig as FlagsConfigurationResponse;
+
+      // Set format from the configuration
+      flagConfigurationStore.setFormat(flagsConfigResponse.format);
+
+      // Load flag configurations into store
+      // Note: setEntries is async but MemoryOnlyConfigurationStore performs synchronous operations internally,
+      // so there's no race condition. We add .catch() for defensive error handling, matching JS client SDK pattern.
+      flagConfigurationStore
+        .setEntries(flagsConfigResponse.flags)
+        .catch((err) =>
+          applicationLogger.warn(
+            `Error setting flags for memory-only configuration store: ${
+              err instanceof Error ? err.message : err
+            }`,
+          ),
+        );
+
+      // Set configuration timestamp
+      flagConfigurationStore.setConfigPublishedAt(flagsConfigResponse.createdAt);
+
+      // Set environment
+      flagConfigurationStore.setEnvironment(flagsConfigResponse.environment);
+
+      // Process bandit references from the flags configuration
+      // Index by flag key for quick lookup (instead of by bandit key)
+      const banditVariationsByFlagKey: Record<string, BanditVariation[]> = {};
+      for (const banditReference of Object.values(flagsConfigResponse.banditReferences)) {
+        for (const flagVariation of banditReference.flagVariations) {
+          const { flagKey } = flagVariation;
+          if (!banditVariationsByFlagKey[flagKey]) {
+            banditVariationsByFlagKey[flagKey] = [];
+          }
+          banditVariationsByFlagKey[flagKey].push(flagVariation);
+        }
+      }
+      banditVariationConfigurationStore
+        .setEntries(banditVariationsByFlagKey)
+        .catch((err) =>
+          applicationLogger.warn(
+            `Error setting bandit variations for memory-only configuration store: ${
+              err instanceof Error ? err.message : err
+            }`,
+          ),
+        );
+    }
+
+    // Parse and load bandit models if provided
+    if (banditsConfiguration) {
+      const parsedBanditsConfig = JSON.parse(banditsConfiguration);
+      const banditsValidationErrors = validateBanditsConfiguration(parsedBanditsConfig);
+
+      if (banditsValidationErrors.length > 0) {
+        const errorMessage = `Invalid bandits configuration: ${banditsValidationErrors.join(', ')}`;
+        if (throwOnFailedInitialization) {
+          throw new Error(errorMessage);
+        }
+        applicationLogger.warn(
+          `${errorMessage}. Skipping bandit configuration - bandit assignments will not work.`,
+        );
+        // Skip loading bandits config, store remains empty
+      } else {
+        const banditsConfigResponse = parsedBanditsConfig as BanditsConfigurationResponse;
+        banditModelConfigurationStore
+          .setEntries(banditsConfigResponse.bandits)
+          .catch((err) =>
+            applicationLogger.warn(
+              `Error setting bandit models for memory-only configuration store: ${
+                err instanceof Error ? err.message : err
+              }`,
+            ),
+          );
+      }
+    }
+
+    // Create client without request parameters (offline mode - no polling)
+    clientInstance = new EppoClient({
+      flagConfigurationStore,
+      banditVariationConfigurationStore,
+      banditModelConfigurationStore,
+      // No configurationRequestParameters = offline mode, no network requests
+    });
+
+    // Set loggers if provided
+    if (assignmentLogger) {
+      clientInstance.setAssignmentLogger(assignmentLogger);
+    }
+    if (banditLogger) {
+      clientInstance.setBanditLogger(banditLogger);
+    }
+
+    clientInstance.useLRUInMemoryAssignmentCache(DEFAULT_ASSIGNMENT_CACHE_SIZE);
+    clientInstance.useExpiringInMemoryBanditAssignmentCache(DEFAULT_ASSIGNMENT_CACHE_SIZE);
+
+    return clientInstance;
+  } catch (error) {
+    if (throwOnFailedInitialization) {
+      throw error;
+    }
+    applicationLogger.warn(
+      `Eppo SDK offline initialization failed: ${error instanceof Error ? error.message : error}`,
+    );
+    // Return the client instance even if initialization failed
+    // It will return default values for all assignments
+    return clientInstance;
+  }
+}
+
+/**
+ * Validates that the parsed flags configuration has all required fields.
+ * Returns an array of validation error messages, or empty array if valid.
+ */
+function validateFlagsConfiguration(config: unknown): string[] {
+  const errors: string[] = [];
+
+  if (!config || typeof config !== 'object') {
+    errors.push('Configuration must be an object');
+    return errors;
+  }
+
+  const cfg = config as Record<string, unknown>;
+
+  if (typeof cfg.createdAt !== 'string') {
+    errors.push('Missing or invalid "createdAt" field');
+  }
+  if (typeof cfg.format !== 'string') {
+    errors.push('Missing or invalid "format" field');
+  }
+  if (!cfg.environment || typeof cfg.environment !== 'object') {
+    errors.push('Missing or invalid "environment" field');
+  } else if (typeof (cfg.environment as Record<string, unknown>).name !== 'string') {
+    errors.push('Missing or invalid "environment.name" field');
+  }
+  if (!cfg.flags || typeof cfg.flags !== 'object') {
+    errors.push('Missing or invalid "flags" field');
+  }
+  if (!cfg.banditReferences || typeof cfg.banditReferences !== 'object') {
+    errors.push('Missing or invalid "banditReferences" field');
+  }
+
+  return errors;
+}
+
+/**
+ * Validates that the parsed bandits configuration has all required fields.
+ * Returns an array of validation error messages, or empty array if valid.
+ */
+function validateBanditsConfiguration(config: unknown): string[] {
+  const errors: string[] = [];
+
+  if (!config || typeof config !== 'object') {
+    errors.push('Configuration must be an object');
+    return errors;
+  }
+
+  const cfg = config as Record<string, unknown>;
+
+  if (!cfg.bandits || typeof cfg.bandits !== 'object') {
+    errors.push('Missing or invalid "bandits" field');
+  }
+
+  return errors;
+}
+
+/**
+ * @deprecated Eppo has discontinued eventing support. Event tracking will be handled by Datadog SDKs.
+ */
 function newEventDispatcher(
   sdkKey: string,
   config: IClientConfig['eventTracking'] = {},
