@@ -270,10 +270,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@eppo/js-client-sdk-common@4.15.2":
-  version "4.15.2"
-  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-4.15.2.tgz#80eb4a4e8220b25f6875b3941c7fd949fa05d054"
-  integrity sha512-by4l3kKyJqSFP/obIcaDvvauHpe8MJVdgcZ2WT6rQEFMcLN9IvgX/Bw3wcK/PJI+6VLZaDtpOBFnOFzVRepwcg==
+"@eppo/js-client-sdk-common@4.15.5":
+  version "4.15.5"
+  resolved "https://registry.yarnpkg.com/@eppo/js-client-sdk-common/-/js-client-sdk-common-4.15.5.tgz#6ca7bb4d27bc2ae63ab4a97e25b15ff61be2777c"
+  integrity sha512-pRQG3fWiyOTAfjAvQ818aRMJryaDQXUNfcXzTy4czKFFBzPRTSUhaCDS1wGFU0zBLg2ZjMLBDt71km6q/wnztg==
   dependencies:
     buffer "npm:@eppo/buffer@6.2.0"
     js-base64 "^3.7.7"
