@@ -29,30 +29,30 @@
   },
   "homepage": "https://github.com/Eppo-exp/node-server-sdk#readme",
   "dependencies": {
-    "@eppo/js-client-sdk-common": "4.15.2"
+    "@eppo/js-client-sdk-common": "^5"
   },
   "devDependencies": {
-    "@google-cloud/storage": "^7.18.0",
-    "@microsoft/api-documenter": "^7.28.2",
-    "@microsoft/api-extractor": "^7.38.0",
-    "@types/express": "^4.17.13",
-    "@types/jest": "^29.5.14",
-    "@typescript-eslint/eslint-plugin": "^5.13.0",
-    "@typescript-eslint/parser": "^5.13.0",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-import-resolver-typescript": "^2.5.0",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "express": "^4.22.1",
-    "husky": "^6.0.0",
-    "jest": "^29.7.0",
-    "lint-staged": "^12.3.5",
-    "prettier": "^2.2.1",
-    "testdouble": "^3.16.4",
-    "ts-jest": "^29.4.6",
-    "typescript": "^5.4.5"
+    "@google-cloud/storage": "^7",
+    "@microsoft/api-documenter": "^7.30.5",
+    "@microsoft/api-extractor": "^7.58.7",
+    "@types/express": "^4",
+    "@types/jest": "^30",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@typescript-eslint/parser": "^8",
+    "eslint": "^8",
+    "eslint-config-prettier": "^10",
+    "eslint-import-resolver-typescript": "^4",
+    "eslint-plugin-import": "^2",
+    "eslint-plugin-prettier": "^5",
+    "eslint-plugin-promise": "^7",
+    "express": "^5",
+    "husky": "^9",
+    "jest": "^29",
+    "lint-staged": "^16",
+    "prettier": "^3",
+    "testdouble": "^3",
+    "ts-jest": "^29",
+    "typescript": "^5"
   },
   "engines": {
     "node": ">=20.x",
@@ -60,7 +60,9 @@
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "resolutions": {
-    "minimatch": "^3.1.2",
-    "@types/node": "^20.0.0"
+    "//@types/node": "Pinned to ^20 to keep the dev type surface aligned with engines.node >=20.x; newer @types/node would let consumer code use APIs that aren't actually available on Node 20",
+    "@types/node": "^20.0.0",
+    "//@tootallnate/once": "GHSA-rj4j-rrv4-3xc4 (low). Pulled deeply by @google-cloud/storage → teeny-request → http-proxy-agent. The latest @google-cloud/storage (7.19.x) still ships the unpatched chain and there's no newer release; the chain is dev-only (test fixture downloader)",
+    "@tootallnate/once": "^3.0.1"
   }
 }

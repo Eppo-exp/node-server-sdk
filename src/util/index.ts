@@ -12,7 +12,7 @@ export function isReadOnlyFs(directory: string): boolean {
     fs.writeFileSync(testFilePath, 'test', { flag: 'w' });
     fs.unlinkSync(testFilePath);
     return false;
-  } catch (error) {
+  } catch {
     return true;
   }
 }
