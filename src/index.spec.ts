@@ -1331,6 +1331,7 @@ describe('EppoClient E2E test', () => {
         jest.resetModules();
 
         // Step 4: Re-import module and initialize with offlineInit using exported config
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         sdkModule = require('.');
         sdkModule.offlineInit({ flagsConfiguration: flagsConfig });
       });
@@ -1391,6 +1392,7 @@ describe('EppoClient E2E test', () => {
         jest.resetModules();
 
         // Step 4: Re-import module and initialize with offlineInit using exported configs
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         sdkModule = require('.');
         sdkModule.offlineInit({
           flagsConfiguration: flagsConfig,
