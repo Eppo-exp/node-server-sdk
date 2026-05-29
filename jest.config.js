@@ -9,7 +9,6 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)s$': ['ts-jest', { isolatedModules: true }],
   },
-  globalSetup: './test/globalSetup.ts',
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: 'coverage/',
   testEnvironment: 'node',
