@@ -1,4 +1,4 @@
-import * as express from 'express';
+import { createServer } from 'http';
 
 import {
   MOCK_BANDIT_MODELS_RESPONSE_FILE,
@@ -7,27 +7,38 @@ import {
   readMockResponse,
 } from './testHelpers';
 
-const api = express();
-
 export const TEST_SERVER_PORT = 4123;
 export const TEST_BANDIT_API_KEY = 'foo.ZWg9MTIzNDU2LmUudGVzdGluZy5lcHBvLmNsb3Vk';
 const flagEndpoint = /flag-config\/v1\/config*/;
 const banditEndpoint = /flag-config\/v1\/bandits*/;
 
-api.get(flagEndpoint, (req, res) => {
-  const ufcFile = req.url.includes(TEST_BANDIT_API_KEY)
-    ? MOCK_FLAGS_WITH_BANDITS_RESPONSE_FILE
-    : MOCK_UFC_RESPONSE_FILE;
-  const mockUfcResponse = readMockResponse(ufcFile);
-  res.json(mockUfcResponse);
+const server = createServer((req, res) => {
+  if (req.method !== 'GET' || !req.url) {
+    res.statusCode = 404;
+    res.end();
+    return;
+  }
+
+  if (flagEndpoint.test(req.url)) {
+    const ufcFile = req.url.includes(TEST_BANDIT_API_KEY)
+      ? MOCK_FLAGS_WITH_BANDITS_RESPONSE_FILE
+      : MOCK_UFC_RESPONSE_FILE;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(readMockResponse(ufcFile)));
+    return;
+  }
+
+  if (banditEndpoint.test(req.url)) {
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(readMockResponse(MOCK_BANDIT_MODELS_RESPONSE_FILE)));
+    return;
+  }
+
+  res.statusCode = 404;
+  res.end();
 });
 
-api.get(banditEndpoint, (req, res) => {
-  const mockBanditResponse = readMockResponse(MOCK_BANDIT_MODELS_RESPONSE_FILE);
-  res.json(mockBanditResponse);
-});
-
-const server = api.listen(TEST_SERVER_PORT, () => {
+server.listen(TEST_SERVER_PORT, () => {
   const address = server.address();
   console.log(`Running API server on '${JSON.stringify(address)}'...`);
 });

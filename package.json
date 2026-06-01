@@ -1,6 +1,6 @@
 {
   "name": "@eppo/node-server-sdk",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Eppo node server SDK",
   "main": "dist/index.js",
   "files": [
@@ -14,7 +14,7 @@
     "prepare": "make prepare",
     "pre-commit": "lint-staged && tsc && yarn docs",
     "typecheck": "tsc",
-    "test": "yarn test:unit",
+    "test": "make test",
     "test:unit": "NODE_ENV=test jest '.*\\.spec\\.ts'",
     "docs": "api-documenter markdown -i ./temp -o ./docs"
   },
@@ -32,10 +32,8 @@
     "@eppo/js-client-sdk-common": "^5"
   },
   "devDependencies": {
-    "@google-cloud/storage": "^7",
     "@microsoft/api-documenter": "^7.30.5",
     "@microsoft/api-extractor": "^7.58.7",
-    "@types/express": "^5",
     "@types/jest": "^30",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
@@ -45,7 +43,6 @@
     "eslint-plugin-import": "^2",
     "eslint-plugin-prettier": "^5",
     "eslint-plugin-promise": "^7",
-    "express": "^5",
     "husky": "^9",
     "jest": "^30",
     "lint-staged": "^16",
@@ -60,9 +57,9 @@
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "resolutions": {
-    "//@types/node": "Pinned to ^20 to keep the dev type surface aligned with engines.node >=20.x; newer @types/node would let consumer code use APIs that aren't actually available on Node 20",
-    "@types/node": "^20.0.0",
-    "//@tootallnate/once": "GHSA-rj4j-rrv4-3xc4 (low). Pulled deeply by @google-cloud/storage → teeny-request → http-proxy-agent. The latest @google-cloud/storage (7.19.x) still ships the unpatched chain and there's no newer release; the chain is dev-only (test fixture downloader)",
-    "@tootallnate/once": "^3.0.1"
+    "@types/node": "^20.0.0"
+  },
+  "resolutionRationales": {
+    "@types/node": "Pinned to ^20 to keep the dev type surface aligned with engines.node >=20.x; newer @types/node would let consumer code use APIs that are not available on Node 20."
   }
 }
