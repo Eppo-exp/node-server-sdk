@@ -58,10 +58,10 @@
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "resolutions": {
     "@types/node": "^20.0.0",
-    "@microsoft/api-documenter/js-yaml": "^4.2.0"
+    "@microsoft/api-documenter/js-yaml": "^4.3.2"
   },
   "resolutionRationales": {
     "@types/node": "Pinned to ^20 to keep the dev type surface aligned with engines.node >=20.x; newer @types/node would let consumer code use APIs that are not available on Node 20.",
-    "@microsoft/api-documenter/js-yaml": "@microsoft/api-documenter pins js-yaml ~4.1.0 even at its latest (7.30.8), which caps at the vulnerable 4.1.x; forced to ^4.2.0 to clear GHSA-h67p-54hq-rp68. Dev-only doc-gen tool; js-yaml 4.x API is stable across minors."
+    "@microsoft/api-documenter/js-yaml": "@microsoft/api-documenter pins js-yaml ~4.1.0 even at its latest (7.30.16), which caps at the vulnerable 4.1.x; forced to ^4.3.2 to clear GHSA-h67p-54hq-rp68, GHSA-5p4m-2wfm-xmqj, and GHSA-2883-xcg3-v3hh. Dev-only doc-gen tool; js-yaml 4.x API is stable across minors."
   }
 }
