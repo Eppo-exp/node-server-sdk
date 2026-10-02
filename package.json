@@ -1,6 +1,6 @@
 {
   "name": "@eppo/node-server-sdk",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Eppo node server SDK",
   "main": "dist/index.js",
   "files": [
@@ -32,24 +32,24 @@
     "@eppo/js-client-sdk-common": "^5"
   },
   "devDependencies": {
-    "@microsoft/api-documenter": "^7.30.5",
-    "@microsoft/api-extractor": "^7.58.7",
-    "@types/jest": "^30",
-    "@typescript-eslint/eslint-plugin": "^8",
-    "@typescript-eslint/parser": "^8",
-    "eslint": "^8",
-    "eslint-config-prettier": "^10",
-    "eslint-import-resolver-typescript": "^4",
-    "eslint-plugin-import": "^2",
-    "eslint-plugin-prettier": "^5",
-    "eslint-plugin-promise": "^7",
-    "husky": "^9",
-    "jest": "^30",
-    "lint-staged": "^16",
-    "prettier": "^3",
-    "testdouble": "^3",
-    "ts-jest": "^29",
-    "typescript": "^5"
+    "@microsoft/api-documenter": "^7.30.16",
+    "@microsoft/api-extractor": "^7.59.2",
+    "@types/jest": "^30.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.70.1",
+    "@typescript-eslint/parser": "^8.70.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-promise": "^7.3.0",
+    "husky": "^9.1.7",
+    "jest": "^30.5.2",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.9",
+    "testdouble": "^3.21.0",
+    "ts-jest": "^29.4.14",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20.x",
@@ -58,10 +58,10 @@
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "resolutions": {
     "@types/node": "^20.0.0",
-    "@microsoft/api-documenter/js-yaml": "^4.2.0"
+    "@microsoft/api-documenter/js-yaml": "^4.3.2"
   },
   "resolutionRationales": {
     "@types/node": "Pinned to ^20 to keep the dev type surface aligned with engines.node >=20.x; newer @types/node would let consumer code use APIs that are not available on Node 20.",
-    "@microsoft/api-documenter/js-yaml": "@microsoft/api-documenter pins js-yaml ~4.1.0 even at its latest (7.30.8), which caps at the vulnerable 4.1.x; forced to ^4.2.0 to clear GHSA-h67p-54hq-rp68. Dev-only doc-gen tool; js-yaml 4.x API is stable across minors."
+    "@microsoft/api-documenter/js-yaml": "@microsoft/api-documenter pins js-yaml ~4.1.0 even at its latest (7.30.16), which caps at the vulnerable 4.1.x; forced to ^4.3.2 to clear GHSA-h67p-54hq-rp68, GHSA-5p4m-2wfm-xmqj, and GHSA-2883-xcg3-v3hh. Dev-only doc-gen tool; js-yaml 4.x API is stable across minors."
   }
 }
