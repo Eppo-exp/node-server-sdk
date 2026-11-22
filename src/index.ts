@@ -25,7 +25,7 @@ import { sdkName, sdkVersion } from './sdk-data';
 import { generateSalt } from './util';
 import { isReadOnlyFs } from './util/index';
 
-export {
+export type {
   Attributes,
   AttributeType,
   BanditActions,
@@ -36,10 +36,10 @@ export {
   IAssignmentLogger,
   IBanditEvent,
   IBanditLogger,
-  EppoAssignmentLogger,
 } from '@eppo/js-client-sdk-common';
+export { EppoAssignmentLogger } from '@eppo/js-client-sdk-common';
 
-export { IClientConfig, IOfflineClientConfig };
+export type { IClientConfig, IOfflineClientConfig };
 
 let clientInstance: EppoClient;
 

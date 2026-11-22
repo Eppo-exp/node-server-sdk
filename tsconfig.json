@@ -8,7 +8,8 @@
     "target": "es2017",
     "outDir": "dist",
     "noImplicitAny": true,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "isolatedModules": true
   },
   "exclude": [
     "node_modules",
