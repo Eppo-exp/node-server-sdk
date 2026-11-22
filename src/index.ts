@@ -98,6 +98,7 @@ const DEFAULT_ASSIGNMENT_CACHE_SIZE = 50_000;
 
 /**
  * @deprecated Eppo has discontinued eventing support. Event tracking will be handled by Datadog SDKs.
+ * @public
  */
 export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -110,7 +111,7 @@ export const NO_OP_EVENT_DISPATCHER: EventDispatcher = {
  * Initializes the Eppo client with configuration parameters.
  * This method should be called once on application startup.
  * After invocation of this method, the SDK will poll Eppo API at regular intervals to retrieve assignment configurations.
- * @param config client configuration
+ * @param config - client configuration
  * @public
  */
 export async function init(config: IClientConfig): Promise<EppoClient> {
@@ -191,6 +192,7 @@ export async function init(config: IClientConfig): Promise<EppoClient> {
  * Used to access a singleton SDK client instance.
  * Use the method after calling init() to initialize the client.
  * @returns a singleton client instance or throws an Error if init() has not been called
+ * @public
  */
 export function getInstance(): EppoClient {
   if (!clientInstance) {
@@ -286,7 +288,7 @@ export function getBanditsConfiguration(): string {
  * Initializes the Eppo client in offline mode with a provided configuration.
  * This method is synchronous and does not make any network requests.
  * Use this when you want to initialize the SDK with a previously fetched configuration.
- * @param config offline client configuration containing flag configurations as JSON strings
+ * @param config - offline client configuration containing flag configurations as JSON strings
  * @returns the initialized client instance
  * @public
  */
