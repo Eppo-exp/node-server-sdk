@@ -47,7 +47,7 @@ test: test-data
 ## prepare
 .PHONY: prepare
 prepare: test-data
-	 husky install
+	 husky
 	 rm -rf dist/
 	 tsc
 	 api-extractor run --local
